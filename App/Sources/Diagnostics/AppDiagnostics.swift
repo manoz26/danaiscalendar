@@ -68,6 +68,9 @@ struct EntitlementCheck: Sendable, Identifiable {
         }
     }
 
+    /// A real problem, not just a choice of the user (like not using iCloud).
+    var isProblem: Bool { !ok && kind != .iCloudAccount }
+
     var status: LocalizedStringResource {
         if ok { return "OK" }
         return kind == .iCloudAccount ? "Not signed in" : "Unavailable"

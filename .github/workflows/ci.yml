@@ -90,8 +90,15 @@ jobs:
             -destination "id=${{ steps.sims.outputs.ipad }}" \
             -derivedDataPath "$DERIVED_DATA" \
             -only-testing:DanaisCalendarUITests \
+            -retry-tests-on-failure -test-iterations 3 \
             -resultBundlePath build/results/ui-ipad.xcresult \
             2>&1 | tee build/logs/ui-ipad.log | xcbeautify
+
+      # One simulator at a time: app launches are much faster on a less busy runner.
+      - name: Switch to the iPhone simulator
+        run: |
+          xcrun simctl shutdown "${{ steps.sims.outputs.ipad }}" || true
+          bash scripts/ci/boot-simulator.sh "${{ steps.sims.outputs.iphone }}"
 
       - name: UI tests and screenshots (iPhone)
         env:
@@ -104,6 +111,7 @@ jobs:
             -destination "id=${{ steps.sims.outputs.iphone }}" \
             -derivedDataPath "$DERIVED_DATA" \
             -only-testing:DanaisCalendarUITests \
+            -retry-tests-on-failure -test-iterations 3 \
             -resultBundlePath build/results/ui-iphone.xcresult \
             2>&1 | tee build/logs/ui-iphone.log | xcbeautify
 

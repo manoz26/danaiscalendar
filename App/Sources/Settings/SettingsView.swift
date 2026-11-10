@@ -91,9 +91,9 @@ struct DiagnosticsView: View {
                             .foregroundStyle(Paper.ink)
                         Spacer()
                         Text(check.status)
-                            .foregroundStyle(check.ok ? Paper.secondary : Paper.ink)
+                            .foregroundStyle(check.isProblem ? Paper.ink : Paper.secondary)
                     }
-                    .font(.inter(check.ok ? .regular : .semibold, size: 15, relativeTo: .subheadline))
+                    .font(.inter(check.isProblem ? .semibold : .regular, size: 15, relativeTo: .subheadline))
                     .listRowBackground(Paper.background)
                 }
             } header: {

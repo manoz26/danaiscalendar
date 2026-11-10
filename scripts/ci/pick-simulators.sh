@@ -2,7 +2,8 @@
 # Creates fresh simulators for CI on the runtime that matches the selected Xcode's SDK:
 #   - the newest "iPad Pro 13-inch" (fallback: "iPad Air 13-inch")
 #   - the newest "iPhone NN Pro"
-# Boots them, sets a clean status bar, and prints key=value lines for $GITHUB_OUTPUT.
+# Boots only the iPad (one simulator at a time keeps app launches fast; the workflow boots
+# the iPhone later with boot-simulator.sh) and prints key=value lines for $GITHUB_OUTPUT.
 set -euo pipefail
 
 sdk=$(xcrun --sdk iphonesimulator --show-sdk-version)
@@ -49,15 +50,7 @@ type_name() { jq -r --arg id "$1" '.supportedDeviceTypes[] | select(.identifier 
 ipad=$(xcrun simctl create "CI iPad 13" "$ipad_type" "$runtime")
 iphone=$(xcrun simctl create "CI iPhone" "$iphone_type" "$runtime")
 
-for udid in "$ipad" "$iphone"; do
-  xcrun simctl boot "$udid"
-done
-for udid in "$ipad" "$iphone"; do
-  xcrun simctl bootstatus "$udid" -b >/dev/null
-  xcrun simctl status_bar "$udid" override \
-    --time "9:41" --dataNetwork wifi --wifiMode active --wifiBars 3 \
-    --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100
-done
+bash "$(dirname "$0")/boot-simulator.sh" "$ipad"
 
 {
   echo "Runtime: $runtime (SDK $sdk)"
