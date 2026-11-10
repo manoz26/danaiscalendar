@@ -1,0 +1,24 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Month page for %@" : {
+      "comment" : "VoiceOver label of a month page. %@ is the month name, e.g. NOVEMBER.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σελίδα μήνα: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Month page for %@"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

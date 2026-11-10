@@ -1,0 +1,8 @@
+# Files are edited on Windows but built on macOS: keep LF everywhere.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ttf binary
+*.otf binary
+*.pdf binary

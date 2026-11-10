@@ -1,0 +1,145 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: Build, test, screenshots
+    # Preview image with the newest stable Xcode. If it queues or misbehaves, use macos-26.
+    runs-on: xcode-27
+    timeout-minutes: 60
+    env:
+      PROJECT: DanaisCalendar.xcodeproj
+      SCHEME: DanaisCalendar
+      DERIVED_DATA: build/DerivedData
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Select newest stable Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Tool versions
+        run: |
+          xcodebuild -version
+          swift --version
+          brew install xcodegen
+          xcodegen --version
+          mkdir -p build/logs build/results build/screenshots
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Core unit tests (swift test)
+        run: |
+          set -o pipefail
+          swift test --package-path Core 2>&1 | tee build/logs/core-tests.log
+
+      - name: Create simulators
+        id: sims
+        run: bash scripts/ci/pick-simulators.sh >> "$GITHUB_OUTPUT"
+
+      - name: Build for testing
+        run: |
+          set -o pipefail
+          xcodebuild build-for-testing \
+            -project "$PROJECT" -scheme "$SCHEME" \
+            -destination "id=${{ steps.sims.outputs.ipad }}" \
+            -derivedDataPath "$DERIVED_DATA" \
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee build/logs/build.log | xcbeautify --quiet
+
+      - name: Inspect app bundle
+        run: |
+          app=$(find "$DERIVED_DATA/Build/Products" -maxdepth 2 -name "DanaisCalendar.app" -type d | head -1)
+          echo "App: $app"
+          ls "$app" | tee build/logs/app-bundle.txt
+          plutil -p "$app/Info.plist" | tee -a build/logs/app-bundle.txt
+
+      - name: App unit tests
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building \
+            -project "$PROJECT" -scheme "$SCHEME" \
+            -destination "id=${{ steps.sims.outputs.ipad }}" \
+            -derivedDataPath "$DERIVED_DATA" \
+            -only-testing:DanaisCalendarTests \
+            -resultBundlePath build/results/unit.xcresult \
+            2>&1 | tee build/logs/unit-tests.log | xcbeautify
+
+      - name: UI tests and screenshots (iPad 13")
+        env:
+          TEST_RUNNER_SCREENSHOT_DIR: ${{ github.workspace }}/build/screenshots
+          TEST_RUNNER_DEVICE_LABEL: ipad13
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building \
+            -project "$PROJECT" -scheme "$SCHEME" \
+            -destination "id=${{ steps.sims.outputs.ipad }}" \
+            -derivedDataPath "$DERIVED_DATA" \
+            -only-testing:DanaisCalendarUITests \
+            -resultBundlePath build/results/ui-ipad.xcresult \
+            2>&1 | tee build/logs/ui-ipad.log | xcbeautify
+
+      - name: UI tests and screenshots (iPhone)
+        env:
+          TEST_RUNNER_SCREENSHOT_DIR: ${{ github.workspace }}/build/screenshots
+          TEST_RUNNER_DEVICE_LABEL: iphone
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building \
+            -project "$PROJECT" -scheme "$SCHEME" \
+            -destination "id=${{ steps.sims.outputs.iphone }}" \
+            -derivedDataPath "$DERIVED_DATA" \
+            -only-testing:DanaisCalendarUITests \
+            -resultBundlePath build/results/ui-iphone.xcresult \
+            2>&1 | tee build/logs/ui-iphone.log | xcbeautify
+
+      - name: Screenshot summary
+        if: always()
+        run: |
+          {
+            echo "### Screenshots"
+            echo "Simulators: ${{ steps.sims.outputs.ipad_name }}, ${{ steps.sims.outputs.iphone_name }} (${{ steps.sims.outputs.runtime }})"
+            echo
+            ls build/screenshots 2>/dev/null | sed 's/^/- /' || echo "none"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: screenshots
+          path: build/screenshots/*.png
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: logs
+          path: build/logs
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results
+          path: build/results
+          if-no-files-found: ignore
+          retention-days: 7
