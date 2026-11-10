@@ -33,6 +33,21 @@ struct BundleResourcesTests {
         #expect(greek.localizedString(forKey: "Diagnostics", value: nil, table: nil) == "Διαγνωστικά")
     }
 
+    @Test(arguments: [
+        ("Goals", "Στόχοι"),
+        ("To do list", "Να κάνω"),
+        ("Memo", "Σημειώσεις"),
+        ("To buy", "Να αγοράσω"),
+        ("Weekly", "Εβδομάδες"),
+        ("Today", "Σήμερα"),
+        ("Year page for %@", "Σελίδα έτους: %@"),
+    ])
+    func plannerTextsAreInGreek(key: String, greekText: String) throws {
+        let greekPath = try #require(Bundle.main.path(forResource: "el", ofType: "lproj"))
+        let greek = try #require(Bundle(path: greekPath))
+        #expect(greek.localizedString(forKey: key, value: nil, table: nil) == greekText)
+    }
+
     @Test func infoPlistBasics() {
         let info = Bundle.main.infoDictionary ?? [:]
         #expect(info["ITSAppUsesNonExemptEncryption"] as? Bool == false)

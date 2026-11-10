@@ -28,6 +28,12 @@
    Ονόματα: `<συσκευή>-<γλώσσα>-<προσανατολισμός>-<οθόνη>.png`, π.χ. `ipad13-el-landscape-month.png`.
 6. Σύγκρινε με τα screenshots αναφοράς στο `reference/` (υπάρχουν μόνο τοπικά). Διόρθωσε μέχρι να είναι πράσινο **και** να φαίνεται σωστό.
 
+Γρήγορος έλεγχος σχεδίασης: το `swift test` του Core σώζει PNG δειγμάτων σελίδων (artifact `core-renders`, π.χ. `month-2026-11-en.png`, `year-2028-el.png`), ζωγραφισμένα από τον ίδιο renderer με την εφαρμογή. Βγαίνουν στα πρώτα λεπτά του CI, ακόμα κι αν αποτύχει το build της εφαρμογής:
+```bash
+gh run download <id> --name core-renders --dir ci-artifacts/<id>/renders
+```
+Τα UI tests ανοίγουν συγκεκριμένη σελίδα με `-DCOpenPage year:2028` ή `-DCOpenPage month:2027-02`.
+
 Το CI: `swift test` για το Core, build, unit tests της εφαρμογής, και UI tests που τραβάνε screenshots σε iPad 13" (portrait + landscape) και iPhone, σε ελληνικά και αγγλικά. Τρέχει στο runner `xcode-27` (preview image του GitHub με το πιο πρόσφατο σταθερό Xcode)· αν κολλάει σε ουρά ή είναι ασταθές, άλλαξε σε `macos-26`.
 
 Πραγματικές συσκευές (iPad/Mac της χρήστριας) μόνο σπάνια και μαζεμένα: ό,τι μπορεί να ελεγχθεί στο CI ελέγχεται εκεί.
@@ -64,11 +70,11 @@ gh run watch --exit-status $(gh run list --workflow testflight --limit 1 --json 
 
 ```
 project.yml                 XcodeGen: targets, Info.plist, scheme
-App/Sources/                εφαρμογή SwiftUI
+App/Sources/                εφαρμογή SwiftUI (Planner/: σελίδα με zoom, μπάρα, tabs)
 App/Resources/              Inter, String Catalog, assets
 AppTests/                   unit tests που τρέχουν μέσα στην εφαρμογή (γραμματοσειρές, μεταφράσεις)
 UITests/                    UI tests + screenshots
-Core/                       Swift package PlannerCore + tests
+Core/                       Swift package PlannerCore + tests (ημερολόγιο, γεωμετρία σελίδων, renderer)
 .github/workflows/ci.yml    build, tests, screenshots
 .github/workflows/testflight.yml  archive, cloud signing, upload στο TestFlight (μετά από πράσινο ci)
 scripts/ci/                 βοηθητικά scripts του CI

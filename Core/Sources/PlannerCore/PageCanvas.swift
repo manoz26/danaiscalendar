@@ -7,12 +7,8 @@ import CoreGraphics
 public enum PageCanvas {
     public static let size = CGSize(width: 1000, height: 1400)
 
-    /// Outer margin of printed content.
-    public static let margin: CGFloat = 56
-
-    /// Month title: top-left corner of its line box, and font size in canvas units.
-    public static let titleOrigin = CGPoint(x: margin, y: margin)
-    public static let titleFontSize: CGFloat = 40
+    /// Height of the page for each unit of width (1.4).
+    public static let aspectRatio = size.height / size.width
 
     /// Scale that fits the page to a given view width.
     public static func scale(forWidth width: CGFloat) -> CGFloat {

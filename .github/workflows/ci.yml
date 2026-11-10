@@ -37,12 +37,15 @@ jobs:
           swift --version
           brew install xcodegen
           xcodegen --version
-          mkdir -p build/logs build/results build/screenshots
+          mkdir -p build/logs build/results build/screenshots build/renders
 
       - name: Generate Xcode project
         run: xcodegen generate
 
+      # Also saves PNGs of sample pages drawn by the Core renderer (artifact core-renders).
       - name: Core unit tests (swift test)
+        env:
+          PLANNER_RENDER_DIR: ${{ github.workspace }}/build/renders
         run: |
           set -o pipefail
           swift test --package-path Core 2>&1 | tee build/logs/core-tests.log
@@ -133,6 +136,15 @@ jobs:
           path: build/screenshots/*.png
           if-no-files-found: warn
           retention-days: 30
+
+      - name: Upload Core page renders
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: core-renders
+          path: build/renders/*.png
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Upload logs
         if: always()

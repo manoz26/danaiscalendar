@@ -2,30 +2,52 @@ import SwiftUI
 import UIKit
 import PlannerCore
 
-/// For now: one blank page with the current month's title, and the Settings button.
+/// The planner: the bar on top, the open page (year or month) and the tabs on the right.
+/// Opens on the current month.
 struct RootView: View {
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var now = Date()
+    @State private var page: PlannerPage
     @State private var showSettings = false
 
+    init() {
+        let month = YearMonth(date: Date(), calendar: PlannerLocale.calendar(locale: AppLocale.current))
+        _page = State(initialValue: LaunchOptions.initialPage ?? .month(month))
+    }
+
     var body: some View {
-        GeometryReader { proxy in
-            let scale = PageCanvas.scale(forWidth: proxy.size.width)
-            ScrollView(.vertical) {
-                BlankMonthPage(month: currentMonth, locale: AppLocale.current, scale: scale)
-                    .frame(width: proxy.size.width, height: PageCanvas.size.height * scale)
+        let locale = AppLocale.current
+        let content = PlannerPageContent(page: page, today: today, locale: locale)
+        VStack(spacing: 0) {
+            PlannerTopBar(
+                page: page,
+                onOpen: open,
+                onToday: { open(.month(currentMonth)) },
+                onSettings: { showSettings = true }
+            )
+            HStack(spacing: 0) {
+                PageCanvasView(
+                    template: content.template,
+                    identifier: content.identifier,
+                    spokenLabel: content.accessibilityLabel,
+                    accessibilityItems: content.accessibilityItems,
+                    onTap: { point in handleTap(at: point, in: content.template) }
+                )
+                // A fresh view per page: each page opens at 1x, scrolled to the top.
+                .id(page)
+                PlannerTabs(
+                    page: page,
+                    locale: locale,
+                    compact: horizontalSizeClass == .compact,
+                    onOpen: open
+                )
             }
-            .scrollIndicators(.hidden)
         }
-        .overlay(alignment: .topTrailing) {
-            SettingsButton { showSettings = true }
-                .padding(.top, 4)
-                .padding(.trailing, 12)
-        }
+        .background(Paper.background.ignoresSafeArea())
         .sheet(isPresented: $showSettings) {
             SettingsView()
         }
-        .background(Paper.background.ignoresSafeArea())
         .onChange(of: scenePhase) { _, phase in
             switch phase {
             case .active:
@@ -38,56 +60,36 @@ struct RootView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
+            // Midnight, time zone or clock change: move the "today" mark.
             now = Date()
         }
     }
 
+    private var calendar: Calendar {
+        PlannerLocale.calendar(locale: AppLocale.current)
+    }
+
+    private var today: PlannerDate {
+        PlannerDate(date: now, calendar: calendar)
+    }
+
     private var currentMonth: YearMonth {
-        YearMonth(date: now, calendar: PlannerLocale.calendar(locale: AppLocale.current))
+        YearMonth(date: now, calendar: calendar)
     }
-}
 
-/// Small gear in the corner that opens Settings.
-struct SettingsButton: View {
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: "gearshape")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 22, height: 22)
-                .foregroundStyle(Paper.ink)
-                .frame(width: 44, height: 44)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(Text("Settings"))
-        .accessibilityIdentifier("settings.button")
+    private func open(_ target: PlannerPage) {
+        guard target != page else { return }
+        page = target
     }
-}
 
-/// A white page on the 1000 x 1400 canvas, scaled to the view width.
-struct BlankMonthPage: View {
-    let month: YearMonth
-    let locale: Locale
-    let scale: CGFloat
-
-    var body: some View {
-        let title = MonthTitle.text(for: month, locale: locale)
-        ZStack(alignment: .topLeading) {
-            Paper.background
-            Text(verbatim: title)
-                .font(.inter(.bold, size: PageCanvas.titleFontSize * scale))
-                .foregroundStyle(Paper.ink)
-                .lineLimit(1)
-                .fixedSize()
-                .offset(x: PageCanvas.titleOrigin.x * scale, y: PageCanvas.titleOrigin.y * scale)
-                .accessibilityIdentifier("page.title")
-                .accessibilityAddTraits(.isHeader)
+    /// A finger tap on the page: a small month on the year page opens that month.
+    /// (The WEEKLY buttons are printed but the weekly pages come later.)
+    private func handleTap(at point: CGPoint, in template: PageTemplate) {
+        for region in template.regions(at: point) {
+            if case .month(let month) = region.id {
+                open(.month(month))
+                return
+            }
         }
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel(Text("Month page for \(title)"))
-        .accessibilityIdentifier("page.month")
     }
 }

@@ -37,6 +37,24 @@
         }
       }
     },
+    "Back to the year" : {
+      "comment" : "Button at the top left of a month page that opens the year page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πίσω στο έτος"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back to the year"
+          }
+        }
+      }
+    },
     "Checks" : {
       "comment" : "Diagnostics section header: checks that iCloud and the App Group work.",
       "extractionState" : "manual",
@@ -87,6 +105,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Done"
+          }
+        }
+      }
+    },
+    "Goals" : {
+      "comment" : "Label of the goals box on the month page (printed in capitals).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Στόχοι"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Goals"
           }
         }
       }
@@ -163,8 +199,26 @@
         }
       }
     },
+    "Memo" : {
+      "comment" : "Label of the memo box on the month page (printed in capitals).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σημειώσεις"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Memo"
+          }
+        }
+      }
+    },
     "Month page for %@" : {
-      "comment" : "VoiceOver label of a month page. %@ is the month name, e.g. NOVEMBER.",
+      "comment" : "VoiceOver label of a month page. %@ is the month and year, e.g. NOVEMBER 2026.",
       "extractionState" : "manual",
       "localizations" : {
         "el" : {
@@ -177,6 +231,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Month page for %@"
+          }
+        }
+      }
+    },
+    "Next month" : {
+      "comment" : "Arrow button on a month page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επόμενος μήνας"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next month"
+          }
+        }
+      }
+    },
+    "Next year" : {
+      "comment" : "Arrow button on the year page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επόμενο έτος"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next year"
           }
         }
       }
@@ -213,6 +303,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "Previous month" : {
+      "comment" : "Arrow button on a month page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προηγούμενος μήνας"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previous month"
+          }
+        }
+      }
+    },
+    "Previous year" : {
+      "comment" : "Arrow button on the year page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προηγούμενο έτος"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previous year"
           }
         }
       }
@@ -289,6 +415,60 @@
         }
       }
     },
+    "To buy" : {
+      "comment" : "Label of the shopping list on the month page (printed in capitals).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Να αγοράσω"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To buy"
+          }
+        }
+      }
+    },
+    "To do list" : {
+      "comment" : "Label of the to-do list on the month page (printed in capitals).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Να κάνω"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To do list"
+          }
+        }
+      }
+    },
+    "Today" : {
+      "comment" : "Button that opens the current month.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σήμερα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today"
+          }
+        }
+      }
+    },
     "Unavailable" : {
       "comment" : "Diagnostics check result: does not work.",
       "extractionState" : "manual",
@@ -321,6 +501,60 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Version"
+          }
+        }
+      }
+    },
+    "Week %lld" : {
+      "comment" : "VoiceOver: one of the WEEKLY 1-6 buttons on the month page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εβδομάδα %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Week %lld"
+          }
+        }
+      }
+    },
+    "Weekly" : {
+      "comment" : "Label before the buttons 1-6 that open the weekly pages (printed in capitals).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εβδομάδες"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weekly"
+          }
+        }
+      }
+    },
+    "Year page for %@" : {
+      "comment" : "VoiceOver label of the year page. %@ is the year, e.g. 2026.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σελίδα έτους: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Year page for %@"
           }
         }
       }

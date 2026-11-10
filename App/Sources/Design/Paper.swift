@@ -8,4 +8,10 @@ enum Paper {
     static let secondary = Color(white: 0.55)
     /// Box fills, like the grey GOALS and notes boxes.
     static let fill = Color(white: 0.95)
+    /// Month tabs that are not the open page.
+    static let tab = Color(white: 0.92)
+    /// Labels of those tabs.
+    static let tabLabel = Color(white: 0.4)
+    /// Hairlines of the app's own bars.
+    static let hairline = Color(white: 0.85)
 }
