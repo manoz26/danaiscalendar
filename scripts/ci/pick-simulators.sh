@@ -7,13 +7,17 @@ set -euo pipefail
 
 sdk=$(xcrun --sdk iphonesimulator --show-sdk-version)
 
+# Some Xcode versions also ship device-specific runtimes (e.g. one that only supports a
+# single new iPhone), so keep only runtimes that support both a 13" iPad and an iPhone Pro.
 runtime_json=$(xcrun simctl list runtimes available --json | jq --arg sdk "$sdk" '
   ($sdk | split(".") | map(tonumber)) as $s
   | [.runtimes[]
      | select(.identifier | test("SimRuntime\\.iOS"))
      | select(.isAvailable)
-     | select(((.version | split(".") | map(tonumber))[0:2]) <= $s[0:2])]
-  | sort_by(.version | split(".") | map(tonumber))
+     | select(((.version | split(".") | map(tonumber))[0:2]) <= $s[0:2])
+     | select(any(.supportedDeviceTypes[]?; .name | test("^iPad (Pro|Air) 13-inch")))
+     | select(any(.supportedDeviceTypes[]?; .name | test("^iPhone [0-9]+ Pro$")))]
+  | sort_by([(.version | split(".") | map(tonumber)), (.supportedDeviceTypes | length)])
   | last')
 
 runtime=$(jq -r '.identifier // empty' <<<"$runtime_json")
