@@ -46,8 +46,8 @@ final class ScreenshotTests: XCTestCase {
             save(app, "\(language)-landscape-month")
             device.orientation = .portrait
         }
-
-        app.terminate()
+        // No app.terminate(): it can hang on the simulator right after a rotation, and the
+        // next launch() (or the end of the run) closes the app anyway.
     }
 
     /// Waits until the app window has the requested shape, then lets the rotation animation settle.
