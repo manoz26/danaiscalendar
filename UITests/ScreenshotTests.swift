@@ -1,6 +1,6 @@
 import XCTest
 
-/// Launches the app in each language, checks the page title, and saves screenshots.
+/// Launches the app in each language, checks the main screens, and saves screenshots.
 ///
 /// CI passes `TEST_RUNNER_SCREENSHOT_DIR` and `TEST_RUNNER_DEVICE_LABEL`; xcodebuild hands
 /// them to this process without the `TEST_RUNNER_` prefix. Files are named
@@ -17,7 +17,25 @@ final class ScreenshotTests: XCTestCase {
         try captureMonthPage(language: "el", region: "GR", titlePattern: "^[Α-ΩΪΫ]+$")
     }
 
+    @MainActor
+    func testSettingsAndDiagnosticsEnglish() throws {
+        try captureSettingsAndDiagnostics(language: "en", region: "US")
+    }
+
+    @MainActor
+    func testSettingsAndDiagnosticsGreek() throws {
+        try captureSettingsAndDiagnostics(language: "el", region: "GR")
+    }
+
     // MARK: - Helpers
+
+    @MainActor
+    private func launch(language: String, region: String) -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchArguments = ["-AppleLanguages", "(\(language))", "-AppleLocale", "\(language)_\(region)"]
+        app.launch()
+        return app
+    }
 
     @MainActor
     private func captureMonthPage(language: String, region: String, titlePattern: String) throws {
@@ -25,9 +43,7 @@ final class ScreenshotTests: XCTestCase {
         let device = XCUIDevice.shared
         device.orientation = .portrait
 
-        let app = XCUIApplication()
-        app.launchArguments = ["-AppleLanguages", "(\(language))", "-AppleLocale", "\(language)_\(region)"]
-        app.launch()
+        let app = launch(language: language, region: region)
 
         let title = app.staticTexts["page.title"]
         XCTAssertTrue(title.waitForExistence(timeout: 15), "Month title did not appear")
@@ -48,6 +64,42 @@ final class ScreenshotTests: XCTestCase {
         }
         // No app.terminate(): it can hang on the simulator right after a rotation, and the
         // next launch() (or the end of the run) closes the app anyway.
+    }
+
+    /// Opens Settings, taps the version 5 times and checks that Diagnostics shows the log.
+    @MainActor
+    private func captureSettingsAndDiagnostics(language: String, region: String) throws {
+        continueAfterFailure = false
+        XCUIDevice.shared.orientation = .portrait
+        let app = launch(language: language, region: region)
+        waitForOrientation(app, landscape: false)
+
+        let settingsButton = app.buttons["settings.button"]
+        XCTAssertTrue(settingsButton.waitForExistence(timeout: 15), "Settings button did not appear")
+        settingsButton.tap()
+
+        let version = app.buttons["settings.version"]
+        XCTAssertTrue(version.waitForExistence(timeout: 10), "Settings did not open")
+        settle()
+        save(app, "\(language)-portrait-settings")
+
+        for _ in 0..<5 {
+            version.tap()
+        }
+
+        let log = app.staticTexts["diagnostics.log"]
+        XCTAssertTrue(log.waitForExistence(timeout: 10), "Diagnostics did not open after 5 taps")
+        let launchLine = NSPredicate(format: "label CONTAINS %@", "Launch: Danai's Calendar")
+        let logged = XCTNSPredicateExpectation(predicate: launchLine, object: log)
+        XCTAssertEqual(XCTWaiter().wait(for: [logged], timeout: 15), .completed, "The launch was not in the log: \(log.label.prefix(500))")
+        settle()
+        save(app, "\(language)-portrait-diagnostics")
+    }
+
+    /// Lets animations finish before a screenshot.
+    @MainActor
+    private func settle() {
+        RunLoop.current.run(until: Date().addingTimeInterval(1.0))
     }
 
     /// Waits until the app window has the requested shape, then lets the rotation animation settle.

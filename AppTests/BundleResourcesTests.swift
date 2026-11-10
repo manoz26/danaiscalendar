@@ -30,6 +30,7 @@ struct BundleResourcesTests {
         let greekPath = try #require(Bundle.main.path(forResource: "el", ofType: "lproj"))
         let greek = try #require(Bundle(path: greekPath))
         #expect(greek.localizedString(forKey: "Month page for %@", value: nil, table: nil) == "Σελίδα μήνα: %@")
+        #expect(greek.localizedString(forKey: "Diagnostics", value: nil, table: nil) == "Διαγνωστικά")
     }
 
     @Test func infoPlistBasics() {
@@ -37,5 +38,18 @@ struct BundleResourcesTests {
         #expect(info["ITSAppUsesNonExemptEncryption"] as? Bool == false)
         #expect(info["CFBundleDisplayName"] as? String == "Danai's Calendar")
         #expect(info["UIUserInterfaceStyle"] as? String == "Light")
+    }
+
+    @Test func buildInfoForDiagnostics() {
+        let info = Bundle.main.infoDictionary ?? [:]
+        #expect(info["DCGitCommit"] as? String == "dev")
+        #expect(info["DCAppGroup"] as? String == "group.com.manoz26.danaiscalendar")
+        #expect(info["DCICloudContainer"] as? String == "iCloud.com.manoz26.danaiscalendar")
+    }
+
+    @Test func privacyManifestIsBundled() throws {
+        let url = try #require(Bundle.main.url(forResource: "PrivacyInfo", withExtension: "xcprivacy"))
+        let manifest = try #require(NSDictionary(contentsOf: url))
+        #expect(manifest["NSPrivacyTracking"] as? Bool == false)
     }
 }

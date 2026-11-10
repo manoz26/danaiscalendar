@@ -2,10 +2,11 @@ import SwiftUI
 import UIKit
 import PlannerCore
 
-/// For now: one blank page with the current month's title.
+/// For now: one blank page with the current month's title, and the Settings button.
 struct RootView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var now = Date()
+    @State private var showSettings = false
 
     var body: some View {
         GeometryReader { proxy in
@@ -16,9 +17,25 @@ struct RootView: View {
             }
             .scrollIndicators(.hidden)
         }
+        .overlay(alignment: .topTrailing) {
+            SettingsButton { showSettings = true }
+                .padding(.top, 4)
+                .padding(.trailing, 12)
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
+        }
         .background(Paper.background.ignoresSafeArea())
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { now = Date() }
+            switch phase {
+            case .active:
+                now = Date()
+                AppLog.info("App active")
+            case .background:
+                AppLog.info("App in background")
+            default:
+                break
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
             now = Date()
@@ -27,6 +44,26 @@ struct RootView: View {
 
     private var currentMonth: YearMonth {
         YearMonth(date: now, calendar: PlannerLocale.calendar(locale: AppLocale.current))
+    }
+}
+
+/// Small gear in the corner that opens Settings.
+struct SettingsButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "gearshape")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 22, height: 22)
+                .foregroundStyle(Paper.ink)
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text("Settings"))
+        .accessibilityIdentifier("settings.button")
     }
 }
 

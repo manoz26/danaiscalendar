@@ -64,3 +64,6 @@ Native εφαρμογή iPad/iPhone: ψηφιακό planner που γράφει�
 - **Ονόματα μηνών:** η ονομαστική μορφή (standalone, "Νοέμβριος"), όχι η γενική ("Νοεμβρίου").
 - **Ημερολόγιο:** πάντα Γρηγοριανό, στη ζώνη ώρας της συσκευής.
 - **Χαρτί:** η εφαρμογή είναι πάντα σε light mode (`UIUserInterfaceStyle = Light`). Το προαιρετικό σκούρο χαρτί (prompt 9) θα είναι ρύθμιση της εφαρμογής, όχι το dark mode του συστήματος.
+- **Υπογραφή και TestFlight:** κάθε push στο `main` με πράσινο `ci` γίνεται build στο TestFlight (workflow `testflight`). Υπογραφή μόνο μέσω App Store Connect API key (ρόλος Admin) και cloud-managed distribution certificate· κανένα χειροκίνητο certificate. Build number = αριθμός run του `testflight`, έκδοση = `MARKETING_VERSION` στο `project.yml`.
+- **Entitlements από την αρχή:** iCloud Documents με container `iCloud.com.manoz26.danaiscalendar` και App Group `group.com.manoz26.danaiscalendar` (για το widget), ώστε η υπογραφή να μην αλλάξει αργότερα.
+- **Διαγνωστικά:** Ρυθμίσεις → 5 πατήματα στην έκδοση. Τοπικό αρχείο καταγραφής (έως 512 KB, κρατάει τα νεότερα) που η χρήστρια μοιράζεται με Κοινοποίηση. Δεν στέλνεται ποτέ αυτόματα πουθενά.

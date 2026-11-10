@@ -32,6 +32,22 @@
 
 Πραγματικές συσκευές (iPad/Mac της χρήστριας) μόνο σπάνια και μαζεμένα: ό,τι μπορεί να ελεγχθεί στο CI ελέγχεται εκεί.
 
+## TestFlight
+
+Κάθε push στο `main` που περνάει το `ci` ξεκινάει αυτόματα το workflow `testflight` (`.github/workflows/testflight.yml`): archive χωρίς υπογραφή, export με το cloud-managed distribution certificate της Apple μέσω του App Store Connect API key (`-allowProvisioningUpdates` + `-authenticationKey*`), έλεγχος υπογραφής/entitlements, upload, και αναμονή μέχρι το App Store Connect να πει `VALID`. Build number = `github.run_number` του `testflight`. Κανένα certificate ή provisioning profile δεν φυλάγεται πουθενά.
+
+```bash
+gh run watch --exit-status $(gh run list --workflow testflight --limit 1 --json databaseId --jq '.[0].databaseId')
+```
+
+- Secrets στο GitHub: `ASC_KEY_P8` (περιεχόμενο του `.p8`), `ASC_KEY_ID`, `ASC_ISSUER_ID`. Team ID `22M7WDXU43` (δημόσιο, στο `project.yml`).
+- Αν αποτύχει η υπογραφή: το artifact `distribution-logs` έχει τα logs του Xcode (κρατιέται 3 μέρες).
+- Χειροκίνητο τρέξιμο: `gh workflow run testflight` (μόνο για commit που έχει ήδη πράσινο `ci`).
+
+## Διαγνωστικά (αντί για κονσόλα συσκευής)
+
+Ρυθμίσεις (γρανάζι) → πάτημα 5 φορές στην Έκδοση → Διαγνωστικά: έκδοση/commit, συσκευή, έλεγχοι iCloud/App Group, και το τοπικό αρχείο καταγραφής με κουμπί Κοινοποίηση. **Κάθε σημαντικό σφάλμα γράφεται με `AppLog.error("…", error)`** (και `AppLog.info/warning` για σημαντικά γεγονότα). Ποτέ προσωπικό περιεχόμενο της χρήστριας στο log. Τα crash/hang reports του iOS (MetricKit) μπαίνουν εκεί αυτόματα στο επόμενο άνοιγμα.
+
 ## Κανόνες
 
 - **Το repo είναι public.** Ποτέ μυστικά (κλειδιά `.p8`, certificates, tokens) ή προσωπικά δεδομένα. Τα κλειδιά μπαίνουν μόνο ως GitHub secrets.
@@ -39,6 +55,8 @@
 - Κανένα χρώμα στο UI· μόνο το μελάνι έχει χρώμα. Γραμματοσειρά μόνο Inter (`Font.inter(...)`).
 - Κάθε κείμενο UI στο `App/Resources/Localizable.xcstrings` με **en και el**. Κεφαλαία μέσω `PlannerText.uppercased` (σωστά ελληνικά χωρίς τόνους).
 - Swift 6 (strict concurrency). Καμία εξωτερική βιβλιοθήκη χωρίς πολύ σοβαρό λόγο.
+- Privacy manifest στο `App/Resources/PrivacyInfo.xcprivacy`: αν ο κώδικας αρχίσει να χρησιμοποιεί "required reason" API (π.χ. `UserDefaults`/`@AppStorage`, χρονοσφραγίδες αρχείων), πρόσθεσέ το εκεί με τον λόγο, αλλιώς η Apple απορρίπτει το build.
+- Τα entitlements (iCloud Documents, App Group) ορίζονται στο `project.yml` (`entitlements:`) και παράγονται· μην τα αλλάζεις χωρίς λόγο, αλλάζουν την υπογραφή.
 - Μη χτίζεις λειτουργίες πέρα από αυτό που ζητάει η τρέχουσα συνεδρία.
 - Στο τέλος κάθε συνεδρίας πες καθαρά τι επαληθεύτηκε (CI, screenshots) και τι όχι (π.χ. χρειάζεται συσκευή).
 
@@ -52,5 +70,6 @@ AppTests/                   unit tests που τρέχουν μέσα στην �
 UITests/                    UI tests + screenshots
 Core/                       Swift package PlannerCore + tests
 .github/workflows/ci.yml    build, tests, screenshots
+.github/workflows/testflight.yml  archive, cloud signing, upload στο TestFlight (μετά από πράσινο ci)
 scripts/ci/                 βοηθητικά scripts του CI
 ```

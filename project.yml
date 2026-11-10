@@ -1,5 +1,5 @@
 # XcodeGen spec: the CI runs `xcodegen generate` to create DanaisCalendar.xcodeproj.
-# The .xcodeproj and App/Info.plist are generated and never committed.
+# The .xcodeproj, App/Info.plist and App/DanaisCalendar.entitlements are generated and never committed.
 name: DanaisCalendar
 
 options:
@@ -20,6 +20,10 @@ settings:
     SWIFT_EMIT_LOC_STRINGS: YES
     ENABLE_USER_SCRIPT_SANDBOXING: YES
     CODE_SIGN_STYLE: Automatic
+    # Apple Developer team (not a secret: it is part of every signed app).
+    DEVELOPMENT_TEAM: 22M7WDXU43
+    # Short git commit shown in Diagnostics; the testflight workflow sets it.
+    GIT_COMMIT: dev
 
 packages:
   PlannerCore:
@@ -44,10 +48,27 @@ targets:
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         SUPPORTS_MACCATALYST: NO
         SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: NO
+    # Signed in from the first TestFlight build so the signature never has to change later.
+    # The container and group ids are repeated in `info:` below; keep them in sync.
+    entitlements:
+      path: App/DanaisCalendar.entitlements
+      properties:
+        com.apple.developer.icloud-container-identifiers:
+          - iCloud.com.manoz26.danaiscalendar
+        com.apple.developer.ubiquity-container-identifiers:
+          - iCloud.com.manoz26.danaiscalendar
+        com.apple.developer.icloud-services:
+          - CloudDocuments
+        com.apple.security.application-groups:
+          - group.com.manoz26.danaiscalendar
     info:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: "Danai's Calendar"
+        # Read by Diagnostics (AppInfo).
+        DCGitCommit: $(GIT_COMMIT)
+        DCICloudContainer: iCloud.com.manoz26.danaiscalendar
+        DCAppGroup: group.com.manoz26.danaiscalendar
         CFBundleDevelopmentRegion: en
         CFBundleLocalizations: [en, el]
         CFBundleShortVersionString: $(MARKETING_VERSION)

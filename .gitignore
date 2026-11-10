@@ -8,6 +8,7 @@ PROMPTS.md
 *.xcodeproj/
 *.xcworkspace/
 App/Info.plist
+App/DanaisCalendar.entitlements
 
 # Build output and downloaded CI artifacts
 build/
