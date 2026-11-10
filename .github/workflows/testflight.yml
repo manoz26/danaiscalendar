@@ -169,12 +169,13 @@ jobs:
           codesign -d --entitlements - --xml "$app" > build/final-entitlements.plist
           plutil -p build/final-entitlements.plist | tee build/logs/final-entitlements.txt
           failed=0
+          # PlistBuddy, not plutil: plutil reads the dots in these keys as a key path.
           for key in com.apple.developer.icloud-container-identifiers \
                      com.apple.developer.ubiquity-container-identifiers \
                      com.apple.developer.icloud-services \
                      com.apple.security.application-groups; do
-            want=$(plutil -extract "$key" json -o - App/DanaisCalendar.entitlements)
-            got=$(plutil -extract "$key" json -o - build/final-entitlements.plist 2>/dev/null || echo missing)
+            want=$(/usr/libexec/PlistBuddy -c "Print :$key" App/DanaisCalendar.entitlements)
+            got=$(/usr/libexec/PlistBuddy -c "Print :$key" build/final-entitlements.plist 2>/dev/null || echo missing)
             if [ "$want" = "$got" ]; then echo "$key: OK"; else echo "::error::$key is $got, expected $want"; failed=1; fi
           done
           if [ "$(plutil -extract get-task-allow raw -o - build/final-entitlements.plist 2>/dev/null)" = "true" ]; then
@@ -206,7 +207,7 @@ jobs:
       - name: Wait for App Store Connect processing
         timeout-minutes: 30
         run: |
-          swiftc -parse-as-library scripts/ci/asc-wait-for-build.swift -o build/asc-wait-for-build
+          swiftc -swift-version 5 -parse-as-library scripts/ci/asc-wait-for-build.swift -o build/asc-wait-for-build
           build/asc-wait-for-build "$BUNDLE_ID" "$APP_VERSION" "$BUILD_NUMBER" | tee build/logs/processing.log
 
       # Xcode's own export logs explain signing failures in detail. They name the team,

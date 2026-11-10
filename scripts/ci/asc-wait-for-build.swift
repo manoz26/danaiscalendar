@@ -1,6 +1,6 @@
 // Waits until App Store Connect has processed an uploaded build, and reports its state.
 //
-// Build: swiftc -parse-as-library scripts/ci/asc-wait-for-build.swift -o build/asc-wait-for-build
+// Build: swiftc -swift-version 5 -parse-as-library scripts/ci/asc-wait-for-build.swift -o build/asc-wait-for-build
 // Usage: build/asc-wait-for-build <bundle-id> <version> <build-number>
 // Env:   ASC_KEY_PATH, ASC_KEY_ID, ASC_ISSUER_ID (App Store Connect API key)
 //
