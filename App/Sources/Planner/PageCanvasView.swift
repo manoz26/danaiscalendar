@@ -70,16 +70,15 @@ final class PageScrollView: UIScrollView, UIScrollViewDelegate {
         guard width > 0, abs(width - laidOutWidth) > 0.5 else { return }
 
         // New width (first layout, rotation, Split View): fit the page to it again and keep
-        // the same part of the page in view.
-        let anchor = contentSize.height > 0 ? (contentOffset.y + bounds.height / 2) / contentSize.height : 0
+        // the same line of the page at the top of the view (the title stays in view if it was).
+        let topFraction = contentSize.height > 0 ? max(0, contentOffset.y) / contentSize.height : 0
         laidOutWidth = width
         zoomScale = 1
         let size = CGSize(width: width, height: (width * PageCanvas.aspectRatio).rounded())
         pageView.frame = CGRect(origin: .zero, size: size)
         contentSize = size
         let maxOffset = max(0, size.height - bounds.height)
-        let offset = anchor > 0 ? anchor * size.height - bounds.height / 2 : 0
-        contentOffset = CGPoint(x: 0, y: min(maxOffset, max(0, offset)))
+        contentOffset = CGPoint(x: 0, y: min(maxOffset, topFraction * size.height))
     }
 
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
