@@ -55,6 +55,7 @@ jobs:
         run: bash scripts/ci/pick-simulators.sh >> "$GITHUB_OUTPUT"
 
       - name: Build for testing
+        id: build
         run: |
           set -o pipefail
           xcodebuild build-for-testing \
@@ -98,12 +99,15 @@ jobs:
             2>&1 | tee build/logs/ui-ipad.log | xcbeautify
 
       # One simulator at a time: app launches are much faster on a less busy runner.
+      # The iPhone runs even if the iPad tests failed, so both sets of screenshots come out.
       - name: Switch to the iPhone simulator
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           xcrun simctl shutdown "${{ steps.sims.outputs.ipad }}" || true
           bash scripts/ci/boot-simulator.sh "${{ steps.sims.outputs.iphone }}"
 
       - name: UI tests and screenshots (iPhone)
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         env:
           TEST_RUNNER_SCREENSHOT_DIR: ${{ github.workspace }}/build/screenshots
           TEST_RUNNER_DEVICE_LABEL: iphone

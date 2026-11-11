@@ -37,7 +37,7 @@ struct RootView: View {
                     onTap: { point in handleTap(at: point, in: content.template) }
                 )
                 .overlay {
-                    if ink.canDraw {
+                    if ink.canDraw, !TouchDiagnosis.noToolbar {
                         InkToolbarOverlay(ink: ink)
                     }
                 }

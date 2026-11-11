@@ -17,7 +17,7 @@ final class InkCanvasView: PKCanvasView {
     private var fittedWidth: CGFloat = 0
 
     /// Each open page has its own undo history (cleared when another page opens).
-    override var undoManager: UndoManager? { pageUndoManager }
+    override var undoManager: UndoManager? { TouchDiagnosis.noOverrides ? super.undoManager : pageUndoManager }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -34,11 +34,18 @@ final class InkCanvasView: PKCanvasView {
         templateView.layer.anchorPoint = .zero
         templateView.bounds = CGRect(origin: .zero, size: PageCanvas.size)
         templateView.layer.position = .zero
-        insertSubview(templateView, at: 0)
+        if !TouchDiagnosis.noTemplateView {
+            insertSubview(templateView, at: 0)
+        }
+        if TouchDiagnosis.noContentDelay {
+            delaysContentTouches = false
+        }
 
         // VoiceOver names the page when entering it; the items printed on it stay reachable.
-        isAccessibilityElement = false
-        accessibilityContainerType = .semanticGroup
+        if !TouchDiagnosis.noOverrides {
+            isAccessibilityElement = false
+            accessibilityContainerType = .semanticGroup
+        }
     }
 
     @available(*, unavailable)
@@ -47,14 +54,14 @@ final class InkCanvasView: PKCanvasView {
     }
 
     override var accessibilityElements: [Any]? {
-        get { [templateView] }
-        set { }
+        get { TouchDiagnosis.noOverrides ? super.accessibilityElements : [templateView] }
+        set { if TouchDiagnosis.noOverrides { super.accessibilityElements = newValue } }
     }
 
     override func layoutSubviews() {
         super.layoutSubviews()
         // PencilKit adds its own views; the template always stays behind the ink.
-        if subviews.first !== templateView {
+        if templateView.superview === self, subviews.first !== templateView {
             sendSubviewToBack(templateView)
         }
 

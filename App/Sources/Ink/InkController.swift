@@ -75,9 +75,15 @@ final class InkController {
         tap.delaysTouchesEnded = false
         tap.cancelsTouchesInView = false
         tap.delegate = helper
-        canvas.addGestureRecognizer(tap)
+        if !TouchDiagnosis.noTap {
+            canvas.addGestureRecognizer(tap)
+        }
 
-        if self.canDraw {
+        if self.canDraw, TouchDiagnosis.noDrawing {
+            canvas.drawingGestureRecognizer.isEnabled = false
+        } else if self.canDraw, TouchDiagnosis.noPencilInteraction {
+            // Drawing on, no Pencil double tap.
+        } else if self.canDraw {
             let pencil = UIPencilInteraction()
             pencil.delegate = helper
             canvas.addInteraction(pencil)
