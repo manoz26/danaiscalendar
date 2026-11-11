@@ -38,14 +38,17 @@ final class PageFiles: Sendable {
         }
     }
 
-    /// Saves a page in the background. `completion` (on the main thread) gets `false` if it failed.
+    /// Saves a page in the background. `scale` is the drawing's PencilKit units per canvas
+    /// unit (files are always in canvas units). `completion` (on the main thread) gets
+    /// `false` if it failed.
     func save(
-        _ box: DrawingBox, page: PlannerPage, layout: PageLayoutStamp, writtenBy: String,
+        _ box: DrawingBox, scale: CGFloat = 1, page: PlannerPage, layout: PageLayoutStamp, writtenBy: String,
         then completion: (@MainActor @Sendable (Bool) -> Void)? = nil
     ) {
         let store = store
         queue.async {
-            let saved = Self.write(box, page: page, layout: layout, writtenBy: writtenBy, to: store)
+            let canvasUnits = DrawingBox(drawing: InkLibrary.rescaled(box.drawing, from: scale, to: 1))
+            let saved = Self.write(canvasUnits, page: page, layout: layout, writtenBy: writtenBy, to: store)
             guard let completion else { return }
             DispatchQueue.main.async {
                 MainActor.assumeIsolated { completion(saved) }
@@ -111,6 +114,8 @@ final class InkLibrary {
 
     private struct Entry {
         var drawing: PKDrawing
+        /// PencilKit units per canvas unit of `drawing` (1 when read from disk).
+        var scale: CGFloat = 1
         var layout: PageLayoutStamp
         var dirtySince: Date?
         var lastUse = 0
@@ -130,21 +135,25 @@ final class InkLibrary {
         files = PageFiles(folder: folder)
     }
 
-    /// The ink of a page, from memory or (the first time) from disk.
-    func drawing(for page: PlannerPage, layout: PageLayoutStamp) -> PKDrawing {
+    /// The ink of a page at `scale` PencilKit units per canvas unit, from memory or (the
+    /// first time) from disk.
+    func drawing(for page: PlannerPage, scale: CGFloat = 1, layout: PageLayoutStamp) -> PKDrawing {
         current = page
         if entries[page] == nil {
             entries[page] = Entry(drawing: files.loadNow(page), layout: layout)
         }
         touch(page)
         trimCache()
-        return entries[page]?.drawing ?? PKDrawing()
+        guard let entry = entries[page] else { return PKDrawing() }
+        return Self.rescaled(entry.drawing, from: entry.scale, to: scale)
     }
 
-    /// The user changed a page's ink: keep it and save it shortly.
-    func update(_ drawing: PKDrawing, for page: PlannerPage, layout: PageLayoutStamp) {
+    /// The user changed a page's ink (at `scale` PencilKit units per canvas unit): keep it
+    /// and save it shortly.
+    func update(_ drawing: PKDrawing, scale: CGFloat = 1, for page: PlannerPage, layout: PageLayoutStamp) {
         var entry = entries[page] ?? Entry(drawing: drawing, layout: layout)
         entry.drawing = drawing
+        entry.scale = scale
         entry.layout = layout
         if entry.dirtySince == nil {
             entry.dirtySince = Date()
@@ -177,7 +186,7 @@ final class InkLibrary {
         guard var entry = entries[page], entry.isDirty else { return }
         entry.dirtySince = nil
         entries[page] = entry
-        files.save(DrawingBox(drawing: entry.drawing), page: page, layout: entry.layout, writtenBy: writtenBy) { [weak self] saved in
+        files.save(DrawingBox(drawing: entry.drawing), scale: entry.scale, page: page, layout: entry.layout, writtenBy: writtenBy) { [weak self] saved in
             guard !saved else { return }
             self?.markUnsaved(page)
         }
@@ -200,6 +209,14 @@ final class InkLibrary {
     /// Low memory: keep only unsaved pages and the open page.
     func releaseMemory() {
         entries = entries.filter { $0.value.isDirty || $0.key == current }
+    }
+
+    /// The same ink at another scale (strokes keep their points; PencilKit stores the
+    /// scaling as each stroke's transform, so nothing is lost).
+    nonisolated static func rescaled(_ drawing: PKDrawing, from: CGFloat, to: CGFloat) -> PKDrawing {
+        guard from > 0, to > 0, abs(from - to) > 0.000_001 else { return drawing }
+        let ratio = to / from
+        return drawing.transformed(using: CGAffineTransform(scaleX: ratio, y: ratio))
     }
 
     private func scheduleSave(_ page: PlannerPage) {

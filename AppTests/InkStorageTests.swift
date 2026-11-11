@@ -77,6 +77,29 @@ struct InkStorageTests {
         #expect(PageFiles(folder: folder).loadNow(page).strokes.count == 2)
     }
 
+    /// The canvas draws at the view's scale; files and the library's callers get canvas units.
+    @Test func inkDrawnAtAScaleIsSavedInCanvasUnits() throws {
+        let folder = temporaryFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let library = InkLibrary(folder: folder)
+        let layout = PageLayoutStamp.current(for: page)
+        let original = sampleDrawing()
+        let onScreen = original.transformed(using: CGAffineTransform(scaleX: 0.376, y: 0.376))
+        library.update(onScreen, scale: 0.376, for: page, layout: layout)
+
+        // Shown again at another width (another scale), it lines up with the canvas.
+        let atTwice = library.drawing(for: page, scale: 2, layout: layout)
+        #expect(abs(atTwice.bounds.minX - original.bounds.minX * 2) < 0.5)
+        #expect(abs(atTwice.bounds.maxY - original.bounds.maxY * 2) < 0.5)
+
+        library.saveAll(wait: true)
+        let saved = PageFiles(folder: folder).loadNow(page)
+        #expect(saved.strokes.count == 2)
+        #expect(abs(saved.bounds.minX - original.bounds.minX) < 0.5)
+        #expect(abs(saved.bounds.maxX - original.bounds.maxX) < 0.5)
+        #expect(abs(saved.bounds.maxY - original.bounds.maxY) < 0.5)
+    }
+
     @Test func pagesWithoutEditsAreNeverWritten() throws {
         let folder = temporaryFolder()
         defer { try? FileManager.default.removeItem(at: folder) }

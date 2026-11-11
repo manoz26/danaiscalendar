@@ -2,19 +2,25 @@ import PencilKit
 import PlannerCore
 import UIKit
 
-/// The open page: a PencilKit canvas whose drawing is in canvas units (1000 x 1400),
-/// with the printed template underneath.
+/// The open page: a PencilKit canvas with the printed template underneath.
 ///
-/// PencilKit does the zooming (it keeps the ink sharp at every zoom level). The template
-/// view sits inside the same scroll view at the same scale, so ink and print always line
-/// up: on every device, in both orientations and at every zoom. The page fits the width,
-/// zooms from 1x to 4x and scrolls.
+/// Ink is kept in canvas units (1000 x 1400) everywhere else; on this canvas it is drawn
+/// at `drawingScale` PencilKit units per canvas unit, so that the page fitted to the width
+/// is PencilKit's zoom 1. PencilKit's zoom then goes from 1 to 4 and never below 1: below
+/// 1 (iPhone, smaller iPads in portrait, Split View) it drew the ink on part of the page
+/// only. PencilKit does the zooming (it keeps the ink sharp); the template view sits in
+/// the same scroll view at the same scale, so ink and print always line up.
 final class InkCanvasView: PKCanvasView {
     static let maximumZoom: CGFloat = 4
 
     let templateView = PageTemplateView()
     private let pageUndoManager = UndoManager()
     private var fittedWidth: CGFloat = 0
+
+    /// PencilKit units per canvas unit: the view width over 1000.
+    private(set) var drawingScale: CGFloat = 1
+    /// Called with the old and new scale when the width changes (rotation, Split View).
+    var onDrawingScaleChange: ((CGFloat, CGFloat) -> Void)?
 
     /// Each open page has its own undo history (cleared when another page opens).
     override var undoManager: UndoManager? { pageUndoManager }
@@ -106,34 +112,30 @@ final class InkCanvasView: PKCanvasView {
         // the same line of the page at the top of the view (the title stays in view if it was).
         let topFraction = contentSize.height > 0 ? max(0, contentOffset.y) / contentSize.height : 0
         fittedWidth = width
-        let fit = width / PageCanvas.size.width
-        // PencilKit sizes the area it draws ink in from the content size. Give it the page
-        // at zoom 1 (1000 x 1400), then zoom to fit, as with any zooming scroll view: setting
-        // a zoomed-out size directly made it draw only part of the page (on iPhone the ink
-        // stopped 512 units from the left).
-        minimumZoomScale = min(fit, 1)
-        maximumZoomScale = max(fit * Self.maximumZoom, 1)
+        let oldScale = drawingScale
+        drawingScale = width / PageCanvas.size.width
+        minimumZoomScale = 1
+        maximumZoomScale = Self.maximumZoom
         zoomScale = 1
-        contentSize = PageCanvas.size
-        minimumZoomScale = fit
-        maximumZoomScale = fit * Self.maximumZoom
-        zoomScale = fit
         followZoom()
         let maxOffset = max(0, contentSize.height - bounds.height)
         contentOffset = CGPoint(x: 0, y: min(maxOffset, (topFraction * contentSize.height).rounded()))
+        if drawingScale != oldScale {
+            onDrawingScaleChange?(oldScale, drawingScale)
+        }
     }
 
     /// A newly opened page: fitted to the width, scrolled to the top.
     func showWholeWidthFromTop() {
         guard fittedWidth > 0 else { return }
-        zoomScale = minimumZoomScale
+        zoomScale = 1
         followZoom()
         contentOffset = .zero
     }
 
     /// Keeps the template and the scrollable area in step with PencilKit's zoom.
     func followZoom() {
-        let scale = zoomScale
+        let scale = zoomScale * drawingScale
         let transform = CGAffineTransform(scaleX: scale, y: scale)
         if templateView.transform != transform {
             templateView.transform = transform
@@ -151,7 +153,7 @@ final class InkCanvasView: PKCanvasView {
         let views = subviews.map { view in
             "\(type(of: view)) frame=\(view.frame) bounds=\(view.bounds)"
         }
-        return (["zoom=\(zoomScale) bounds=\(bounds) content=\(contentSize) offset=\(contentOffset)"] + views)
+        return (["zoom=\(zoomScale) drawingScale=\(drawingScale) bounds=\(bounds) content=\(contentSize) offset=\(contentOffset)"] + views)
             .joined(separator: "; ")
     }
     #endif

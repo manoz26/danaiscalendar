@@ -67,6 +67,9 @@ final class InkController {
 
         helper.controller = self
         canvas.delegate = helper
+        canvas.onDrawingScaleChange = { [weak self] old, new in
+            self?.drawingScaleChanged(from: old, to: new)
+        }
 
         // A finger tap opens things printed on the page. It only listens: it never delays
         // or cancels the touches PencilKit and the scroll view get (that crashed on taps
@@ -106,7 +109,7 @@ final class InkController {
         page = content.page
         layout = content.layout
         setTemplate(content)
-        replaceDrawing(library.drawing(for: content.page, layout: content.layout))
+        replaceDrawing(library.drawing(for: content.page, scale: canvas.drawingScale, layout: content.layout))
         canvas.undoManager?.removeAllActions()
         canvas.showWholeWidthFromTop()
         library.preload(content.page.neighbors)
@@ -200,7 +203,7 @@ final class InkController {
             return
         }
         replacedDrawing = nil
-        library.update(drawing, for: page, layout: layout)
+        library.update(drawing, scale: canvas.drawingScale, for: page, layout: layout)
     }
 
     fileprivate func tapped(_ recognizer: UITapGestureRecognizer) {
@@ -233,6 +236,17 @@ final class InkController {
         canvas.accessibilityLabel = content.accessibilityLabel
     }
 
+    /// The view's width changed: the same ink, re-expressed at the new scale. The undo
+    /// history refers to the old scale, so it starts again.
+    private func drawingScaleChanged(from old: CGFloat, to new: CGFloat) {
+        applyTool()
+        guard old > 0, new > 0 else { return }
+        let ratio = new / old
+        replaceDrawing(canvas.drawing.transformed(using: CGAffineTransform(scaleX: ratio, y: ratio)))
+        canvas.undoManager?.removeAllActions()
+        Task { [weak self] in self?.refreshUndoState() }
+    }
+
     private func replaceDrawing(_ drawing: PKDrawing) {
         isReplacingDrawing = true
         canvas.drawing = drawing
@@ -252,7 +266,7 @@ final class InkController {
 
     private func applyTool() {
         guard canDraw else { return }
-        canvas.tool = InkToolFactory.tool(for: tools)
+        canvas.tool = InkToolFactory.tool(for: tools, scale: canvas.drawingScale)
         // A new tool can bring new gesture recognizers with it.
         canvas.stopDelayingTouches()
     }
@@ -293,17 +307,20 @@ final class InkController {
     /// `-DCSampleInk YES` (UI tests): sample strokes on every opened page without ink.
     private func addSampleInkIfRequested(_ content: PlannerPageContent) {
         guard LaunchOptions.sampleInk, canvas.drawing.strokes.isEmpty else { return }
+        let scale = canvas.drawingScale
         let sample = SampleInk.drawing(for: content.page, template: content.template)
+            .transformed(using: CGAffineTransform(scaleX: scale, y: scale))
         replaceDrawing(sample)
-        library.update(sample, for: content.page, layout: content.layout)
+        library.update(sample, scale: scale, for: content.page, layout: content.layout)
     }
     #endif
 }
 
 /// PencilKit tools for the toolbar's state.
 enum InkToolFactory {
-    static func tool(for state: InkToolState) -> any PKTool {
-        let width = state.width ?? 1
+    /// `scale`: PencilKit units per canvas unit (the widths are in canvas units).
+    static func tool(for state: InkToolState, scale: CGFloat = 1) -> any PKTool {
+        let width = (state.width ?? 1) * scale
         let color = state.color.uiColor
         switch state.tool {
         case .pen:
