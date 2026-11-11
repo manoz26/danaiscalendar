@@ -54,8 +54,32 @@ final class InkCanvasView: PKCanvasView {
     }
 
     override var accessibilityElements: [Any]? {
-        get { TouchDiagnosis.noOverrides ? super.accessibilityElements : [templateView] }
+        get {
+            if TouchDiagnosis.noOverrides { return super.accessibilityElements }
+            return [templateView] + (diagnosisElement.map { [$0] } ?? [])
+        }
         set { if TouchDiagnosis.noOverrides { super.accessibilityElements = newValue } }
+    }
+
+    /// Temporary: the gesture recognizer report for `DiagnosticTouchTests`.
+    private var diagnosisElement: UIAccessibilityElement?
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        guard window != nil, TouchDiagnosis.report || TouchDiagnosis.noDelays || TouchDiagnosis.noKitGestures else { return }
+        for delay in [0.3, 1.5] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                MainActor.assumeIsolated {
+                    guard let self else { return }
+                    TouchDiagnosis.apply(to: self)
+                    let element = UIAccessibilityElement(accessibilityContainer: self)
+                    element.accessibilityIdentifier = "diag.recognizers"
+                    element.accessibilityLabel = TouchDiagnosis.describe(around: self)
+                    element.accessibilityFrameInContainerSpace = CGRect(x: 0, y: 0, width: 10, height: 10)
+                    self.diagnosisElement = element
+                }
+            }
+        }
     }
 
     override func layoutSubviews() {
