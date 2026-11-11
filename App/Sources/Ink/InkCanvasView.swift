@@ -149,11 +149,22 @@ final class InkCanvasView: PKCanvasView {
 
     #if DEBUG
     /// Zoom, sizes and PencilKit's own views, for UI test failure messages ("debug.inkGeometry").
+    /// The last things that happened to the ink (Debug only), for UI test failure messages.
+    var debugEvents: [String] = []
+
+    func noteDebugEvent(_ event: String) {
+        debugEvents.append(event)
+        if debugEvents.count > 12 { debugEvents.removeFirst() }
+    }
+
     var geometryReport: String {
+        let ink = drawing
+        let events = "events: " + debugEvents.joined(separator: " > ")
+        let inkLine = "ink: \(ink.strokes.count) strokes bounds=\(ink.bounds)"
         let views = subviews.map { view in
             "\(type(of: view)) frame=\(view.frame) bounds=\(view.bounds)"
         }
-        return (["zoom=\(zoomScale) drawingScale=\(drawingScale) bounds=\(bounds) content=\(contentSize) offset=\(contentOffset)"] + views)
+        return (["zoom=\(zoomScale) drawingScale=\(drawingScale) bounds=\(bounds) content=\(contentSize) offset=\(contentOffset)", inkLine, events] + views)
             .joined(separator: "; ")
     }
     #endif

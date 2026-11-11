@@ -27,15 +27,15 @@ final class InkTests: XCTestCase {
         waitForPage(app, "2029-03")
         settle()
         print("INK GEOMETRY: \(element(app, "debug.inkGeometry").label)")
-        checkInk(app, page: "page.month", targets: Self.monthTargets("2029-03"), minimum: 3)
         save(app, "en-portrait-ink-month")
+        checkInk(app, page: "page.month", targets: Self.monthTargets("2029-03"), minimum: 3)
 
         if isPad {
             device.orientation = .landscapeLeft
             waitForOrientation(app, landscape: true)
             waitForPage(app, "2029-03")
-            checkInk(app, page: "page.month", targets: Self.monthTargets("2029-03"), minimum: 2)
             save(app, "en-landscape-ink-month")
+            checkInk(app, page: "page.month", targets: Self.monthTargets("2029-03"), minimum: 2)
 
             // The bottom of the page (to-do list and memo), far below the first screen.
             let page = element(app, "page.month")

@@ -200,8 +200,14 @@ final class InkController {
         if let replaced = replacedDrawing, Date() < echoDeadline,
            replaced.strokes.count == drawing.strokes.count, replaced.bounds == drawing.bounds {
             // PencilKit reporting the drawing the app just set, not an edit.
+            #if DEBUG
+            canvas.noteDebugEvent("echo")
+            #endif
             return
         }
+        #if DEBUG
+        canvas.noteDebugEvent("edit(\(drawing.strokes.count), w=\(Int(drawing.bounds.width)), s=\(canvas.drawingScale))")
+        #endif
         replacedDrawing = nil
         library.update(drawing, scale: canvas.drawingScale, for: page, layout: layout)
     }
@@ -240,6 +246,9 @@ final class InkController {
     /// history refers to the old scale, so it starts again.
     /// (The library always has the latest ink: every edit reaches it right away.)
     private func drawingScaleChanged(from old: CGFloat, to new: CGFloat) {
+        #if DEBUG
+        canvas.noteDebugEvent("scale \(old)->\(new) page=\(page?.description ?? "none")")
+        #endif
         applyTool()
         guard let page else { return }
         replaceDrawing(library.drawing(for: page, scale: new, layout: layout))
@@ -248,6 +257,9 @@ final class InkController {
     }
 
     private func replaceDrawing(_ drawing: PKDrawing) {
+        #if DEBUG
+        canvas.noteDebugEvent("replace(\(drawing.strokes.count), w=\(Int(drawing.bounds.width)), s=\(canvas.drawingScale))")
+        #endif
         isReplacingDrawing = true
         canvas.drawing = drawing
         isReplacingDrawing = false
