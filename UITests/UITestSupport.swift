@@ -118,20 +118,22 @@ struct ScreenPixels {
         size = upright.size
         scale = upright.scale
         let cgImage = upright.cgImage
-        width = cgImage?.width ?? 0
-        height = cgImage?.height ?? 0
-        var buffer = [UInt8](repeating: 0, count: width * height * 4)
+        let pixelWidth = cgImage?.width ?? 0
+        let pixelHeight = cgImage?.height ?? 0
+        var buffer = [UInt8](repeating: 0, count: pixelWidth * pixelHeight * 4)
         if let cgImage, let space = CGColorSpace(name: CGColorSpace.sRGB) {
             buffer.withUnsafeMutableBytes { raw in
                 let context = CGContext(
-                    data: raw.baseAddress, width: width, height: height, bitsPerComponent: 8,
-                    bytesPerRow: width * 4, space: space,
+                    data: raw.baseAddress, width: pixelWidth, height: pixelHeight, bitsPerComponent: 8,
+                    bytesPerRow: pixelWidth * 4, space: space,
                     bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
                 )
                 // Row 0 of the buffer is the top of the image.
-                context?.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+                context?.draw(cgImage, in: CGRect(x: 0, y: 0, width: pixelWidth, height: pixelHeight))
             }
         }
+        width = pixelWidth
+        height = pixelHeight
         bytes = buffer
     }
 
