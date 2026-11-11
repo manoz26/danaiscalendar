@@ -97,7 +97,7 @@ struct InkStorageTests {
         state.select(.highlighter)
         #expect((InkToolFactory.tool(for: state) as? PKInkingTool)?.inkType == .marker)
         state.select(.eraser)
-        #expect((InkToolFactory.tool(for: state) as? PKEraserTool)?.eraserType == .bitmap)
+        #expect((InkToolFactory.tool(for: state) as? PKEraserTool)?.eraserType == .fixedWidthBitmap)
         state.eraserMode = .wholeStroke
         #expect((InkToolFactory.tool(for: state) as? PKEraserTool)?.eraserType == .vector)
         state.select(.lasso)

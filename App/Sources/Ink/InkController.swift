@@ -307,7 +307,8 @@ enum InkToolFactory {
         case .highlighter:
             return PKInkingTool(.marker, color: color, width: width)
         case .eraser:
-            return PKEraserTool(state.eraserMode == .partial ? .bitmap : .vector, width: width)
+            // A pixel eraser of a fixed width (PencilKit turns `.bitmap` with a width into this anyway).
+            return PKEraserTool(state.eraserMode == .partial ? .fixedWidthBitmap : .vector, width: width)
         case .lasso:
             return PKLassoTool()
         }
