@@ -5,10 +5,10 @@ import UIKit
 /// The open page: a PencilKit canvas with the printed template underneath.
 ///
 /// Ink is kept in canvas units (1000 x 1400) everywhere else; on this canvas it is drawn
-/// at `drawingScale` PencilKit units per canvas unit, so that the page fitted to the width
-/// is PencilKit's zoom 1. PencilKit's zoom then goes from 1 to 4 and never below 1: below
-/// 1 (iPhone, smaller iPads in portrait, Split View) it drew the ink on part of the page
-/// only. PencilKit does the zooming (it keeps the ink sharp); the template view sits in
+/// at `drawingScale` PencilKit units per canvas unit, chosen so that PencilKit's zoom never
+/// goes below 1: below 1 (iPhone, smaller iPads in portrait, Split View) it drew the ink
+/// on part of the page only. The scale changes only when the page would need a zoom below
+/// 1 (or above 2 at its fitted width); otherwise a new width (rotation) is just a zoom. PencilKit does the zooming (it keeps the ink sharp); the template view sits in
 /// the same scroll view at the same scale, so ink and print always line up.
 final class InkCanvasView: PKCanvasView {
     static let maximumZoom: CGFloat = 4
@@ -17,8 +17,10 @@ final class InkCanvasView: PKCanvasView {
     private let pageUndoManager = UndoManager()
     private var fittedWidth: CGFloat = 0
 
-    /// PencilKit units per canvas unit: the view width over 1000.
+    /// PencilKit units per canvas unit.
     private(set) var drawingScale: CGFloat = 1
+    /// PencilKit's zoom with the page fitted to the width: 1...2.
+    private var fitZoom: CGFloat = 1
     /// Called with the old and new scale when the width changes (rotation, Split View).
     var onDrawingScaleChange: ((CGFloat, CGFloat) -> Void)?
 
@@ -113,10 +115,14 @@ final class InkCanvasView: PKCanvasView {
         let topFraction = contentSize.height > 0 ? max(0, contentOffset.y) / contentSize.height : 0
         fittedWidth = width
         let oldScale = drawingScale
-        drawingScale = width / PageCanvas.size.width
-        minimumZoomScale = 1
-        maximumZoomScale = Self.maximumZoom
-        zoomScale = 1
+        let fit = width / PageCanvas.size.width
+        if fit < drawingScale || fit > drawingScale * 2 {
+            drawingScale = fit
+        }
+        fitZoom = fit / drawingScale
+        minimumZoomScale = fitZoom
+        maximumZoomScale = fitZoom * Self.maximumZoom
+        zoomScale = fitZoom
         followZoom()
         let maxOffset = max(0, contentSize.height - bounds.height)
         contentOffset = CGPoint(x: 0, y: min(maxOffset, (topFraction * contentSize.height).rounded()))
@@ -128,7 +134,7 @@ final class InkCanvasView: PKCanvasView {
     /// A newly opened page: fitted to the width, scrolled to the top.
     func showWholeWidthFromTop() {
         guard fittedWidth > 0 else { return }
-        zoomScale = 1
+        zoomScale = fitZoom
         followZoom()
         contentOffset = .zero
     }

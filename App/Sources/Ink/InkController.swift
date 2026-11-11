@@ -112,7 +112,7 @@ final class InkController {
         #if DEBUG
         addSampleInkIfRequested(content)
         #endif
-        replaceDrawing(library.drawing(for: content.page, scale: canvas.drawingScale, layout: content.layout))
+        replaceDrawing(Self.asNewStrokes(library.drawing(for: content.page, scale: canvas.drawingScale, layout: content.layout)))
         canvas.undoManager?.removeAllActions()
         canvas.showWholeWidthFromTop()
         library.preload(content.page.neighbors)
@@ -244,16 +244,32 @@ final class InkController {
 
     /// The view's width changed: the same ink, re-expressed at the new scale. The undo
     /// history refers to the old scale, so it starts again.
+    ///
+    /// PencilKit kept tiles drawn at the old scale when it got the same strokes rescaled, so
+    /// the canvas is emptied first and gets the ink back as new strokes a moment later.
     /// (The library always has the latest ink: every edit reaches it right away.)
     private func drawingScaleChanged(from old: CGFloat, to new: CGFloat) {
         #if DEBUG
         canvas.noteDebugEvent("scale \(old)->\(new) page=\(page?.description ?? "none")")
         #endif
         applyTool()
-        guard let page else { return }
-        replaceDrawing(library.drawing(for: page, scale: new, layout: layout))
+        guard page != nil else { return }
+        replaceDrawing(PKDrawing())
         canvas.undoManager?.removeAllActions()
-        Task { [weak self] in self?.refreshUndoState() }
+        Task { [weak self] in
+            guard let self, let page = self.page else { return }
+            let ink = self.library.drawing(for: page, scale: self.canvas.drawingScale, layout: self.layout)
+            self.replaceDrawing(Self.asNewStrokes(ink))
+            self.canvas.undoManager?.removeAllActions()
+            self.refreshUndoState()
+        }
+    }
+
+    /// The same strokes as new objects, so PencilKit draws them from scratch.
+    private static func asNewStrokes(_ drawing: PKDrawing) -> PKDrawing {
+        PKDrawing(strokes: drawing.strokes.map { stroke in
+            PKStroke(ink: stroke.ink, path: stroke.path, transform: stroke.transform, mask: stroke.mask, randomSeed: stroke.randomSeed)
+        })
     }
 
     private func replaceDrawing(_ drawing: PKDrawing) {
