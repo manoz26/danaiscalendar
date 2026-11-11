@@ -37,6 +37,24 @@
         }
       }
     },
+    "Apple Pencil" : {
+      "comment" : "Settings section header (product name, keep it).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Pencil"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Pencil"
+          }
+        }
+      }
+    },
     "Back to the year" : {
       "comment" : "Button at the top left of a month page that opens the year page.",
       "extractionState" : "manual",
@@ -51,6 +69,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Back to the year"
+          }
+        }
+      }
+    },
+    "Black" : {
+      "comment" : "Toolbar: ink colour (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μαύρο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Black"
+          }
+        }
+      }
+    },
+    "Blue" : {
+      "comment" : "Toolbar: ink colour (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μπλε"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blue"
           }
         }
       }
@@ -109,6 +163,78 @@
         }
       }
     },
+    "Draw with finger too" : {
+      "comment" : "Settings switch: a finger writes on the page like the Apple Pencil.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σχέδιο και με δάχτυλο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Draw with finger too"
+          }
+        }
+      }
+    },
+    "Erase what you touch" : {
+      "comment" : "Toolbar, eraser mode: erases only the parts of the ink it touches (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σβήνει ό,τι αγγίζει"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erase what you touch"
+          }
+        }
+      }
+    },
+    "Erase whole lines" : {
+      "comment" : "Toolbar, eraser mode: erases every stroke it touches, whole (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σβήνει ολόκληρες γραμμές"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erase whole lines"
+          }
+        }
+      }
+    },
+    "Eraser" : {
+      "comment" : "Toolbar: the eraser tool (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Γόμα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eraser"
+          }
+        }
+      }
+    },
     "Goals" : {
       "comment" : "Label of the goals box on the month page (printed in capitals).",
       "extractionState" : "manual",
@@ -123,6 +249,60 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Goals"
+          }
+        }
+      }
+    },
+    "Green" : {
+      "comment" : "Toolbar: ink colour (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πράσινο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Green"
+          }
+        }
+      }
+    },
+    "Hide tools" : {
+      "comment" : "Toolbar: folds the tool bar to a small button (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Απόκρυψη εργαλείων"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide tools"
+          }
+        }
+      }
+    },
+    "Highlighter" : {
+      "comment" : "Toolbar: the highlighter tool (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μαρκαδόρος"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Highlighter"
           }
         }
       }
@@ -163,6 +343,24 @@
         }
       }
     },
+    "Lasso" : {
+      "comment" : "Toolbar: the lasso tool that selects ink to move it (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Λάσο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lasso"
+          }
+        }
+      }
+    },
     "Loading…" : {
       "comment" : "Shown while the diagnostics log loads.",
       "extractionState" : "manual",
@@ -199,6 +397,24 @@
         }
       }
     },
+    "Medium" : {
+      "comment" : "Toolbar: middle line width (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μεσαίο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medium"
+          }
+        }
+      }
+    },
     "Memo" : {
       "comment" : "Label of the memo box on the month page (printed in capitals).",
       "extractionState" : "manual",
@@ -231,6 +447,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Month page for %@"
+          }
+        }
+      }
+    },
+    "Move tools" : {
+      "comment" : "Toolbar: the grip that drags the tool bar to the other side (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μετακίνηση εργαλείων"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move tools"
+          }
+        }
+      }
+    },
+    "Moves the tools to the other side of the page." : {
+      "comment" : "VoiceOver hint of the tool bar's grip.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μετακινεί τα εργαλεία στην άλλη πλευρά της σελίδας."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moves the tools to the other side of the page."
           }
         }
       }
@@ -289,6 +541,24 @@
         }
       }
     },
+    "Notes for %@" : {
+      "comment" : "VoiceOver: the grey notes box under a small month on the year page, e.g. 'Notes for March'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σημειώσεις: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notes for %@"
+          }
+        }
+      }
+    },
     "OK" : {
       "comment" : "Diagnostics check result: works.",
       "extractionState" : "manual",
@@ -303,6 +573,60 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "Pen" : {
+      "comment" : "Toolbar: the pen tool (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Στυλό"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pen"
+          }
+        }
+      }
+    },
+    "Pencil" : {
+      "comment" : "Toolbar: the pencil tool (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μολύβι"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pencil"
+          }
+        }
+      }
+    },
+    "Pink" : {
+      "comment" : "Toolbar: ink colour (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ροζ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pink"
           }
         }
       }
@@ -343,6 +667,60 @@
         }
       }
     },
+    "Purple" : {
+      "comment" : "Toolbar: ink colour (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μωβ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purple"
+          }
+        }
+      }
+    },
+    "Red" : {
+      "comment" : "Toolbar: ink colour (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κόκκινο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Red"
+          }
+        }
+      }
+    },
+    "Redo" : {
+      "comment" : "Toolbar: redo what was undone (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επανάληψη"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redo"
+          }
+        }
+      }
+    },
     "Settings" : {
       "comment" : "Title of the Settings screen, and VoiceOver label of the gear button.",
       "extractionState" : "manual",
@@ -379,6 +757,24 @@
         }
       }
     },
+    "Show tools" : {
+      "comment" : "Toolbar: unfolds the tool bar (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εμφάνιση εργαλείων"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show tools"
+          }
+        }
+      }
+    },
     "The log is empty." : {
       "comment" : "Diagnostics: nothing has been logged yet.",
       "extractionState" : "manual",
@@ -393,6 +789,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "The log is empty."
+          }
+        }
+      }
+    },
+    "Thick" : {
+      "comment" : "Toolbar: thickest line width (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Χοντρό"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thick"
+          }
+        }
+      }
+    },
+    "Thin" : {
+      "comment" : "Toolbar: thinnest line width (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Λεπτό"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thin"
           }
         }
       }
@@ -469,6 +901,24 @@
         }
       }
     },
+    "Tools" : {
+      "comment" : "VoiceOver: name of the floating tool bar.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εργαλεία"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tools"
+          }
+        }
+      }
+    },
     "Unavailable" : {
       "comment" : "Diagnostics check result: does not work.",
       "extractionState" : "manual",
@@ -483,6 +933,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Unavailable"
+          }
+        }
+      }
+    },
+    "Undo" : {
+      "comment" : "Toolbar: undo the last change to the ink (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αναίρεση"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undo"
           }
         }
       }
@@ -537,6 +1005,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Weekly"
+          }
+        }
+      }
+    },
+    "When this is off, only Apple Pencil writes and one finger moves the page. When it is on, your finger writes too and two fingers move the page." : {
+      "comment" : "Settings: explanation under the 'Draw with finger too' switch.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Όταν είναι κλειστό, γράφει μόνο το Apple Pencil και με ένα δάχτυλο μετακινείς τη σελίδα. Όταν είναι ανοιχτό, γράφει και το δάχτυλο, και η σελίδα μετακινείται με δύο δάχτυλα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When this is off, only Apple Pencil writes and one finger moves the page. When it is on, your finger writes too and two fingers move the page."
           }
         }
       }

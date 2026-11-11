@@ -9,12 +9,15 @@ struct PlannerPageContent: Equatable {
     let page: PlannerPage
     let template: PageTemplate
     let identifier: String
+    /// The printed layout, saved with the page's ink.
+    let layout: PageLayoutStamp
     /// Spoken name of the whole page, e.g. "Month page for NOVEMBER 2026".
     let accessibilityLabel: String
     let accessibilityItems: [PageAccessibilityItem]
 
     init(page: PlannerPage, today: PlannerDate, locale: Locale) {
         self.page = page
+        layout = PageLayoutStamp.current(for: page)
         switch page {
         case .year(let year):
             template = YearPageTemplate.make(year: year, locale: locale, today: today)
@@ -66,6 +69,34 @@ struct PlannerPageContent: Equatable {
                 traits: [.button, .notEnabled]
             ))
         }
+
+        // Boxes and days, where the ink goes (the UI tests check the ink against them).
+        let labels = Self.labels
+        func addSection(_ section: RegionID.Section, _ label: String) {
+            guard let region = template.region(.section(section)) else { return }
+            items.append(PageAccessibilityItem(
+                identifier: "section.\(section.rawValue)",
+                label: label,
+                value: nil,
+                rect: region.rect,
+                traits: .staticText
+            ))
+        }
+        addSection(.goals, labels.goals)
+        let days = DayNames(locale: locale)
+        for region in template.regions {
+            guard case .day(let date) = region.id else { continue }
+            items.append(PageAccessibilityItem(
+                identifier: "day.\(date)",
+                label: days.name(of: date),
+                value: nil,
+                rect: region.rect,
+                traits: .staticText
+            ))
+        }
+        addSection(.todo, labels.todo)
+        addSection(.tobuy, labels.toBuy)
+        addSection(.memo, labels.memo)
         return items
     }
 
@@ -90,13 +121,64 @@ struct PlannerPageContent: Equatable {
                 traits: .button
             ))
         }
+        for region in template.regions {
+            guard case .monthNotes(let month) = region.id else { continue }
+            let name = CalendarNames.monthName(month.month, locale: locale)
+            items.append(PageAccessibilityItem(
+                identifier: "year.notes.\(month)",
+                label: String(localized: "Notes for \(name)", comment: "VoiceOver: the grey notes box under a small month on the year page, e.g. 'Notes for March'."),
+                value: nil,
+                rect: region.rect,
+                traits: .staticText
+            ))
+        }
         return items
+    }
+}
+
+/// Spoken names of days, e.g. "Saturday 14 November 2026", in the app's language.
+private struct DayNames {
+    private let formatter: DateFormatter
+    private let calendar: Calendar
+
+    init(locale: Locale) {
+        calendar = PlannerLocale.calendar(locale: locale)
+        formatter = DateFormatter()
+        formatter.locale = locale
+        formatter.calendar = calendar
+        formatter.timeZone = calendar.timeZone
+        formatter.setLocalizedDateFormatFromTemplate("EEEEdMMMMy")
+    }
+
+    func name(of date: PlannerDate) -> String {
+        let components = DateComponents(year: date.year, month: date.month, day: date.day, hour: 12)
+        guard let day = calendar.date(from: components) else { return date.description }
+        return formatter.string(from: day)
     }
 }
 
 /// Launch arguments used by the UI tests, e.g. `-DCOpenPage year:2028`.
 /// Read from the arguments directly, not from UserDefaults.
 enum LaunchOptions {
+    #if DEBUG
+    /// `-DCResetData YES`: start without saved pages and with the default tools.
+    static var resetData: Bool { ProcessInfo.processInfo.arguments.contains("-DCResetData") }
+
+    /// `-DCSampleInk YES`: sample strokes on every opened page without ink (see `SampleInk`).
+    static var sampleInk: Bool { ProcessInfo.processInfo.arguments.contains("-DCSampleInk") }
+
+    /// Called at launch, before the ink is loaded.
+    @MainActor
+    static func prepareTestData() {
+        guard resetData else { return }
+        try? FileManager.default.removeItem(at: InkLibrary.defaultFolder)
+        for key in InkDefaults.all {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
+        AppLog.info("Test data reset")
+    }
+    #endif
+
     static var initialPage: PlannerPage? {
         let arguments = ProcessInfo.processInfo.arguments
         guard let index = arguments.firstIndex(of: "-DCOpenPage"), index + 1 < arguments.count else { return nil }

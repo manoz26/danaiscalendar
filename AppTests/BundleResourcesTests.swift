@@ -41,6 +41,11 @@ struct BundleResourcesTests {
         ("Weekly", "Εβδομάδες"),
         ("Today", "Σήμερα"),
         ("Year page for %@", "Σελίδα έτους: %@"),
+        ("Pen", "Στυλό"),
+        ("Highlighter", "Μαρκαδόρος"),
+        ("Undo", "Αναίρεση"),
+        ("Draw with finger too", "Σχέδιο και με δάχτυλο"),
+        ("Notes for %@", "Σημειώσεις: %@"),
     ])
     func plannerTextsAreInGreek(key: String, greekText: String) throws {
         let greekPath = try #require(Bundle.main.path(forResource: "el", ofType: "lproj"))
@@ -66,5 +71,9 @@ struct BundleResourcesTests {
         let url = try #require(Bundle.main.url(forResource: "PrivacyInfo", withExtension: "xcprivacy"))
         let manifest = try #require(NSDictionary(contentsOf: url))
         #expect(manifest["NSPrivacyTracking"] as? Bool == false)
+        // The app uses UserDefaults (tools, settings): Apple rejects builds that don't say why.
+        let apis = manifest["NSPrivacyAccessedAPITypes"] as? [[String: Any]] ?? []
+        let userDefaults = apis.first { $0["NSPrivacyAccessedAPIType"] as? String == "NSPrivacyAccessedAPICategoryUserDefaults" }
+        #expect(userDefaults?["NSPrivacyAccessedAPITypeReasons"] as? [String] == ["CA92.1"])
     }
 }

@@ -32,7 +32,7 @@
 ```bash
 gh run download <id> --name core-renders --dir ci-artifacts/<id>/renders
 ```
-Τα UI tests ανοίγουν συγκεκριμένη σελίδα με `-DCOpenPage year:2028` ή `-DCOpenPage month:2027-02`.
+Τα UI tests ανοίγουν συγκεκριμένη σελίδα με `-DCOpenPage year:2028` ή `-DCOpenPage month:2027-02`. Για το μελάνι (μόνο σε Debug): `-DCResetData YES` (χωρίς αποθηκευμένες σελίδες, το βάζει πάντα το `launch()` των tests), `-DCSampleInk YES` (κόκκινα ορθογώνια μέσα σε γνωστά κουτιά, που τα `InkTests` εντοπίζουν στα pixels του screenshot), `-DCDrawWithFinger YES`.
 
 Το CI: `swift test` για το Core, build, unit tests της εφαρμογής, και UI tests που τραβάνε screenshots σε iPad 13" (portrait + landscape) και iPhone, σε ελληνικά και αγγλικά. Τρέχει στο runner `xcode-27` (preview image του GitHub με το πιο πρόσφατο σταθερό Xcode)· αν κολλάει σε ουρά ή είναι ασταθές, άλλαξε σε `macos-26`.
 
@@ -58,7 +58,7 @@ gh run watch --exit-status $(gh run list --workflow testflight --limit 1 --json 
 
 - **Το repo είναι public.** Ποτέ μυστικά (κλειδιά `.p8`, certificates, tokens) ή προσωπικά δεδομένα. Τα κλειδιά μπαίνουν μόνο ως GitHub secrets.
 - **Το `reference/` δεν ανεβαίνει ποτέ** (έχει προσωπικές σημειώσεις). Είναι στο `.gitignore`· μην το αφαιρέσεις.
-- Κανένα χρώμα στο UI· μόνο το μελάνι έχει χρώμα. Γραμματοσειρά μόνο Inter (`Font.inter(...)`).
+- Κανένα χρώμα στο UI· χρώμα έχει μόνο το περιεχόμενο της χρήστριας (το μελάνι και, αργότερα, οι φωτογραφίες της Λίστας επιθυμιών). Γραμματοσειρά μόνο Inter (`Font.inter(...)`).
 - Κάθε κείμενο UI στο `App/Resources/Localizable.xcstrings` με **en και el**. Κεφαλαία μέσω `PlannerText.uppercased` (σωστά ελληνικά χωρίς τόνους).
 - Swift 6 (strict concurrency). Καμία εξωτερική βιβλιοθήκη χωρίς πολύ σοβαρό λόγο.
 - Privacy manifest στο `App/Resources/PrivacyInfo.xcprivacy`: αν ο κώδικας αρχίσει να χρησιμοποιεί "required reason" API (π.χ. `UserDefaults`/`@AppStorage`, χρονοσφραγίδες αρχείων), πρόσθεσέ το εκεί με τον λόγο, αλλιώς η Apple απορρίπτει το build.
@@ -70,11 +70,11 @@ gh run watch --exit-status $(gh run list --workflow testflight --limit 1 --json 
 
 ```
 project.yml                 XcodeGen: targets, Info.plist, scheme
-App/Sources/                εφαρμογή SwiftUI (Planner/: σελίδα με zoom, μπάρα, tabs)
+App/Sources/                εφαρμογή SwiftUI (Planner/: σελίδα, μπάρα, tabs· Ink/: PencilKit, εργαλεία, αποθήκευση)
 App/Resources/              Inter, String Catalog, assets
 AppTests/                   unit tests που τρέχουν μέσα στην εφαρμογή (γραμματοσειρές, μεταφράσεις)
 UITests/                    UI tests + screenshots
-Core/                       Swift package PlannerCore + tests (ημερολόγιο, γεωμετρία σελίδων, renderer)
+Core/                       Swift package PlannerCore + tests (ημερολόγιο, γεωμετρία σελίδων, renderer, αρχεία σελίδων, εργαλεία)
 .github/workflows/ci.yml    build, tests, screenshots
 .github/workflows/testflight.yml  archive, cloud signing, upload στο TestFlight (μετά από πράσινο ci)
 scripts/ci/                 βοηθητικά scripts του CI

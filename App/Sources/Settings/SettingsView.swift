@@ -1,8 +1,11 @@
 import SwiftUI
+import UIKit
 
-/// Settings sheet. For now only the version; tapping it 5 times opens Diagnostics.
+/// Settings sheet: drawing with a finger (iPad), and the version; tapping the version
+/// 5 times opens Diagnostics.
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @AppStorage(InkDefaults.drawWithFinger) private var drawWithFinger = false
     @State private var versionTaps = 0
     @State private var lastVersionTap = Date.distantPast
     @State private var showDiagnostics = false
@@ -10,6 +13,25 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
+                if UIDevice.current.userInterfaceIdiom == .pad {
+                    Section {
+                        Toggle(isOn: $drawWithFinger) {
+                            Text("Draw with finger too")
+                                .font(.inter(.regular, size: 17, relativeTo: .body))
+                                .foregroundStyle(Paper.ink)
+                        }
+                        .tint(Paper.ink)
+                        .accessibilityIdentifier("settings.drawWithFinger")
+                        .listRowBackground(Paper.background)
+                    } header: {
+                        CapsLabel("Apple Pencil")
+                    } footer: {
+                        Text("When this is off, only Apple Pencil writes and one finger moves the page. When it is on, your finger writes too and two fingers move the page.")
+                            .font(.inter(.regular, size: 13, relativeTo: .footnote))
+                            .foregroundStyle(Paper.secondary)
+                    }
+                }
+
                 Section {
                     Button(action: versionTapped) {
                         HStack {

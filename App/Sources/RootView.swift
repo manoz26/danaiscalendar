@@ -2,16 +2,19 @@ import SwiftUI
 import UIKit
 import PlannerCore
 
-/// The planner: the bar on top, the open page (year or month) and the tabs on the right.
-/// Opens on the current month.
+/// The planner: the bar on top, the open page (year or month) with the ink and the tool
+/// bar, and the tabs on the right. Opens on the current month.
 struct RootView: View {
+    let ink: InkController
+    @AppStorage(InkDefaults.drawWithFinger) private var drawWithFinger = false
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var now = Date()
     @State private var page: PlannerPage
     @State private var showSettings = false
 
-    init() {
+    init(ink: InkController) {
+        self.ink = ink
         let month = YearMonth(date: Date(), calendar: PlannerLocale.calendar(locale: AppLocale.current))
         _page = State(initialValue: LaunchOptions.initialPage ?? .month(month))
     }
@@ -27,15 +30,17 @@ struct RootView: View {
                 onSettings: { showSettings = true }
             )
             HStack(spacing: 0) {
-                PageCanvasView(
-                    template: content.template,
-                    identifier: content.identifier,
-                    spokenLabel: content.accessibilityLabel,
-                    accessibilityItems: content.accessibilityItems,
+                PlannerCanvas(
+                    ink: ink,
+                    content: content,
+                    drawWithFinger: drawWithFinger,
                     onTap: { point in handleTap(at: point, in: content.template) }
                 )
-                // A fresh view per page: each page opens at 1x, scrolled to the top.
-                .id(page)
+                .overlay {
+                    if ink.canDraw {
+                        InkToolbarOverlay(ink: ink)
+                    }
+                }
                 PlannerTabs(
                     page: page,
                     locale: locale,
@@ -53,7 +58,10 @@ struct RootView: View {
             case .active:
                 now = Date()
                 AppLog.info("App active")
+            case .inactive:
+                ink.saveSoon()
             case .background:
+                ink.saveEverything()
                 AppLog.info("App in background")
             default:
                 break
