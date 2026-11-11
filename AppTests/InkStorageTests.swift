@@ -87,10 +87,13 @@ struct InkStorageTests {
         let onScreen = original.transformed(using: CGAffineTransform(scaleX: 0.376, y: 0.376))
         library.update(onScreen, scale: 0.376, for: page, layout: layout)
 
-        // Shown again at another width (another scale), it lines up with the canvas.
+        // Shown again at another width (another scale), it lines up with the canvas. (Bounds
+        // include half the stroke width, which PencilKit counts differently once scaled, so
+        // compare centres and sizes.)
         let atTwice = library.drawing(for: page, scale: 2, layout: layout)
-        #expect(abs(atTwice.bounds.minX - original.bounds.minX * 2) < 0.5)
-        #expect(abs(atTwice.bounds.maxY - original.bounds.maxY * 2) < 0.5)
+        #expect(abs(atTwice.bounds.midX - original.bounds.midX * 2) < 1)
+        #expect(abs(atTwice.bounds.midY - original.bounds.midY * 2) < 1)
+        #expect(abs(atTwice.bounds.width - original.bounds.width * 2) < 20)
 
         library.saveAll(wait: true)
         let saved = PageFiles(folder: folder).loadNow(page)

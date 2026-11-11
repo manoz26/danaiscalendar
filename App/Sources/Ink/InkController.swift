@@ -109,13 +109,13 @@ final class InkController {
         page = content.page
         layout = content.layout
         setTemplate(content)
+        #if DEBUG
+        addSampleInkIfRequested(content)
+        #endif
         replaceDrawing(library.drawing(for: content.page, scale: canvas.drawingScale, layout: content.layout))
         canvas.undoManager?.removeAllActions()
         canvas.showWholeWidthFromTop()
         library.preload(content.page.neighbors)
-        #if DEBUG
-        addSampleInkIfRequested(content)
-        #endif
         Task { [weak self] in self?.refreshUndoState() }
     }
 
@@ -238,11 +238,11 @@ final class InkController {
 
     /// The view's width changed: the same ink, re-expressed at the new scale. The undo
     /// history refers to the old scale, so it starts again.
+    /// (The library always has the latest ink: every edit reaches it right away.)
     private func drawingScaleChanged(from old: CGFloat, to new: CGFloat) {
         applyTool()
-        guard old > 0, new > 0 else { return }
-        let ratio = new / old
-        replaceDrawing(canvas.drawing.transformed(using: CGAffineTransform(scaleX: ratio, y: ratio)))
+        guard let page else { return }
+        replaceDrawing(library.drawing(for: page, scale: new, layout: layout))
         canvas.undoManager?.removeAllActions()
         Task { [weak self] in self?.refreshUndoState() }
     }
@@ -305,13 +305,12 @@ final class InkController {
 
     #if DEBUG
     /// `-DCSampleInk YES` (UI tests): sample strokes on every opened page without ink.
+    /// Puts the sample into the library (in canvas units); `show` then puts it on the canvas.
     private func addSampleInkIfRequested(_ content: PlannerPageContent) {
-        guard LaunchOptions.sampleInk, canvas.drawing.strokes.isEmpty else { return }
-        let scale = canvas.drawingScale
+        guard LaunchOptions.sampleInk,
+              library.drawing(for: content.page, layout: content.layout).strokes.isEmpty else { return }
         let sample = SampleInk.drawing(for: content.page, template: content.template)
-            .transformed(using: CGAffineTransform(scaleX: scale, y: scale))
-        replaceDrawing(sample)
-        library.update(sample, scale: scale, for: content.page, layout: content.layout)
+        library.update(sample, scale: 1, for: content.page, layout: content.layout)
     }
     #endif
 }
