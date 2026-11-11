@@ -17,7 +17,7 @@ final class InkCanvasView: PKCanvasView {
     private var fittedWidth: CGFloat = 0
 
     /// Each open page has its own undo history (cleared when another page opens).
-    override var undoManager: UndoManager? { TouchDiagnosis.noOverrides ? super.undoManager : pageUndoManager }
+    override var undoManager: UndoManager? { pageUndoManager }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -34,18 +34,11 @@ final class InkCanvasView: PKCanvasView {
         templateView.layer.anchorPoint = .zero
         templateView.bounds = CGRect(origin: .zero, size: PageCanvas.size)
         templateView.layer.position = .zero
-        if !TouchDiagnosis.noTemplateView {
-            insertSubview(templateView, at: 0)
-        }
-        if TouchDiagnosis.noContentDelay {
-            delaysContentTouches = false
-        }
+        insertSubview(templateView, at: 0)
 
         // VoiceOver names the page when entering it; the items printed on it stay reachable.
-        if !TouchDiagnosis.noOverrides {
-            isAccessibilityElement = false
-            accessibilityContainerType = .semanticGroup
-        }
+        isAccessibilityElement = false
+        accessibilityContainerType = .semanticGroup
     }
 
     @available(*, unavailable)
@@ -54,40 +47,43 @@ final class InkCanvasView: PKCanvasView {
     }
 
     override var accessibilityElements: [Any]? {
-        get {
-            if TouchDiagnosis.noOverrides { return super.accessibilityElements }
-            return [templateView] + (diagnosisElement.map { [$0] } ?? [])
-        }
-        set { if TouchDiagnosis.noOverrides { super.accessibilityElements = newValue } }
+        get { [templateView] }
+        set { }
     }
-
-    /// Temporary: the gesture recognizer report for `DiagnosticTouchTests`.
-    private var diagnosisElement: UIAccessibilityElement?
 
     override func didMoveToWindow() {
         super.didMoveToWindow()
-        guard window != nil, TouchDiagnosis.report || TouchDiagnosis.noDelays || TouchDiagnosis.noKitGestures else { return }
-        for delay in [0.3, 1.5] {
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
-                MainActor.assumeIsolated {
-                    guard let self else { return }
-                    TouchDiagnosis.apply(to: self)
-                    let element = UIAccessibilityElement(accessibilityContainer: self)
-                    element.accessibilityIdentifier = "diag.recognizers"
-                    element.accessibilityLabel = TouchDiagnosis.describe(around: self)
-                    element.accessibilityFrameInContainerSpace = CGRect(x: 0, y: 0, width: 10, height: 10)
-                    self.diagnosisElement = element
-                }
-            }
+        guard window != nil else { return }
+        stopDelayingTouches()
+        // PencilKit finishes setting up its views a moment later.
+        DispatchQueue.main.async { [weak self] in
+            MainActor.assumeIsolated { self?.stopDelayingTouches() }
         }
+    }
+
+    /// No gesture recognizer of the canvas (or of PencilKit's views inside it) holds touches
+    /// back. When one did, UIKit crashed on the first finger touch of the page
+    /// (`-[UIGestureRecognizer _delayTouchesForEvent:inPhase:]` inserting nil): seen on every
+    /// tap and pinch in the iOS 27 simulators, and gone with this. Nothing here uses the
+    /// delayed touches; PencilKit works through its gesture recognizers.
+    func stopDelayingTouches() {
+        func visit(_ view: UIView) {
+            for recognizer in view.gestureRecognizers ?? [] {
+                if recognizer.delaysTouchesBegan { recognizer.delaysTouchesBegan = false }
+                if recognizer.delaysTouchesEnded { recognizer.delaysTouchesEnded = false }
+            }
+            view.subviews.forEach(visit)
+        }
+        visit(self)
     }
 
     override func layoutSubviews() {
         super.layoutSubviews()
         // PencilKit adds its own views; the template always stays behind the ink.
-        if templateView.superview === self, subviews.first !== templateView {
+        if subviews.first !== templateView {
             sendSubviewToBack(templateView)
         }
+        stopDelayingTouches()
 
         let width = bounds.width
         guard width > 0 else { return }

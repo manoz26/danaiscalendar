@@ -75,15 +75,9 @@ final class InkController {
         tap.delaysTouchesEnded = false
         tap.cancelsTouchesInView = false
         tap.delegate = helper
-        if !TouchDiagnosis.noTap {
-            canvas.addGestureRecognizer(tap)
-        }
+        canvas.addGestureRecognizer(tap)
 
-        if self.canDraw, TouchDiagnosis.noDrawing {
-            canvas.drawingGestureRecognizer.isEnabled = false
-        } else if self.canDraw, TouchDiagnosis.noPencilInteraction {
-            // Drawing on, no Pencil double tap.
-        } else if self.canDraw {
+        if self.canDraw {
             let pencil = UIPencilInteraction()
             pencil.delegate = helper
             canvas.addInteraction(pencil)
@@ -259,6 +253,8 @@ final class InkController {
     private func applyTool() {
         guard canDraw else { return }
         canvas.tool = InkToolFactory.tool(for: tools)
+        // A new tool can bring new gesture recognizers with it.
+        canvas.stopDelayingTouches()
     }
 
     private func refreshUndoState() {
