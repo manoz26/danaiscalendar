@@ -51,14 +51,6 @@ final class InkCanvasView: PKCanvasView {
         set { }
     }
 
-    override func didMoveToWindow() {
-        super.didMoveToWindow()
-        // First responder: the lasso's menu (copy, delete) and the keyboard's undo work.
-        if window != nil, drawingGestureRecognizer.isEnabled {
-            becomeFirstResponder()
-        }
-    }
-
     override func layoutSubviews() {
         super.layoutSubviews()
         // PencilKit adds its own views; the template always stays behind the ink.

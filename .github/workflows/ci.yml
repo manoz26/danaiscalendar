@@ -118,6 +118,15 @@ jobs:
             -resultBundlePath build/results/ui-iphone.xcresult \
             2>&1 | tee build/logs/ui-iphone.log | xcbeautify
 
+      # Crash reports of the app in the simulators (the .ips files the host keeps), in the logs artifact.
+      - name: Collect app crash reports
+        if: failure()
+        run: |
+          mkdir -p build/logs/crashes
+          find ~/Library/Logs/DiagnosticReports -name 'DanaisCalendar*' -newer build/logs/build.log \
+            -exec cp {} build/logs/crashes/ \; 2>/dev/null || true
+          ls build/logs/crashes
+
       - name: Screenshot summary
         if: always()
         run: |

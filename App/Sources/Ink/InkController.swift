@@ -68,8 +68,12 @@ final class InkController {
         helper.controller = self
         canvas.delegate = helper
 
+        // A finger tap opens things printed on the page. It only listens: it never delays
+        // or cancels the touches PencilKit and the scroll view get (that crashed on taps
+        // and pinches in the simulator).
         let tap = UITapGestureRecognizer(target: helper, action: #selector(CanvasHelper.tapped(_:)))
-        tap.allowedTouchTypes = [NSNumber(value: UITouch.TouchType.direct.rawValue)]
+        tap.delaysTouchesEnded = false
+        tap.cancelsTouchesInView = false
         tap.delegate = helper
         canvas.addGestureRecognizer(tap)
 
@@ -338,12 +342,17 @@ private final class CanvasHelper: NSObject, PKCanvasViewDelegate, UIGestureRecog
         controller?.tapped(recognizer)
     }
 
-    /// The tap never blocks scrolling, zooming or (with a finger) drawing.
+    /// The Apple Pencil writes; only fingers tap (a dot on a month title must not open it).
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        touch.type != .pencil
+    }
+
+    /// With "Draw with finger too", a finger tap may also start a stroke.
     func gestureRecognizer(
         _ gestureRecognizer: UIGestureRecognizer,
         shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
     ) -> Bool {
-        true
+        otherGestureRecognizer === (gestureRecognizer.view as? PKCanvasView)?.drawingGestureRecognizer
     }
 
     /// iOS 17.0–17.4.

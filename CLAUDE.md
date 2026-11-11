@@ -20,7 +20,7 @@
    ```bash
    gh run watch --exit-status $(gh run list --workflow ci --limit 1 --json databaseId --jq '.[0].databaseId')
    ```
-4. Αν αποτύχει: `gh run view <id> --log-failed`, διάβασε το πραγματικό σφάλμα, διόρθωσε, ξανά από το 2. Τα πλήρη logs του xcodebuild είναι στο artifact `logs`, και τα `.xcresult` στο `test-results` όταν κάτι αποτύχει.
+4. Αν αποτύχει: `gh run view <id> --log-failed`, διάβασε το πραγματικό σφάλμα, διόρθωσε, ξανά από το 2. Τα πλήρη logs του xcodebuild είναι στο artifact `logs` (και οι αναφορές κρασαρίσματος της εφαρμογής στο `logs/crashes/*.ips`), και τα `.xcresult` στο `test-results` όταν κάτι αποτύχει.
 5. Κατέβασε τα screenshots και **κοίταξέ τα ένα-ένα** (με το Read tool):
    ```bash
    gh run download <id> --name screenshots --dir ci-artifacts/<id>
