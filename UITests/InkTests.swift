@@ -115,7 +115,10 @@ final class InkTests: XCTestCase {
         let window = app.windows.firstMatch
         let grip = element(app, "toolbar.grip")
         XCTAssertTrue(grip.waitForExistence(timeout: 5), "The tool bar grip was not found")
-        grip.press(forDuration: 0.2, thenDragTo: window.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)))
+        grip.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).press(
+            forDuration: 0.2,
+            thenDragTo: window.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5))
+        )
         settle()
         XCTAssertGreaterThan(element(app, "toolbar").frame.midX, window.frame.midX, "The tool bar did not move right")
         save(app, "en-portrait-toolbar-right")
