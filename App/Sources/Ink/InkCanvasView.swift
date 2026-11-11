@@ -47,7 +47,17 @@ final class InkCanvasView: PKCanvasView {
     }
 
     override var accessibilityElements: [Any]? {
-        get { [templateView] }
+        get {
+            #if DEBUG
+            let geometry = UIAccessibilityElement(accessibilityContainer: self)
+            geometry.accessibilityIdentifier = "debug.inkGeometry"
+            geometry.accessibilityLabel = geometryReport
+            geometry.accessibilityFrameInContainerSpace = CGRect(x: 0, y: 0, width: 4, height: 4)
+            return [templateView, geometry]
+            #else
+            return [templateView]
+            #endif
+        }
         set { }
     }
 
@@ -97,6 +107,14 @@ final class InkCanvasView: PKCanvasView {
         let topFraction = contentSize.height > 0 ? max(0, contentOffset.y) / contentSize.height : 0
         fittedWidth = width
         let fit = width / PageCanvas.size.width
+        // PencilKit sizes the area it draws ink in from the content size. Give it the page
+        // at zoom 1 (1000 x 1400), then zoom to fit, as with any zooming scroll view: setting
+        // a zoomed-out size directly made it draw only part of the page (on iPhone the ink
+        // stopped 512 units from the left).
+        minimumZoomScale = min(fit, 1)
+        maximumZoomScale = max(fit * Self.maximumZoom, 1)
+        zoomScale = 1
+        contentSize = PageCanvas.size
         minimumZoomScale = fit
         maximumZoomScale = fit * Self.maximumZoom
         zoomScale = fit
@@ -126,6 +144,17 @@ final class InkCanvasView: PKCanvasView {
             contentSize = size
         }
     }
+
+    #if DEBUG
+    /// Zoom, sizes and PencilKit's own views, for UI test failure messages ("debug.inkGeometry").
+    var geometryReport: String {
+        let views = subviews.map { view in
+            "\(type(of: view)) frame=\(view.frame) bounds=\(view.bounds)"
+        }
+        return (["zoom=\(zoomScale) bounds=\(bounds) content=\(contentSize) offset=\(contentOffset)"] + views)
+            .joined(separator: "; ")
+    }
+    #endif
 
     /// Canvas units of a touch.
     func canvasLocation(of recognizer: UIGestureRecognizer) -> CGPoint {

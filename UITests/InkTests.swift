@@ -26,6 +26,7 @@ final class InkTests: XCTestCase {
         waitForOrientation(app, landscape: false)
         waitForPage(app, "2029-03")
         settle()
+        print("INK GEOMETRY: \(element(app, "debug.inkGeometry").label)")
         checkInk(app, page: "page.month", targets: Self.monthTargets("2029-03"), minimum: 3)
         save(app, "en-portrait-ink-month")
 
@@ -35,6 +36,17 @@ final class InkTests: XCTestCase {
             waitForPage(app, "2029-03")
             checkInk(app, page: "page.month", targets: Self.monthTargets("2029-03"), minimum: 2)
             save(app, "en-landscape-ink-month")
+
+            // The bottom of the page (to-do list and memo), far below the first screen.
+            let page = element(app, "page.month")
+            page.swipeUp(velocity: .fast)
+            page.swipeUp(velocity: .fast)
+            settle(1.5)
+            checkInk(app, page: "page.month", targets: Self.monthTargets("2029-03"), minimum: 2)
+            save(app, "en-landscape-ink-month-bottom")
+            page.swipeDown(velocity: .fast)
+            page.swipeDown(velocity: .fast)
+            settle()
             device.orientation = .portrait
             waitForOrientation(app, landscape: false)
         }
@@ -163,7 +175,10 @@ final class InkTests: XCTestCase {
                 abs(found.minX - expected.minX), abs(found.maxX - expected.maxX),
                 abs(found.minY - expected.minY), abs(found.maxY - expected.maxY),
             ].max() ?? 0
-            XCTAssertLessThanOrEqual(off, tolerance, "Ink in \(id) at \(found), expected \(expected) (off by \(off), allowed \(tolerance))")
+            XCTAssertLessThanOrEqual(
+                off, tolerance,
+                "Ink in \(id) at \(found), expected \(expected) (off by \(off), allowed \(tolerance)). \(element(app, "debug.inkGeometry").label)"
+            )
             checked.append(id)
         }
         XCTAssertGreaterThanOrEqual(checked.count, minimum, "Too few boxes on screen to check: \(checked)")
