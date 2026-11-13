@@ -4,8 +4,10 @@ import Foundation
 /// Where everything sits on a month page, in canvas units (1000 x 1400).
 ///
 /// Top to bottom: year and title (WEEKLY buttons on the right), GOALS box, weekday
-/// headers, the day grid, and three columns at the bottom: TO DO LIST, TO BUY and MEMO.
-/// The grid always fills the same area; 4, 5 or 6 weeks share it.
+/// headers, the day grid, and at the bottom TO DO LIST (under 3 columns of the grid) and
+/// MEMO (ruled lines under the other 4). The grid always fills the same area; 4, 5 or 6
+/// weeks share it. (Layout `month-v2`; v1 also had a TO BUY list where MEMO's lines now
+/// start: the shopping list has its own page.)
 public struct MonthPageLayout: Sendable {
     public struct Column: Sendable, Equatable {
         public let weekday: Weekday
@@ -72,9 +74,8 @@ public struct MonthPageLayout: Sendable {
     /// One row of 7 cells per week.
     public let weeks: [[Cell]]
     public let todo: ListSection
-    public let toBuy: ListSection
-    public let memoLabelAnchor: CGPoint
-    public let memo: CGRect
+    /// The notes: ruled lines that run across the rest of the width.
+    public let memo: ListSection
 
     public var month: YearMonth { grid.month }
 
@@ -132,7 +133,7 @@ public struct MonthPageLayout: Sendable {
             }
         }
 
-        // Bottom lists line up with the grid columns: TO DO over 3, TO BUY and MEMO over 2 each.
+        // Bottom lists line up with the grid columns: TO DO over 3, MEMO over the other 4.
         let halfGutter = Self.columnGutter / 2
         let listHeight = Self.listRowHeight * CGFloat(Self.listRowCount)
         func list(from firstColumn: Int, to endColumn: Int) -> ListSection {
@@ -146,10 +147,7 @@ public struct MonthPageLayout: Sendable {
             return ListSection(labelAnchor: CGPoint(x: leftEdge, y: Self.listLabelBaseline), frame: frame, rows: rows)
         }
         todo = list(from: 0, to: 3)
-        toBuy = list(from: 3, to: 5)
-        let memoList = list(from: 5, to: 7)
-        memoLabelAnchor = memoList.labelAnchor
-        memo = memoList.frame
+        memo = list(from: 3, to: 7)
     }
 
     /// The cell of a day shown on this page (including days of the next/previous month).
@@ -167,9 +165,7 @@ public struct MonthPageLayout: Sendable {
         regions += weeks.joined().map { PageRegion(.day($0.day.date), $0.frame) }
         regions.append(PageRegion(.section(.todo), todo.frame))
         regions += todo.rows.enumerated().map { PageRegion(.todoLine($0.offset + 1), $0.element) }
-        regions.append(PageRegion(.section(.tobuy), toBuy.frame))
-        regions += toBuy.rows.enumerated().map { PageRegion(.toBuyLine($0.offset + 1), $0.element) }
-        regions.append(PageRegion(.section(.memo), memo))
+        regions.append(PageRegion(.section(.memo), memo.frame))
         return regions
     }
 }

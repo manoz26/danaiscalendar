@@ -190,5 +190,18 @@ struct PlannerPageTests {
         #expect(PlannerPage("month:2027-02") == .month(YearMonth(year: 2027, month: 2)))
         #expect(PlannerPage("month:2027-14") == nil)
         #expect(PlannerPage("day:2027-02-01") == nil)
+        #expect(PlannerPage.toBuy.description == "tobuy")
+        #expect(PlannerPage("tobuy") == .toBuy)
+    }
+
+    @Test func theToBuyPageHasNoDateAndNoNeighbours() {
+        #expect(PlannerPage.toBuy.year == nil)
+        #expect(PlannerPage.toBuy.yearPage == nil)
+        #expect(!PlannerPage.toBuy.isCalendarPage)
+        #expect(PlannerPage.month(YearMonth(year: 2026, month: 11)).isCalendarPage)
+        #expect(PlannerPage.toBuy.previous == .toBuy)
+        #expect(PlannerPage.toBuy.next == .toBuy)
+        #expect(PlannerPage.toBuy.neighbors.isEmpty)
+        #expect(PlannerPage.month(YearMonth(year: 2026, month: 11)).neighbors.contains(.year(2026)))
     }
 }

@@ -52,7 +52,7 @@ public enum RegionID: Hashable, Sendable, CustomStringConvertible {
         case goals, todo, memo, tobuy
     }
 
-    /// The page title ("NOVEMBER", "2026").
+    /// The page title ("NOVEMBER", "2026", "TO BUY").
     case title
     /// Month page: the WEEKLY buttons, numbered from 1.
     case weekly(Int)
@@ -60,11 +60,11 @@ public enum RegionID: Hashable, Sendable, CustomStringConvertible {
     case weekday(Weekday)
     /// A day cell (month page) or day number (small month on the year page).
     case day(PlannerDate)
-    /// Month page: goals box, to-do list, memo, to-buy list.
+    /// Month page: goals box, to-do list, memo. To-buy page: the whole list.
     case section(Section)
     /// Month page: a to-do line, numbered from 1.
     case todoLine(Int)
-    /// Month page: a to-buy line, numbered from 1.
+    /// To-buy page: a line, numbered from 1 (down the left column, then the right one).
     case toBuyLine(Int)
     /// Year page: a small month (title and days); tapping it opens the month.
     case month(YearMonth)

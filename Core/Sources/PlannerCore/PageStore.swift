@@ -16,7 +16,7 @@ public protocol PageStore: Sendable {
 }
 
 /// Page files in a folder on this device: one `<page>.dcpage` per page
-/// (`year-2026.dcpage`, `month-2026-11.dcpage`).
+/// (`year-2026.dcpage`, `month-2026-11.dcpage`, `tobuy.dcpage`).
 public final class LocalPageStore: PageStore {
     public let folder: URL
 
@@ -73,11 +73,12 @@ public final class LocalPageStore: PageStore {
 }
 
 extension PlannerPage {
-    /// File name without extension: "year-2026", "month-2026-11".
+    /// File name without extension: "year-2026", "month-2026-11", "tobuy".
     public var fileStem: String {
         switch self {
         case .year(let year): String(format: "year-%04ld", year)
         case .month(let month): "month-\(month)"
+        case .toBuy: "tobuy"
         }
     }
 
@@ -88,6 +89,8 @@ extension PlannerPage {
         } else if fileStem.hasPrefix("month-"), let month = YearMonth(String(fileStem.dropFirst(6))),
                   Self.years.contains(month.year) {
             self = .month(month)
+        } else if fileStem == "tobuy" {
+            self = .toBuy
         } else {
             return nil
         }
@@ -97,7 +100,7 @@ extension PlannerPage {
     /// advance so that turning to them is instant.
     public var neighbors: [PlannerPage] {
         var pages = [previous, next]
-        if case .month = self { pages.append(yearPage) }
+        if case .month(let month) = self { pages.append(.year(month.year)) }
         return pages.filter { $0 != self }
     }
 }

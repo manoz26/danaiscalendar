@@ -103,14 +103,27 @@ struct MonthPageLayoutTests {
         #expect(layout.goals.maxY < layout.weekdays[0].frame.minY)
         #expect(layout.weekdays[0].frame.maxY <= layout.gridFrame.minY)
         #expect(layout.gridFrame.maxY < layout.todo.frame.minY)
-        expectNoOverlap([layout.todo.frame, layout.toBuy.frame, layout.memo], "bottom lists")
+        expectNoOverlap([layout.todo.frame, layout.memo.frame], "bottom lists")
         #expect(layout.todo.rows.count == MonthPageLayout.listRowCount)
-        #expect(layout.toBuy.rows.count == MonthPageLayout.listRowCount)
+        #expect(layout.memo.rows.count == MonthPageLayout.listRowCount)
         #expect(layout.todo.frame.minX == MonthPageLayout.margin)
-        #expect(abs(layout.memo.maxX - (PageCanvas.size.width - MonthPageLayout.margin)) < 0.01)
-        // The lists line up with the grid's columns.
-        #expect(layout.todo.frame.width > layout.toBuy.frame.width)
-        #expect(abs(layout.toBuy.frame.midX - layout.weekdays[4].frame.minX) < 0.01)
+        #expect(abs(layout.memo.frame.maxX - (PageCanvas.size.width - MonthPageLayout.margin)) < 0.01)
+        // The lists line up with the grid's columns: to-do under 3, the notes under the other 4.
+        #expect(abs(layout.todo.frame.maxX + MonthPageLayout.columnGutter / 2 - layout.weekdays[3].frame.minX) < 0.01)
+        #expect(abs(layout.memo.frame.minX - MonthPageLayout.columnGutter / 2 - layout.weekdays[3].frame.minX) < 0.01)
+        #expect(layout.memo.frame.width > layout.todo.frame.width)
+        // The notes' lines run across their whole width, level with the to-do lines.
+        for (todo, memo) in zip(layout.todo.rows, layout.memo.rows) {
+            #expect(todo.minY == memo.minY)
+            #expect(memo.width == layout.memo.frame.width)
+        }
+    }
+
+    @Test func theMonthPageHasNoShoppingListAnyMore() {
+        let regions = MonthPageLayout(month: YearMonth(year: 2026, month: 11)).regions.map(\.id)
+        #expect(!regions.contains(.section(.tobuy)))
+        #expect(!regions.contains { if case .toBuyLine = $0 { true } else { false } })
+        #expect(regions.contains(.section(.memo)))
     }
 
     @Test func hitTestingFindsTheMostSpecificRegion() throws {

@@ -123,10 +123,15 @@ public struct PageLayoutStamp: Sendable, Equatable {
     }
 
     /// The layout the app prints today for a page.
+    ///
+    /// - `month-v1`: TO DO LIST, TO BUY and MEMO (an open box) at the bottom.
+    /// - `month-v2`: TO DO LIST and MEMO as ruled lines over the space of the old TO BUY and
+    ///   MEMO. The bottom of the page did not move, so v1 ink keeps its coordinates.
     public static func current(for page: PlannerPage, firstWeekday: Weekday = .defaultFirst) -> PageLayoutStamp {
         switch page {
         case .year: PageLayoutStamp(name: "year-v1", firstWeekday: firstWeekday)
-        case .month: PageLayoutStamp(name: "month-v1", firstWeekday: firstWeekday)
+        case .month: PageLayoutStamp(name: "month-v2", firstWeekday: firstWeekday)
+        case .toBuy: PageLayoutStamp(name: "tobuy-v1", firstWeekday: firstWeekday)
         }
     }
 }

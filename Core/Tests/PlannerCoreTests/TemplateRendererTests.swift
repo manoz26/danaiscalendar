@@ -90,7 +90,7 @@ struct TemplateRendererTests {
     private let english = Locale(identifier: "en_US")
     private let greek = Locale(identifier: "el_GR")
     private let greekLabels = MonthPageLabels(
-        goals: "Στόχοι", todo: "Να κάνω", memo: "Σημειώσεις", toBuy: "Να αγοράσω", weekly: "Εβδομάδες"
+        goals: "Στόχοι", todo: "Να κάνω", memo: "Σημειώσεις", weekly: "Εβδομάδες"
     )
 
     @Test func interIsAvailableToTheRenderer() {
@@ -154,8 +154,18 @@ struct TemplateRendererTests {
             ("month-2028-02-el", MonthPageTemplate.make(month: YearMonth(year: 2028, month: 2), locale: greek, labels: greekLabels)),
             ("month-2027-02-en", MonthPageTemplate.make(month: YearMonth(year: 2027, month: 2), locale: english, labels: .english)),
             ("month-2026-09-el", MonthPageTemplate.make(month: YearMonth(year: 2026, month: 9), locale: greek, labels: greekLabels)),
+            ("month-2026-11-el-birthdays", MonthPageTemplate.make(
+                month: YearMonth(year: 2026, month: 11), locale: greek, labels: greekLabels, today: today,
+                birthdays: [
+                    BirthdayNote(date: PlannerDate(year: 2026, month: 11, day: 13), text: "Μάνος — γενέθλια"),
+                    BirthdayNote(date: PlannerDate(year: 2026, month: 11, day: 21), text: "Ελένη — γενέθλια"),
+                    BirthdayNote(date: PlannerDate(year: 2026, month: 11, day: 21), text: "Αλεξάνδρα-Μαρία Παπαδοπούλου — γενέθλια"),
+                ]
+            )),
             ("year-2026-en", YearPageTemplate.make(year: 2026, locale: english, today: today)),
             ("year-2028-el", YearPageTemplate.make(year: 2028, locale: greek)),
+            ("tobuy-en", ToBuyPageTemplate.make(locale: english, title: "To buy")),
+            ("tobuy-el", ToBuyPageTemplate.make(locale: greek, title: "Να αγοράσω")),
         ]
         for (name, template) in samples {
             try PageBitmap(template, scale: 1.5).writePNG(to: directory.appending(path: "\(name).png"))

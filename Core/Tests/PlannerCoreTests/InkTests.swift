@@ -50,14 +50,16 @@ struct InkAnchorTests {
         let layout = MonthPageLayout(month: november)
         let third = layout.todo.rows[2]
         #expect(InkAnchor.region(forStrokeBounds: box(around: center(third), width: 120), in: monthTemplate) == .todoLine(3))
-        let firstToBuy = layout.toBuy.rows[0]
-        #expect(InkAnchor.region(forStrokeBounds: box(around: center(firstToBuy)), in: monthTemplate) == .toBuyLine(1))
+        let toBuy = ToBuyPageTemplate.make(locale: Locale(identifier: "en_US"), title: "To buy")
+        let firstToBuy = ToBuyPageLayout().rows[0]
+        #expect(InkAnchor.region(forStrokeBounds: box(around: center(firstToBuy)), in: toBuy) == .toBuyLine(1))
+        #expect(InkAnchor.region(forStrokeBounds: box(around: center(ToBuyPageLayout().frame), width: 30), in: toBuy) == .section(.tobuy))
     }
 
     @Test func boxes() {
         let layout = MonthPageLayout(month: november)
         #expect(InkAnchor.region(forStrokeBounds: box(around: center(layout.goals), width: 300), in: monthTemplate) == .section(.goals))
-        #expect(InkAnchor.region(forStrokeBounds: box(around: center(layout.memo)), in: monthTemplate) == .section(.memo))
+        #expect(InkAnchor.region(forStrokeBounds: box(around: center(layout.memo.frame)), in: monthTemplate) == .section(.memo))
         #expect(InkAnchor.region(forStrokeBounds: box(around: center(layout.title)), in: monthTemplate) == .title)
         #expect(InkAnchor.region(forStrokeBounds: box(around: center(layout.weeklyButtons[1]), width: 10, height: 10), in: monthTemplate) == .weekly(2))
         #expect(InkAnchor.region(forStrokeBounds: box(around: center(layout.weekdays[0].frame)), in: monthTemplate) == .weekday(.monday))
@@ -93,7 +95,7 @@ struct InkAnchorTests {
         #expect(InkAnchor.region(forStrokePoints: points, in: monthTemplate) == .day(PlannerDate(year: 2026, month: 11, day: 3)))
         #expect(InkAnchor.region(forStrokePoints: [], in: monthTemplate) == nil)
         // A single dot.
-        #expect(InkAnchor.region(forStrokePoints: [center(layout.memo)], in: monthTemplate) == .section(.memo))
+        #expect(InkAnchor.region(forStrokePoints: [center(layout.memo.frame)], in: monthTemplate) == .section(.memo))
     }
 }
 

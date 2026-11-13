@@ -7,20 +7,16 @@ public struct MonthPageLabels: Sendable, Equatable {
     public var goals: String
     public var todo: String
     public var memo: String
-    public var toBuy: String
     public var weekly: String
 
-    public init(goals: String, todo: String, memo: String, toBuy: String, weekly: String) {
+    public init(goals: String, todo: String, memo: String, weekly: String) {
         self.goals = goals
         self.todo = todo
         self.memo = memo
-        self.toBuy = toBuy
         self.weekly = weekly
     }
 
-    public static let english = MonthPageLabels(
-        goals: "Goals", todo: "To do list", memo: "Memo", toBuy: "To buy", weekly: "Weekly"
-    )
+    public static let english = MonthPageLabels(goals: "Goals", todo: "To do list", memo: "Memo", weekly: "Weekly")
 }
 
 /// Line widths of the printed pages, in canvas units.
@@ -39,13 +35,16 @@ enum Tracking {
 }
 
 public enum MonthPageTemplate {
-    /// The printed month page. `today` gets a discreet black mark when it is a day of this month.
+    /// The printed month page. `today` gets a discreet black mark when it is a day of this
+    /// month. Each of `birthdays` (see `Birthday.notes`) puts a small gift in its day's cell
+    /// and a line in the notes, printed under the ink like everything else.
     public static func make(
         month: YearMonth,
         firstWeekday: Weekday = .defaultFirst,
         locale: Locale,
         labels: MonthPageLabels,
-        today: PlannerDate? = nil
+        today: PlannerDate? = nil,
+        birthdays: [BirthdayNote] = []
     ) -> PageTemplate {
         let layout = MonthPageLayout(month: month, firstWeekday: firstWeekday)
         let caps = { (text: String) in PlannerText.uppercased(text, locale: locale) }
@@ -106,7 +105,8 @@ public enum MonthPageTemplate {
             shapes.append(.line(from: CGPoint(x: grid.minX, y: y), to: CGPoint(x: grid.maxX, y: y), width: Stroke.strong, tone: .border))
         }
 
-        // Day numbers.
+        // Day numbers, and a small gift on days of this month with a birthday.
+        let birthdayDates = Set(birthdays.map(\.date))
         for cell in layout.weeks.joined() {
             let center = CGPoint(
                 x: cell.frame.minX + MonthPageLayout.dayNumberOffset.x,
@@ -124,27 +124,73 @@ public enum MonthPageTemplate {
                 anchor: CGPoint(x: center.x, y: TemplateText.baseline(centeredOn: center.y, size: size)),
                 alignment: .center
             )))
+            if day.isInMonth, birthdayDates.contains(day.date) {
+                shapes += GiftMark.shapes(
+                    center: CGPoint(x: cell.frame.maxX - MonthPageLayout.dayNumberOffset.x + 3, y: center.y),
+                    size: 14, tone: .text
+                )
+            }
         }
 
-        // TO DO LIST (circles) and TO BUY (boxes).
+        // TO DO LIST (circles) and MEMO (plain lines across the rest of the width).
         shapes += list(layout.todo, label: caps(labels.todo), marker: .circle)
-        shapes += list(layout.toBuy, label: caps(labels.toBuy), marker: .box)
-
-        // MEMO: an open box.
-        shapes.append(label(caps(labels.memo), at: layout.memoLabelAnchor))
-        shapes.append(.rect(layout.memo, fill: nil, stroke: .rule, lineWidth: Stroke.hairline, cornerRadius: 0))
-        shapes.append(.line(
-            from: CGPoint(x: layout.memo.minX, y: layout.memo.minY),
-            to: CGPoint(x: layout.memo.maxX, y: layout.memo.minY),
-            width: Stroke.listTop, tone: .border
-        ))
+        shapes += list(layout.memo, label: caps(labels.memo), marker: nil)
+        shapes += birthdayLines(birthdays.filter { $0.date.yearMonth == month }, in: layout.memo)
 
         return PageTemplate(shapes: shapes, regions: layout.regions)
     }
 
-    private enum Marker { case circle, box }
+    enum Marker { case circle, box }
 
-    private static func list(_ section: MonthPageLayout.ListSection, label text: String, marker: Marker) -> [TemplateShape] {
+    /// Size of the printed birthday lines in the notes.
+    public static let birthdaySize: CGFloat = 12.5
+
+    /// One birthday per line of the notes, from the top: a small gift, the day, the text.
+    /// When there are more than lines, each line holds two; beyond that the last place
+    /// says "+N".
+    static func birthdayLines(_ notes: [BirthdayNote], in memo: MonthPageLayout.ListSection) -> [TemplateShape] {
+        guard !notes.isEmpty else { return [] }
+        let rows = memo.rows
+        let columns = notes.count > rows.count ? 2 : 1
+        let slots: [CGRect] = (0..<columns).flatMap { column in
+            rows.map { row in
+                let width = row.width / CGFloat(columns)
+                return CGRect(x: row.minX + width * CGFloat(column), y: row.minY, width: width, height: row.height)
+            }
+        }
+        var shown = Array(notes.prefix(slots.count))
+        var more = 0
+        if notes.count > slots.count {
+            shown = Array(notes.prefix(slots.count - 1))
+            more = notes.count - shown.count
+        }
+
+        let size = birthdaySize
+        var shapes: [TemplateShape] = []
+        for (note, slot) in zip(shown, slots) {
+            let baseline = TemplateText.baseline(centeredOn: slot.midY, size: size)
+            shapes += GiftMark.shapes(center: CGPoint(x: slot.minX + 9, y: slot.midY), size: 11, tone: .text)
+            shapes.append(.text(TemplateText(
+                String(note.date.day), font: .semibold, size: size, tone: .text,
+                anchor: CGPoint(x: slot.minX + 24, y: baseline)
+            )))
+            // Inter at this size is under 7 units per letter on average.
+            let room = max(4, Int((slot.width - 56) / 7))
+            shapes.append(.text(TemplateText(
+                Birthday.shortened(note.text, to: room), font: .medium, size: size, tone: .text,
+                anchor: CGPoint(x: slot.minX + 48, y: baseline)
+            )))
+        }
+        if more > 0, let slot = slots.last {
+            shapes.append(.text(TemplateText(
+                "+\(more)", font: .semibold, size: size, tone: .label,
+                anchor: CGPoint(x: slot.minX + 24, y: TemplateText.baseline(centeredOn: slot.midY, size: size))
+            )))
+        }
+        return shapes
+    }
+
+    static func list(_ section: MonthPageLayout.ListSection, label text: String, marker: Marker?) -> [TemplateShape] {
         var shapes = [label(text, at: section.labelAnchor)]
         let frame = section.frame
         shapes.append(.line(
@@ -156,14 +202,20 @@ public enum MonthPageTemplate {
                 from: CGPoint(x: row.minX, y: row.maxY), to: CGPoint(x: row.maxX, y: row.maxY),
                 width: Stroke.hairline, tone: .rule
             ))
-            switch marker {
-            case .circle:
-                shapes.append(.circle(center: CGPoint(x: row.minX + 9, y: row.midY), radius: 4.5, fill: nil, stroke: .label, lineWidth: Stroke.mark))
-            case .box:
-                shapes.append(.rect(CGRect(x: row.minX + 4.5, y: row.midY - 4.5, width: 9, height: 9), fill: nil, stroke: .label, lineWidth: Stroke.mark, cornerRadius: 1.5))
-            }
+            shapes += markerShapes(marker, in: row)
         }
         return shapes
+    }
+
+    static func markerShapes(_ marker: Marker?, in row: CGRect) -> [TemplateShape] {
+        switch marker {
+        case .circle:
+            [.circle(center: CGPoint(x: row.minX + 9, y: row.midY), radius: 4.5, fill: nil, stroke: .label, lineWidth: Stroke.mark)]
+        case .box:
+            [.rect(CGRect(x: row.minX + 4.5, y: row.midY - 4.5, width: 9, height: 9), fill: nil, stroke: .label, lineWidth: Stroke.mark, cornerRadius: 1.5)]
+        case nil:
+            []
+        }
     }
 
     static func label(_ text: String, at anchor: CGPoint) -> TemplateShape {
@@ -238,5 +290,48 @@ public enum YearPageTemplate {
         }
 
         return PageTemplate(shapes: shapes, regions: layout.regions)
+    }
+}
+
+public enum ToBuyPageTemplate {
+    /// The printed shopping list page: its title and two columns of lines with boxes.
+    public static func make(locale: Locale, title: String) -> PageTemplate {
+        let layout = ToBuyPageLayout()
+        var shapes: [TemplateShape] = [.text(TemplateText(
+            PlannerText.uppercased(title, locale: locale), font: .bold, size: ToBuyPageLayout.titleSize,
+            tone: .ink, anchor: layout.titleAnchor
+        ))]
+        for column in layout.columns {
+            shapes.append(.line(
+                from: CGPoint(x: column.minX, y: column.minY), to: CGPoint(x: column.maxX, y: column.minY),
+                width: Stroke.listTop, tone: .border
+            ))
+        }
+        for row in layout.rows {
+            shapes.append(.line(
+                from: CGPoint(x: row.minX, y: row.maxY), to: CGPoint(x: row.maxX, y: row.maxY),
+                width: Stroke.hairline, tone: .rule
+            ))
+            shapes += MonthPageTemplate.markerShapes(.box, in: row)
+        }
+        return PageTemplate(shapes: shapes, regions: layout.regions)
+    }
+}
+
+/// A small gift drawn with lines (box, lid, ribbon and bow): the birthday mark of the
+/// month page, like the gift button that opens the birthdays.
+public enum GiftMark {
+    /// The gift centred on `center`, about `size` units wide and tall.
+    public static func shapes(center c: CGPoint, size s: CGFloat, tone: Tone) -> [TemplateShape] {
+        let width = max(0.8, s * 0.075)
+        return [
+            // Lid, then the box under it.
+            .rect(CGRect(x: c.x - s / 2, y: c.y - s * 0.28, width: s, height: s * 0.22), fill: nil, stroke: tone, lineWidth: width, cornerRadius: 0),
+            .rect(CGRect(x: c.x - s * 0.41, y: c.y - s * 0.06, width: s * 0.82, height: s * 0.5), fill: nil, stroke: tone, lineWidth: width, cornerRadius: 0),
+            // Ribbon down the middle, and the bow on top.
+            .line(from: CGPoint(x: c.x, y: c.y - s * 0.28), to: CGPoint(x: c.x, y: c.y + s * 0.44), width: width, tone: tone),
+            .circle(center: CGPoint(x: c.x - s * 0.14, y: c.y - s * 0.4), radius: s * 0.12, fill: nil, stroke: tone, lineWidth: width),
+            .circle(center: CGPoint(x: c.x + s * 0.14, y: c.y - s * 0.4), radius: s * 0.12, fill: nil, stroke: tone, lineWidth: width),
+        ]
     }
 }

@@ -94,7 +94,8 @@ struct PageFileTests {
 
     @Test func layoutStamps() {
         #expect(PageLayoutStamp.current(for: .year(2026)).name == "year-v1")
-        #expect(PageLayoutStamp.current(for: .month(YearMonth(year: 2026, month: 1))).name == "month-v1")
+        #expect(PageLayoutStamp.current(for: .month(YearMonth(year: 2026, month: 1))).name == "month-v2")
+        #expect(PageLayoutStamp.current(for: .toBuy).name == "tobuy-v1")
         #expect(PageLayoutStamp.current(for: .year(2026), firstWeekday: .sunday).firstWeekday == .sunday)
     }
 }
@@ -166,7 +167,8 @@ struct LocalPageStoreTests {
         #expect(november.fileStem == "month-2026-11")
         #expect(PlannerPage.year(2026).fileStem == "year-2026")
         #expect(PlannerPage.year(987).fileStem == "year-0987")
-        for page in [november, .year(2026), .year(1), .month(YearMonth(year: 9999, month: 12))] {
+        #expect(PlannerPage.toBuy.fileStem == "tobuy")
+        for page in [november, .year(2026), .year(1), .month(YearMonth(year: 9999, month: 12)), .toBuy] {
             #expect(PlannerPage(fileStem: page.fileStem) == page)
         }
         #expect(PlannerPage(fileStem: "month-2026-13") == nil)
