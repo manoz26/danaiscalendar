@@ -131,6 +131,37 @@ final class InkCanvasView: PKCanvasView {
         }
     }
 
+    /// PencilKit's own views (the ink and its gestures): not the template, not the scroll bars.
+    private var pencilKitViews: [UIView] {
+        subviews.filter { view in
+            view !== templateView && !NSStringFromClass(type(of: view)).contains("ScrollIndicator")
+        }
+    }
+
+    private var inkHideCount = 0
+
+    /// Hides the ink until `revealInk()`, or for `seconds` at most.
+    func hideInk(forAtMost seconds: TimeInterval) {
+        inkHideCount += 1
+        let hide = inkHideCount
+        for view in pencilKitViews {
+            view.alpha = 0
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + seconds) { [weak self] in
+            MainActor.assumeIsolated {
+                guard let self, self.inkHideCount == hide else { return }
+                self.revealInk()
+            }
+        }
+    }
+
+    func revealInk() {
+        inkHideCount += 1
+        for view in pencilKitViews where view.alpha != 1 {
+            view.alpha = 1
+        }
+    }
+
     /// A newly opened page: fitted to the width, scrolled to the top.
     func showWholeWidthFromTop() {
         guard fittedWidth > 0 else { return }

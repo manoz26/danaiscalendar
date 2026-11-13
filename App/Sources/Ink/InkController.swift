@@ -55,6 +55,8 @@ final class InkController {
     /// callback with the same strokes is only its echo, not an edit.
     @ObservationIgnored private var replacedDrawing: PKDrawing?
     @ObservationIgnored private var echoDeadline = Date.distantPast
+    /// The page's ink was just put on the canvas; PencilKit has not drawn it yet.
+    @ObservationIgnored private var awaitingRender = false
 
     init(library: InkLibrary? = nil, canDraw: Bool? = nil) {
         self.canDraw = canDraw ?? (UIDevice.current.userInterfaceIdiom == .pad)
@@ -112,11 +114,8 @@ final class InkController {
         #if DEBUG
         addSampleInkIfRequested(content)
         #endif
-        replaceDrawing(Self.asNewStrokes(library.drawing(for: content.page, scale: canvas.drawingScale, layout: content.layout)))
-        canvas.undoManager?.removeAllActions()
-        canvas.showWholeWidthFromTop()
+        putInkOnCanvas(resetZoom: true)
         library.preload(content.page.neighbors)
-        Task { [weak self] in self?.refreshUndoState() }
     }
 
     func setDrawWithFinger(_ on: Bool) {
@@ -253,16 +252,39 @@ final class InkController {
         canvas.noteDebugEvent("scale \(old)->\(new) page=\(page?.description ?? "none")")
         #endif
         applyTool()
-        guard page != nil else { return }
+        putInkOnCanvas(resetZoom: false)
+    }
+
+    /// Puts the open page's ink on the canvas so that nothing of the previous ink stays on
+    /// screen. PencilKit kept showing tiles of the previous drawing for a while (after a
+    /// change of scale, and on the iPad when going from a zoomed-in month to the year), so:
+    /// its views are hidden, the canvas is emptied (and fitted to the width for a newly
+    /// opened page), the ink is given back a moment later as new strokes, and the views
+    /// come back once PencilKit has drawn it (at most 0.8 s later). The undo history
+    /// starts again.
+    private func putInkOnCanvas(resetZoom: Bool) {
+        guard let page else { return }
+        let ink = Self.asNewStrokes(library.drawing(for: page, scale: canvas.drawingScale, layout: layout))
+        canvas.hideInk(forAtMost: 0.8)
+        awaitingRender = false
         replaceDrawing(PKDrawing())
         canvas.undoManager?.removeAllActions()
+        if resetZoom {
+            canvas.showWholeWidthFromTop()
+        }
         Task { [weak self] in
-            guard let self, let page = self.page else { return }
-            let ink = self.library.drawing(for: page, scale: self.canvas.drawingScale, layout: self.layout)
-            self.replaceDrawing(Self.asNewStrokes(ink))
+            guard let self, self.page == page else { return }
+            self.awaitingRender = true
+            self.replaceDrawing(ink)
             self.canvas.undoManager?.removeAllActions()
             self.refreshUndoState()
         }
+    }
+
+    fileprivate func inkDidFinishRendering() {
+        guard awaitingRender else { return }
+        awaitingRender = false
+        canvas.revealInk()
     }
 
     /// The same strokes as new objects, so PencilKit draws them from scratch.
@@ -378,6 +400,10 @@ private final class CanvasHelper: NSObject, PKCanvasViewDelegate, UIGestureRecog
 
     func canvasViewDrawingDidChange(_ canvasView: PKCanvasView) {
         controller?.drawingDidChange()
+    }
+
+    func canvasViewDidFinishRendering(_ canvasView: PKCanvasView) {
+        controller?.inkDidFinishRendering()
     }
 
     func scrollViewDidZoom(_ scrollView: UIScrollView) {

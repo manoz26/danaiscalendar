@@ -60,10 +60,13 @@ final class InkTests: XCTestCase {
         checkInk(app, page: "page.month", targets: Self.monthTargets("2029-03"), minimum: isPad ? 1 : 0)
         save(app, "en-portrait-ink-month-zoom")
 
+        // From the zoomed-in month to the year: nothing of the month's ink may stay on screen.
         tap(app, "nav.year")
         waitForPage(app, "2029")
+        checkNoInkOutside(app, page: "page.year", targets: Self.yearTargets("2029"))
         settle()
         checkInk(app, page: "page.year", targets: Self.yearTargets("2029"), minimum: 3)
+        checkNoInkOutside(app, page: "page.year", targets: Self.yearTargets("2029"))
         save(app, "en-portrait-ink-year")
     }
 
@@ -182,6 +185,22 @@ final class InkTests: XCTestCase {
             checked.append(id)
         }
         XCTAssertGreaterThanOrEqual(checked.count, minimum, "Too few boxes on screen to check: \(checked)")
+    }
+
+    /// No red ink on the page outside the boxes that have their own sample ink (ink of the
+    /// previous page left on screen would be).
+    @MainActor
+    private func checkNoInkOutside(_ app: XCUIApplication, page pageID: String, targets: [String]) {
+        let page = element(app, pageID)
+        XCTAssertTrue(page.waitForExistence(timeout: 5), "\(pageID) was not found")
+        let visible = page.frame.intersection(app.windows.firstMatch.frame)
+        let toolbar = element(app, "toolbar")
+        var excluded = targets.map { element(app, $0).frame.insetBy(dx: -14, dy: -14) }
+        if toolbar.exists {
+            excluded.append(toolbar.frame.insetBy(dx: -4, dy: -4))
+        }
+        let stray = ScreenPixels(XCUIScreen.main.screenshot()).redBounds(in: visible, excluding: excluded)
+        XCTAssertNil(stray, "Ink of another page left on screen at \(String(describing: stray)). \(element(app, "debug.inkGeometry").label)")
     }
 
     @MainActor
