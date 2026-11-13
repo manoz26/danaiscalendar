@@ -32,7 +32,7 @@
 ```bash
 gh run download <id> --name core-renders --dir ci-artifacts/<id>/renders
 ```
-Τα UI tests ανοίγουν συγκεκριμένη σελίδα με `-DCOpenPage year:2028` ή `-DCOpenPage month:2027-02`. Για το μελάνι (μόνο σε Debug): `-DCResetData YES` (χωρίς αποθηκευμένες σελίδες, το βάζει πάντα το `launch()` των tests), `-DCSampleInk YES` (κόκκινα ορθογώνια μέσα σε γνωστά κουτιά, που τα `InkTests` εντοπίζουν στα pixels του screenshot), `-DCDrawWithFinger YES`.
+Τα UI tests ανοίγουν συγκεκριμένη σελίδα με `-DCOpenPage year:2028` ή `-DCOpenPage month:2027-02`. Για το μελάνι (μόνο σε Debug): `-DCResetData YES` (χωρίς αποθηκευμένες σελίδες, το βάζει πάντα το `launch()` των tests), `-DCSampleInk YES` (κόκκινα ορθογώνια μέσα σε γνωστά κουτιά, που τα `InkTests` εντοπίζουν στα pixels του screenshot), `-DCDrawWithFinger YES`, `-DCSampleBirthdays YES` (φτιαχτά γενέθλια στον Μάρτιο και τον Νοέμβριο). Η σελίδα To Buy ανοίγει με `-DCOpenPage tobuy`.
 
 Το CI: `swift test` για το Core, build, unit tests της εφαρμογής, και UI tests που τραβάνε screenshots σε iPad 13" (portrait + landscape) και iPhone, σε ελληνικά και αγγλικά. Τρέχει στο runner `xcode-27` (preview image του GitHub με το πιο πρόσφατο σταθερό Xcode)· αν κολλάει σε ουρά ή είναι ασταθές, άλλαξε σε `macos-26`.
 
@@ -70,7 +70,7 @@ gh run watch --exit-status $(gh run list --workflow testflight --limit 1 --json 
 
 ```
 project.yml                 XcodeGen: targets, Info.plist, scheme
-App/Sources/                εφαρμογή SwiftUI (Planner/: σελίδα, μπάρα, tabs· Ink/: PencilKit, εργαλεία, αποθήκευση)
+App/Sources/                εφαρμογή SwiftUI (Planner/: σελίδα, μπάρα, tabs· Ink/: PencilKit, εργαλεία, αποθήκευση· Birthdays/: λίστα γενεθλίων)
 App/Resources/              Inter, String Catalog, assets
 AppTests/                   unit tests που τρέχουν μέσα στην εφαρμογή (γραμματοσειρές, μεταφράσεις)
 UITests/                    UI tests + screenshots
