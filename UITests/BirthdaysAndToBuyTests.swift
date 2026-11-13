@@ -100,9 +100,9 @@ final class BirthdaysAndToBuyTests: XCTestCase {
         settle()
         save(app, "el-portrait-birthday-edit")
         tap(app, "birthday.delete")
-        var confirm = app.buttons["birthday.confirmDelete"]
+        var confirm = app.buttons.matching(identifier: "birthday.confirmDelete").firstMatch
         if !confirm.waitForExistence(timeout: 3) {
-            confirm = app.buttons["Διαγραφή"]
+            confirm = app.buttons.matching(NSPredicate(format: "label == %@", "Διαγραφή")).firstMatch
         }
         XCTAssertTrue(confirm.waitForExistence(timeout: 5), "No confirmation before deleting")
         confirm.tap()

@@ -39,7 +39,7 @@ struct InkStorageTests {
 
         let file = try #require(try files.store.load(page))
         #expect(file.metadata.page == "month:2029-03")
-        #expect(file.metadata.layout == "month-v1")
+        #expect(file.metadata.layout == "month-v2")
         #expect(file.metadata.firstWeekday == "monday")
         #expect(file.metadata.strokeCount == 2)
         #expect(file.metadata.writtenBy == "tests")
