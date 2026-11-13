@@ -150,20 +150,9 @@ public enum MonthPageTemplate {
     /// says "+N".
     static func birthdayLines(_ notes: [BirthdayNote], in memo: MonthPageLayout.ListSection) -> [TemplateShape] {
         guard !notes.isEmpty else { return [] }
-        let rows = memo.rows
-        let columns = notes.count > rows.count ? 2 : 1
-        let slots: [CGRect] = (0..<columns).flatMap { column in
-            rows.map { row in
-                let width = row.width / CGFloat(columns)
-                return CGRect(x: row.minX + width * CGFloat(column), y: row.minY, width: width, height: row.height)
-            }
-        }
-        var shown = Array(notes.prefix(slots.count))
-        var more = 0
-        if notes.count > slots.count {
-            shown = Array(notes.prefix(slots.count - 1))
-            more = notes.count - shown.count
-        }
+        let (slots, shownCount) = birthdaySlots(count: notes.count, in: memo)
+        let shown = notes.prefix(shownCount)
+        let more = notes.count - shownCount
 
         let size = birthdaySize
         var shapes: [TemplateShape] = []
@@ -188,6 +177,21 @@ public enum MonthPageTemplate {
             )))
         }
         return shapes
+    }
+
+    /// Where the printed birthdays go in the notes, in order, and how many are printed: when
+    /// they don't all fit two per line, the last place holds "+N" instead.
+    public static func birthdaySlots(count: Int, in memo: MonthPageLayout.ListSection) -> (slots: [CGRect], shown: Int) {
+        let rows = memo.rows
+        let columns = count > rows.count ? 2 : 1
+        let slots: [CGRect] = (0..<columns).flatMap { column in
+            rows.map { row in
+                let width = row.width / CGFloat(columns)
+                return CGRect(x: row.minX + width * CGFloat(column), y: row.minY, width: width, height: row.height)
+            }
+        }
+        let shown = count > slots.count ? slots.count - 1 : count
+        return (slots, shown)
     }
 
     static func list(_ section: MonthPageLayout.ListSection, label text: String, marker: Marker?) -> [TemplateShape] {

@@ -2,31 +2,44 @@ import SwiftUI
 import UIKit
 import PlannerCore
 
-/// The planner: the bar on top, the open page (year or month) with the ink and the tool
-/// bar, and the tabs on the right. Opens on the current month.
+/// The planner: the bar on top, the open page (year, month or the To Buy page) with the
+/// ink and the tool bar, and the tabs on the right. Opens on the current month.
 struct RootView: View {
     let ink: InkController
+    let birthdays: BirthdayBook
     @AppStorage(InkDefaults.drawWithFinger) private var drawWithFinger = false
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var now = Date()
     @State private var page: PlannerPage
+    /// The last year or month page: where the To Buy page goes back to, and whose tabs it shows.
+    @State private var calendarPage: PlannerPage
     @State private var showSettings = false
+    @State private var showBirthdays = false
 
-    init(ink: InkController) {
+    init(ink: InkController, birthdays: BirthdayBook) {
         self.ink = ink
+        self.birthdays = birthdays
         let month = YearMonth(date: Date(), calendar: PlannerLocale.calendar(locale: AppLocale.current))
-        _page = State(initialValue: LaunchOptions.initialPage ?? .month(month))
+        let first = LaunchOptions.initialPage ?? .month(month)
+        _page = State(initialValue: first)
+        _calendarPage = State(initialValue: first.isCalendarPage ? first : .month(month))
     }
 
     var body: some View {
         let locale = AppLocale.current
-        let content = PlannerPageContent(page: page, today: today, locale: locale)
+        let compact = horizontalSizeClass == .compact
+        let content = PlannerPageContent(page: page, today: today, locale: locale, birthdays: birthdays.birthdays)
         VStack(spacing: 0) {
             PlannerTopBar(
                 page: page,
+                calendarPage: calendarPage,
+                locale: locale,
+                compact: compact,
                 onOpen: open,
                 onToday: { open(.month(currentMonth)) },
+                onBirthdays: { showBirthdays = true },
+                onToBuy: { open(page == .toBuy ? calendarPage : .toBuy) },
                 onSettings: { showSettings = true }
             )
             HStack(spacing: 0) {
@@ -43,8 +56,9 @@ struct RootView: View {
                 }
                 PlannerTabs(
                     page: page,
+                    year: calendarPage.year ?? currentMonth.year,
                     locale: locale,
-                    compact: horizontalSizeClass == .compact,
+                    compact: compact,
                     onOpen: open
                 )
             }
@@ -52,6 +66,9 @@ struct RootView: View {
         .background(Paper.background.ignoresSafeArea())
         .sheet(isPresented: $showSettings) {
             SettingsView()
+        }
+        .sheet(isPresented: $showBirthdays) {
+            BirthdaysView(book: birthdays)
         }
         .onChange(of: scenePhase) { _, phase in
             switch phase {
@@ -62,6 +79,7 @@ struct RootView: View {
                 ink.saveSoon()
             case .background:
                 ink.saveEverything()
+                birthdays.waitUntilSaved()
                 AppLog.info("App in background")
             default:
                 break
@@ -87,6 +105,9 @@ struct RootView: View {
 
     private func open(_ target: PlannerPage) {
         guard target != page else { return }
+        if target.isCalendarPage {
+            calendarPage = target
+        }
         page = target
     }
 

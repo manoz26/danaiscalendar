@@ -46,6 +46,8 @@ struct BundleResourcesTests {
         ("Undo", "Αναίρεση"),
         ("Draw with finger too", "Σχέδιο και με δάχτυλο"),
         ("Notes for %@", "Σημειώσεις: %@"),
+        ("Birthdays", "Γενέθλια"),
+        ("%@'s birthday", "%@ — γενέθλια"),
     ])
     func plannerTextsAreInGreek(key: String, greekText: String) throws {
         let greekPath = try #require(Bundle.main.path(forResource: "el", ofType: "lproj"))

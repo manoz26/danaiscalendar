@@ -54,6 +54,11 @@ struct CapsLabel: View {
         text = PlannerText.uppercased(String(localized: key), locale: AppLocale.current)
     }
 
+    /// A text that is already in the app's language, e.g. a month name.
+    init(verbatim: String) {
+        text = PlannerText.uppercased(verbatim, locale: AppLocale.current)
+    }
+
     var body: some View {
         Text(verbatim: text)
             .font(.inter(.semibold, size: 12, relativeTo: .caption))

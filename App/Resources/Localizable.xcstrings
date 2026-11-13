@@ -1,6 +1,24 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@'s birthday" : {
+      "comment" : "A friend's birthday, printed in the notes of the month page next to the day, e.g. 'Manos's birthday'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ — γενέθλια"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@'s birthday"
+          }
+        }
+      }
+    },
     "About" : {
       "comment" : "Settings section header.",
       "extractionState" : "manual",
@@ -15,6 +33,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "About"
+          }
+        }
+      }
+    },
+    "Add birthday" : {
+      "comment" : "VoiceOver label of the + button in the birthdays list.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προσθήκη γενεθλίων"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add birthday"
           }
         }
       }
@@ -55,6 +91,24 @@
         }
       }
     },
+    "Back" : {
+      "comment" : "VoiceOver label of the back button on the To Buy page (goes back to the month or year).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πίσω"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back"
+          }
+        }
+      }
+    },
     "Back to the year" : {
       "comment" : "Button at the top left of a month page that opens the year page.",
       "extractionState" : "manual",
@@ -69,6 +123,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Back to the year"
+          }
+        }
+      }
+    },
+    "Birthdays" : {
+      "comment" : "Title of the birthdays list, and VoiceOver label of the gift button in the top bar.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Γενέθλια"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birthdays"
           }
         }
       }
@@ -109,6 +181,24 @@
         }
       }
     },
+    "Cancel" : {
+      "comment" : "Keeps the birthday instead of deleting it.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Άκυρο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        }
+      }
+    },
     "Checks" : {
       "comment" : "Diagnostics section header: checks that iCloud and the App Group work.",
       "extractionState" : "manual",
@@ -123,6 +213,96 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Checks"
+          }
+        }
+      }
+    },
+    "Date" : {
+      "comment" : "Birthday form: section header above the day and month wheels.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ημερομηνία"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date"
+          }
+        }
+      }
+    },
+    "Day" : {
+      "comment" : "Birthday form: the day wheel (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μέρα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day"
+          }
+        }
+      }
+    },
+    "Delete" : {
+      "comment" : "Confirms deleting a birthday.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Διαγραφή"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        }
+      }
+    },
+    "Delete birthday" : {
+      "comment" : "Birthday form: button that deletes the birthday (asks first).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Διαγραφή γενεθλίων"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete birthday"
+          }
+        }
+      }
+    },
+    "Delete this birthday?" : {
+      "comment" : "Question before deleting a birthday.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Να διαγραφούν αυτά τα γενέθλια;"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this birthday?"
           }
         }
       }
@@ -177,6 +357,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Draw with finger too"
+          }
+        }
+      }
+    },
+    "Edit birthday" : {
+      "comment" : "Title of the birthday form when changing one.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αλλαγή γενεθλίων"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit birthday"
           }
         }
       }
@@ -416,7 +614,7 @@
       }
     },
     "Memo" : {
-      "comment" : "Label of the memo box on the month page (printed in capitals).",
+      "comment" : "Label of the notes lines on the month page (printed in capitals).",
       "extractionState" : "manual",
       "localizations" : {
         "el" : {
@@ -429,6 +627,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Memo"
+          }
+        }
+      }
+    },
+    "Month" : {
+      "comment" : "Birthday form: the month wheel (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μήνας"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Month"
           }
         }
       }
@@ -487,6 +703,42 @@
         }
       }
     },
+    "Name" : {
+      "comment" : "Birthday form: the friend's name (field placeholder and section header).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Όνομα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
+          }
+        }
+      }
+    },
+    "New birthday" : {
+      "comment" : "Title of the birthday form when adding one.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Νέα γενέθλια"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New birthday"
+          }
+        }
+      }
+    },
     "Next month" : {
       "comment" : "Arrow button on a month page.",
       "extractionState" : "manual",
@@ -519,6 +771,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Next year"
+          }
+        }
+      }
+    },
+    "No birthdays yet" : {
+      "comment" : "Birthdays list when it is empty.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δεν υπάρχουν γενέθλια ακόμα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No birthdays yet"
           }
         }
       }
@@ -721,6 +991,24 @@
         }
       }
     },
+    "Save" : {
+      "comment" : "Birthday form: saves the birthday.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αποθήκευση"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
+          }
+        }
+      }
+    },
     "Settings" : {
       "comment" : "Title of the Settings screen, and VoiceOver label of the gear button.",
       "extractionState" : "manual",
@@ -771,6 +1059,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Show tools"
+          }
+        }
+      }
+    },
+    "Tap + to add a friend's name and birthday. Its day gets a small gift on the month page, with a line in the notes." : {
+      "comment" : "Birthdays list when it is empty, under 'No birthdays yet'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πάτα + για να προσθέσεις το όνομα και τα γενέθλια ενός φίλου. Η μέρα του παίρνει ένα μικρό δωράκι στη σελίδα του μήνα, και μια γραμμή στις σημειώσεις."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap + to add a friend's name and birthday. Its day gets a small gift on the month page, with a line in the notes."
           }
         }
       }
@@ -848,7 +1154,7 @@
       }
     },
     "To buy" : {
-      "comment" : "Label of the shopping list on the month page (printed in capitals).",
+      "comment" : "Title of the shopping list page (printed in capitals) and VoiceOver label of the bag button in the top bar.",
       "extractionState" : "manual",
       "localizations" : {
         "el" : {
@@ -861,6 +1167,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "To buy"
+          }
+        }
+      }
+    },
+    "To buy page" : {
+      "comment" : "VoiceOver: the shopping list page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σελίδα «Να αγοράσω»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To buy page"
           }
         }
       }
@@ -1041,6 +1365,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Year page for %@"
+          }
+        }
+      }
+    },
+    "You can also write the name with Apple Pencil: it turns into text." : {
+      "comment" : "Birthday form, iPad only: under the name field (Scribble).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μπορείς να γράψεις το όνομα και με το Apple Pencil: γίνεται μόνο του κείμενο."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can also write the name with Apple Pencil: it turns into text."
           }
         }
       }

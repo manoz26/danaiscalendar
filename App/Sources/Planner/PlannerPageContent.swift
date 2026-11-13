@@ -4,7 +4,7 @@ import PlannerCore
 
 /// What one planner page shows: its printed template, and the parts VoiceOver and the
 /// UI tests can find on it. Texts come from the String Catalog and the calendar of the
-/// app's language.
+/// app's language. Month pages also print the month's birthdays.
 struct PlannerPageContent: Equatable {
     let page: PlannerPage
     let template: PageTemplate
@@ -15,7 +15,7 @@ struct PlannerPageContent: Equatable {
     let accessibilityLabel: String
     let accessibilityItems: [PageAccessibilityItem]
 
-    init(page: PlannerPage, today: PlannerDate, locale: Locale) {
+    init(page: PlannerPage, today: PlannerDate, locale: Locale, birthdays: [Birthday] = []) {
         self.page = page
         layout = PageLayoutStamp.current(for: page)
         switch page {
@@ -26,11 +26,29 @@ struct PlannerPageContent: Equatable {
             accessibilityLabel = String(localized: "Year page for \(name)", comment: "VoiceOver: the year page, e.g. 'Year page for 2026'.")
             accessibilityItems = Self.yearItems(year: year, template: template, locale: locale)
         case .month(let month):
-            template = MonthPageTemplate.make(month: month, locale: locale, labels: Self.labels, today: today)
+            let notes = Self.birthdayNotes(for: month, in: birthdays)
+            template = MonthPageTemplate.make(month: month, locale: locale, labels: Self.labels, today: today, birthdays: notes)
             identifier = "page.month"
             let name = "\(MonthTitle.text(for: month, locale: locale)) \(month.year)"
             accessibilityLabel = String(localized: "Month page for \(name)", comment: "VoiceOver: the month page, e.g. 'Month page for NOVEMBER 2026'.")
-            accessibilityItems = Self.monthItems(month: month, template: template, locale: locale)
+            accessibilityItems = Self.monthItems(month: month, template: template, locale: locale, birthdays: notes)
+        case .toBuy:
+            template = ToBuyPageTemplate.make(locale: locale, title: Self.toBuyTitle)
+            identifier = "page.tobuy"
+            accessibilityLabel = String(localized: "To buy page", comment: "VoiceOver: the shopping list page.")
+            accessibilityItems = Self.toBuyItems(template: template, locale: locale)
+        }
+    }
+
+    /// Title of the shopping list page and label of the bag button.
+    static var toBuyTitle: String {
+        String(localized: "To buy", comment: "Title of the shopping list page (printed in capitals) and VoiceOver label of the bag button in the top bar.")
+    }
+
+    /// The month's birthdays as printed lines, e.g. "Manos's birthday".
+    static func birthdayNotes(for month: YearMonth, in birthdays: [Birthday]) -> [BirthdayNote] {
+        Birthday.notes(for: month, in: birthdays) { name in
+            String(localized: "\(name)'s birthday", comment: "A friend's birthday, printed in the notes of the month page next to the day, e.g. 'Manos's birthday'.")
         }
     }
 
@@ -39,14 +57,15 @@ struct PlannerPageContent: Equatable {
             goals: String(localized: "Goals", comment: "Label of the goals box on the month page."),
             todo: String(localized: "To do list", comment: "Label of the to-do list on the month page."),
             memo: String(localized: "Memo", comment: "Label of the memo box on the month page."),
-            toBuy: String(localized: "To buy", comment: "Label of the shopping list on the month page."),
             weekly: String(localized: "Weekly", comment: "Label before the buttons 1-6 that open the weekly pages.")
         )
     }
 
     // MARK: - Accessibility
 
-    private static func monthItems(month: YearMonth, template: PageTemplate, locale: Locale) -> [PageAccessibilityItem] {
+    private static func monthItems(
+        month: YearMonth, template: PageTemplate, locale: Locale, birthdays: [BirthdayNote]
+    ) -> [PageAccessibilityItem] {
         let title = MonthTitle.text(for: month, locale: locale)
         var items: [PageAccessibilityItem] = []
         if let region = template.region(.title) {
@@ -86,17 +105,54 @@ struct PlannerPageContent: Equatable {
         let days = DayNames(locale: locale)
         for region in template.regions {
             guard case .day(let date) = region.id else { continue }
+            // A day of this month with birthdays says whose.
+            let birthdaysOfDay = date.yearMonth == month ? birthdays.filter { $0.date == date }.map(\.text) : []
             items.append(PageAccessibilityItem(
                 identifier: "day.\(date)",
                 label: days.name(of: date),
-                value: nil,
+                value: birthdaysOfDay.isEmpty ? nil : birthdaysOfDay.joined(separator: ", "),
                 rect: region.rect,
                 traits: .staticText
             ))
         }
         addSection(.todo, labels.todo)
-        addSection(.tobuy, labels.toBuy)
         addSection(.memo, labels.memo)
+
+        // The birthdays printed in the notes, one item per line.
+        let memo = MonthPageLayout(month: month).memo
+        let (slots, shown) = MonthPageTemplate.birthdaySlots(count: birthdays.count, in: memo)
+        for (index, (note, slot)) in zip(birthdays.prefix(shown), slots).enumerated() {
+            items.append(PageAccessibilityItem(
+                identifier: "memo.birthday.\(index + 1)",
+                label: "\(days.name(of: note.date)): \(note.text)",
+                value: nil,
+                rect: slot,
+                traits: .staticText
+            ))
+        }
+        return items
+    }
+
+    private static func toBuyItems(template: PageTemplate, locale: Locale) -> [PageAccessibilityItem] {
+        var items: [PageAccessibilityItem] = []
+        if let region = template.region(.title) {
+            items.append(PageAccessibilityItem(
+                identifier: "page.title",
+                label: PlannerText.uppercased(toBuyTitle, locale: locale),
+                value: PlannerPage.toBuy.description,
+                rect: region.rect,
+                traits: [.header, .staticText]
+            ))
+        }
+        if let region = template.region(.section(.tobuy)) {
+            items.append(PageAccessibilityItem(
+                identifier: "section.tobuy",
+                label: toBuyTitle,
+                value: nil,
+                rect: region.rect,
+                traits: .staticText
+            ))
+        }
         return items
     }
 
@@ -161,17 +217,21 @@ private struct DayNames {
 /// Read from the arguments directly, not from UserDefaults.
 enum LaunchOptions {
     #if DEBUG
-    /// `-DCResetData YES`: start without saved pages and with the default tools.
+    /// `-DCResetData YES`: start without saved pages or birthdays, and with the default tools.
     static var resetData: Bool { ProcessInfo.processInfo.arguments.contains("-DCResetData") }
 
     /// `-DCSampleInk YES`: sample strokes on every opened page without ink (see `SampleInk`).
     static var sampleInk: Bool { ProcessInfo.processInfo.arguments.contains("-DCSampleInk") }
+
+    /// `-DCSampleBirthdays YES`: a few made-up birthdays, if there are none (see `BirthdayBook`).
+    static var sampleBirthdays: Bool { ProcessInfo.processInfo.arguments.contains("-DCSampleBirthdays") }
 
     /// Called at launch, before the ink is loaded.
     @MainActor
     static func prepareTestData() {
         guard resetData else { return }
         try? FileManager.default.removeItem(at: InkLibrary.defaultFolder)
+        try? FileManager.default.removeItem(at: BirthdayBook.defaultFolder)
         for key in InkDefaults.all {
             UserDefaults.standard.removeObject(forKey: key)
         }

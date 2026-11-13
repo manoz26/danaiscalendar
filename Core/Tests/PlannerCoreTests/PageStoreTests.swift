@@ -28,7 +28,7 @@ struct PageFileTests {
         let decoded = try PageFile(decoding: try file.encoded())
         #expect(decoded == file)
         #expect(decoded.metadata.page == "month:2026-11")
-        #expect(decoded.metadata.layout == "month-v1")
+        #expect(decoded.metadata.layout == "month-v2")
         #expect(decoded.metadata.firstWeekday == "monday")
     }
 
