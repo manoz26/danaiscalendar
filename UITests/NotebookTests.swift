@@ -32,7 +32,7 @@ final class NotebookTests: XCTestCase {
         // A long press on the 5th opens its page: lined, "Ideas". PencilKit's own menu stays closed.
         longPressOnPage(app, "day.2029-03-05")
         waitForPage(app, "journal:1")
-        XCTAssertFalse(pencilKitMenuIsOpen(app), "PencilKit's menu opened over the day's page")
+        XCTAssertFalse(pencilKitMenuIsOpen(app), "PencilKit's menu opened over the day's page. \(element(app, "debug.inkGeometry").label)")
         XCTAssertTrue(element(app, "page.title").label.contains("Ideas"), element(app, "page.title").label)
         XCTAssertFalse(element(app, "tab.year").exists, "Journal pages have no month tabs")
         checkInk(app, page: "page.journal", targets: ["page.title"], minimum: 1)

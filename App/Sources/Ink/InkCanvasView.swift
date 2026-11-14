@@ -109,7 +109,8 @@ final class InkCanvasView: PKCanvasView {
         recognizer.require(toFail: ours)
     }
 
-    /// Closes any edit menu PencilKit has open on the canvas (e.g. after a long press).
+    /// Closes any edit menu PencilKit has open on the canvas (e.g. after a long press),
+    /// whichever way it was shown.
     func dismissEditMenus() {
         func visit(_ view: UIView) {
             for interaction in view.interactions {
@@ -118,6 +119,7 @@ final class InkCanvasView: PKCanvasView {
             view.subviews.forEach(visit)
         }
         visit(self)
+        UIMenuController.shared.hideMenu()
     }
 
     override func layoutSubviews() {
@@ -228,10 +230,21 @@ final class InkCanvasView: PKCanvasView {
         let ink = drawing
         let events = "events: " + debugEvents.joined(separator: " > ")
         let inkLine = "ink: \(ink.strokes.count) strokes bounds=\(ink.bounds)"
+        var touchParts: [String] = []
+        func visit(_ view: UIView) {
+            let recognizers = (view.gestureRecognizers ?? []).map { "\(type(of: $0))" }
+            let interactions = view.interactions.map { "\(type(of: $0))" }
+            if !recognizers.isEmpty || !interactions.isEmpty {
+                touchParts.append("\(type(of: view)): \(recognizers.joined(separator: ",")) | \(interactions.joined(separator: ","))")
+            }
+            view.subviews.forEach(visit)
+        }
+        visit(self)
+        let touchLine = "touch: " + touchParts.joined(separator: " / ")
         let views = subviews.map { view in
             "\(type(of: view)) frame=\(view.frame) bounds=\(view.bounds)"
         }
-        return (["zoom=\(zoomScale) drawingScale=\(drawingScale) bounds=\(bounds) content=\(contentSize) offset=\(contentOffset)", inkLine, events] + views)
+        return (["zoom=\(zoomScale) drawingScale=\(drawingScale) bounds=\(bounds) content=\(contentSize) offset=\(contentOffset)", inkLine, events, touchLine] + views)
             .joined(separator: "; ")
     }
     #endif

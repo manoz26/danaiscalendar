@@ -276,12 +276,24 @@ final class InkController {
     }
 
     fileprivate func longPressed(_ recognizer: UILongPressGestureRecognizer) {
-        guard recognizer.state == .began else { return }
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        onLongPress?(canvas.canvasLocation(of: recognizer))
-        // In case PencilKit opened its menu anyway, close it as the day's page opens.
+        switch recognizer.state {
+        case .began:
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            onLongPress?(canvas.canvasLocation(of: recognizer))
+            dismissPencilKitMenu()
+        case .ended, .cancelled, .failed:
+            // PencilKit's menu shows when the finger lifts: close it then too.
+            dismissPencilKitMenu()
+        default:
+            break
+        }
+    }
+
+    /// In case PencilKit opened its long-press menu over the day's page, closes it now and
+    /// a moment later.
+    private func dismissPencilKitMenu() {
         canvas.dismissEditMenus()
-        for delay in [0.15, 0.45] {
+        for delay in [0.1, 0.3, 0.6] {
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
                 MainActor.assumeIsolated { self?.canvas.dismissEditMenus() }
             }
