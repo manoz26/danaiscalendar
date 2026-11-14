@@ -62,6 +62,7 @@ private func isAbout(_ value: TimeInterval?, _ expected: TimeInterval, within to
     value.map { abs($0 - expected) <= tolerance } ?? false
 }
 
+/// (`checkHold` changes the detector, which `#expect` cannot call: each check is `do { let held = … }`.)
 @Suite("Hold at the end of a line to make it straight")
 struct StraightLineHoldTests {
     private let start = CGPoint(x: 100, y: 200)
@@ -75,15 +76,15 @@ struct StraightLineHoldTests {
         let stopped = samples.lastTime
 
         // No events while a finger rests on the glass: the app asks on a timer.
-        #expect(!hold.checkHold(at: stopped + 0.2))
-        #expect(!hold.checkHold(at: stopped + 0.45))
+        do { let held = hold.checkHold(at: stopped + 0.2); #expect(!held) }
+        do { let held = hold.checkHold(at: stopped + 0.45); #expect(!held) }
         #expect(isAbout(hold.holdDeadline, stopped + 0.5, within: 0.02))
-        #expect(hold.checkHold(at: stopped + 0.5))
+        do { let held = hold.checkHold(at: stopped + 0.5); #expect(held) }
         #expect(hold.isStraight)
         #expect(hold.start == start)
         #expect(hold.end == end)
         // Once only.
-        #expect(!hold.checkHold(at: stopped + 2))
+        do { let held = hold.checkHold(at: stopped + 2); #expect(!held) }
         #expect(hold.holdDeadline == nil)
     }
 
@@ -114,7 +115,7 @@ struct StraightLineHoldTests {
         var hold = StraightLineHold()
         samples.feed(&hold)
         // Lifted 0.3 s after stopping: the app never asks again.
-        #expect(!hold.checkHold(at: samples.lastTime + 0.3))
+        do { let held = hold.checkHold(at: samples.lastTime + 0.3); #expect(!held) }
         #expect(!hold.isStraight)
     }
 
@@ -124,7 +125,7 @@ struct StraightLineHoldTests {
         samples.line(from: start, to: CGPoint(x: 250, y: 265))
         var hold = StraightLineHold()
         samples.feed(&hold)
-        #expect(hold.checkHold(at: samples.lastTime + 0.5))
+        do { let held = hold.checkHold(at: samples.lastTime + 0.5); #expect(held) }
     }
 
     @Test func drawingSlowlyIsNotHolding() {
@@ -138,7 +139,7 @@ struct StraightLineHoldTests {
             time += 1.0 / 60
             x += 12.0 / 60
             hold.move(to: CGPoint(x: x, y: start.y), time: time)
-            #expect(!hold.checkHold(at: time), "Held at \(time)")
+            do { let held = hold.checkHold(at: time); #expect(!held, "Held at \(time)") }
         }
     }
 
@@ -147,7 +148,7 @@ struct StraightLineHoldTests {
         samples.line(from: start, to: CGPoint(x: start.x + 18, y: start.y + 6), wobble: 1, every: 4)
         var hold = StraightLineHold()
         samples.feed(&hold)
-        #expect(!hold.checkHold(at: samples.lastTime + 1))
+        do { let held = hold.checkHold(at: samples.lastTime + 1); #expect(!held) }
         #expect(!hold.isStraight)
     }
 
@@ -165,7 +166,7 @@ struct StraightLineHoldTests {
             }
         }
         #expect(!hold.isLineLike)
-        #expect(!hold.checkHold(at: 2))
+        do { let held = hold.checkHold(at: 2); #expect(!held) }
         // A gentle bow is still a line.
         var bow = StraightLineHold()
         for index in 0...100 {
@@ -187,13 +188,13 @@ struct StraightLineHoldTests {
             hold.move(to: point, time: time)
         }
         #expect(!hold.isLineLike)
-        #expect(!hold.checkHold(at: time + 1))
+        do { let held = hold.checkHold(at: time + 1); #expect(!held) }
         // A line drawn back over itself is not one line either.
         var back = StraightLineHold()
         back.begin(at: CGPoint(x: 100, y: 200), time: 0)
         back.move(to: CGPoint(x: 300, y: 200), time: 0.2)
         back.move(to: CGPoint(x: 150, y: 200), time: 0.4)
-        #expect(!back.checkHold(at: 1))
+        do { let held = back.checkHold(at: 1); #expect(!held) }
     }
 
     @Test func movingAfterTheHoldMovesTheEnd() {
@@ -201,7 +202,7 @@ struct StraightLineHoldTests {
         samples.line(from: start, to: end)
         var hold = StraightLineHold()
         samples.feed(&hold)
-        #expect(hold.checkHold(at: samples.lastTime + 0.6))
+        do { let held = hold.checkHold(at: samples.lastTime + 0.6); #expect(held) }
 
         let later = samples.lastTime + 0.7
         hold.move(to: CGPoint(x: 380, y: 120), time: later)
@@ -210,7 +211,7 @@ struct StraightLineHoldTests {
         #expect(hold.start == start)
         #expect(hold.end == CGPoint(x: 360, y: 90))
         // Holding again changes nothing more.
-        #expect(!hold.checkHold(at: later + 2))
+        do { let held = hold.checkHold(at: later + 2); #expect(!held) }
     }
 
     @Test func aStrokeThatIsNotALineIsLookedAtOnceForEachStop() {
@@ -219,7 +220,7 @@ struct StraightLineHoldTests {
         hold.move(to: CGPoint(x: 200, y: 200), time: 0.1)
         hold.move(to: CGPoint(x: 300, y: 100), time: 0.2)
         #expect(isAbout(hold.holdDeadline, 0.7))
-        #expect(!hold.checkHold(at: 0.8))
+        do { let held = hold.checkHold(at: 0.8); #expect(!held) }
         #expect(hold.holdDeadline == nil)
         // It goes on and comes back into line: the next stop is looked at again.
         hold.move(to: CGPoint(x: 600, y: 100), time: 1.0)
@@ -231,12 +232,12 @@ struct StraightLineHoldTests {
         samples.line(from: start, to: end)
         var hold = StraightLineHold()
         samples.feed(&hold)
-        #expect(hold.checkHold(at: samples.lastTime + 0.5))
+        do { let held = hold.checkHold(at: samples.lastTime + 0.5); #expect(held) }
         hold.begin(at: CGPoint(x: 10, y: 10), time: 20)
         #expect(!hold.isStraight)
         #expect(hold.start == CGPoint(x: 10, y: 10))
         #expect(isAbout(hold.holdDeadline, 20.5))
-        #expect(!hold.checkHold(at: 21))
+        do { let held = hold.checkHold(at: 21); #expect(!held) }
     }
 
     @Test func distanceToASegment() {
