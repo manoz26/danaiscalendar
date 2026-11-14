@@ -23,6 +23,11 @@ final class InkCanvasView: PKCanvasView {
     private var fitZoom: CGFloat = 1
     /// Called with the old and new scale when the width changes (rotation, Split View).
     var onDrawingScaleChange: ((CGFloat, CGFloat) -> Void)?
+    /// The app's long press on a day. PencilKit's own long presses (its "Select All / Insert
+    /// Space" menu) wait for it to fail, so that menu never pops up over the day's page.
+    /// It only begins on a day, so elsewhere PencilKit's menu works as usual.
+    weak var dayLongPress: UILongPressGestureRecognizer?
+    private var waitingForDayPress: Set<ObjectIdentifier> = []
 
     /// Each open page has its own undo history (cleared when another page opens).
     override var undoManager: UndoManager? { pageUndoManager }
@@ -89,6 +94,26 @@ final class InkCanvasView: PKCanvasView {
             for recognizer in view.gestureRecognizers ?? [] {
                 if recognizer.delaysTouchesBegan { recognizer.delaysTouchesBegan = false }
                 if recognizer.delaysTouchesEnded { recognizer.delaysTouchesEnded = false }
+                waitForDayPress(recognizer)
+            }
+            view.subviews.forEach(visit)
+        }
+        visit(self)
+    }
+
+    /// PencilKit's long presses (never its drawing) wait for the app's long press on a day.
+    private func waitForDayPress(_ recognizer: UIGestureRecognizer) {
+        guard let ours = dayLongPress, recognizer !== ours, recognizer !== drawingGestureRecognizer,
+              recognizer is UILongPressGestureRecognizer,
+              waitingForDayPress.insert(ObjectIdentifier(recognizer)).inserted else { return }
+        recognizer.require(toFail: ours)
+    }
+
+    /// Closes any edit menu PencilKit has open on the canvas (e.g. after a long press).
+    func dismissEditMenus() {
+        func visit(_ view: UIView) {
+            for interaction in view.interactions {
+                (interaction as? UIEditMenuInteraction)?.dismissMenu()
             }
             view.subviews.forEach(visit)
         }

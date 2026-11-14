@@ -2,6 +2,14 @@ import SwiftUI
 import UIKit
 import PlannerCore
 
+/// The calendar of the date pickers: the app's language, weeks starting on Monday like the planner.
+@MainActor
+func pickerCalendar() -> Calendar {
+    var calendar = PlannerLocale.calendar(locale: AppLocale.current)
+    calendar.firstWeekday = Weekday.defaultFirst.rawValue
+    return calendar
+}
+
 extension PlannerDate {
     /// Midday of this day, for date pickers.
     func noon(in calendar: Calendar) -> Date {
@@ -55,7 +63,7 @@ private struct EmptyGrid: View {
 }
 
 private var gridColumns: [GridItem] {
-    [GridItem(.adaptive(minimum: 140, maximum: 210), spacing: 24)]
+    [GridItem(.adaptive(minimum: 140, maximum: 210), spacing: 24, alignment: .top)]
 }
 
 // MARK: - Journal pages
@@ -240,7 +248,7 @@ struct JournalPageSettingsView: View {
 
     var body: some View {
         let locale = AppLocale.current
-        let calendar = PlannerLocale.calendar(locale: locale)
+        let calendar = pickerCalendar()
         NavigationStack {
             Form {
                 if let page = journal.page(id) {
@@ -639,7 +647,7 @@ struct SketchPinView: View {
 
     var body: some View {
         let locale = AppLocale.current
-        let calendar = PlannerLocale.calendar(locale: locale)
+        let calendar = pickerCalendar()
         NavigationStack {
             Form {
                 Section {

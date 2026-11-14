@@ -29,9 +29,10 @@ final class NotebookTests: XCTestCase {
         XCTAssertTrue(element(app, "day.sketches.2029-03-21").exists, "No sketch mark on the 21st")
         save(app, "en-portrait-month-notebooks")
 
-        // A long press on the 5th opens its page: lined, "Ideas".
+        // A long press on the 5th opens its page: lined, "Ideas". PencilKit's own menu stays closed.
         longPressOnPage(app, "day.2029-03-05")
         waitForPage(app, "journal:1")
+        XCTAssertFalse(pencilKitMenuIsOpen(app), "PencilKit's menu opened over the day's page")
         XCTAssertTrue(element(app, "page.title").label.contains("Ideas"), element(app, "page.title").label)
         XCTAssertFalse(element(app, "tab.year").exists, "Journal pages have no month tabs")
         checkInk(app, page: "page.journal", targets: ["page.title"], minimum: 1)
@@ -109,6 +110,7 @@ final class NotebookTests: XCTestCase {
 
         longPressOnPage(app, "day.2029-03-08")
         waitForPage(app, "journal:5")
+        XCTAssertFalse(pencilKitMenuIsOpen(app), "PencilKit's menu opened over the day's page")
         XCTAssertTrue(element(app, "page.title").label.contains("THURSDAY, MARCH 8"), element(app, "page.title").label)
         save(app, "en-portrait-journal-day")
         tap(app, "nav.back")
@@ -239,6 +241,14 @@ final class NotebookTests: XCTestCase {
     }
 
     // MARK: - Helpers
+
+    /// PencilKit's long-press menu ("Select All", "Insert Space") is on screen.
+    @MainActor
+    private func pencilKitMenuIsOpen(_ app: XCUIApplication) -> Bool {
+        ["Insert Space", "Select All"].contains { label in
+            app.buttons[label].exists || app.menuItems[label].exists || app.staticTexts[label].exists
+        }
+    }
 
     @MainActor
     private func cells(_ app: XCUIApplication, _ identifier: String) -> XCUIElementQuery {

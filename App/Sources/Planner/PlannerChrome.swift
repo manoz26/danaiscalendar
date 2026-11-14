@@ -193,6 +193,7 @@ struct PlannerTopBar: View {
                 .foregroundStyle(Paper.ink)
                 .frame(width: compact ? 38 : 44, height: 44)
                 .contentShape(Rectangle())
+                .background(ShareAnchorReader())
         }
         .accessibilityLabel(Text("Share page"))
         .accessibilityIdentifier("nav.share")
@@ -276,6 +277,7 @@ struct PlannerTopBar: View {
                 .foregroundStyle(Paper.ink)
                 .frame(width: compact ? 38 : 44, height: 44)
                 .contentShape(Rectangle())
+                .background(ShareAnchorReader())
         }
         .accessibilityLabel(Text("More"))
         .accessibilityIdentifier("nav.more")
@@ -310,6 +312,17 @@ struct PlannerTopBar: View {
         case .month(let month): CalendarNames.monthName(month.month, locale: locale)
         case .year(let year): String(year)
         default: ""
+        }
+    }
+}
+
+/// Remembers where the share button (or the … menu) is on screen, for the share popover.
+private struct ShareAnchorReader: View {
+    var body: some View {
+        GeometryReader { proxy in
+            Color.clear
+                .onAppear { SharePresenter.anchor = proxy.frame(in: .global) }
+                .onChange(of: proxy.frame(in: .global)) { _, frame in SharePresenter.anchor = frame }
         }
     }
 }

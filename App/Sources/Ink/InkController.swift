@@ -97,6 +97,7 @@ final class InkController {
         longPress.cancelsTouchesInView = false
         longPress.delegate = helper
         canvas.addGestureRecognizer(longPress)
+        canvas.dayLongPress = longPress
         tap.require(toFail: longPress)
         for direction: UISwipeGestureRecognizer.Direction in [.left, .right] {
             let swipe = UISwipeGestureRecognizer(target: helper, action: #selector(CanvasHelper.swiped(_:)))
@@ -278,6 +279,20 @@ final class InkController {
         guard recognizer.state == .began else { return }
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         onLongPress?(canvas.canvasLocation(of: recognizer))
+        // In case PencilKit opened its menu anyway, close it as the day's page opens.
+        canvas.dismissEditMenus()
+        for delay in [0.15, 0.45] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                MainActor.assumeIsolated { self?.canvas.dismissEditMenus() }
+            }
+        }
+    }
+
+    /// The long press begins only on a day (month page, or a small month on the year page).
+    fileprivate func wantsLongPress(at point: CGPoint) -> Bool {
+        template?.regions(at: point).contains { region in
+            if case .day = region.id { true } else { false }
+        } ?? false
     }
 
     fileprivate func swiped(_ recognizer: UISwipeGestureRecognizer) {
@@ -485,6 +500,12 @@ private final class CanvasHelper: NSObject, PKCanvasViewDelegate, UIGestureRecog
 
     @objc func longPressed(_ recognizer: UILongPressGestureRecognizer) {
         controller?.longPressed(recognizer)
+    }
+
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard let press = gestureRecognizer as? UILongPressGestureRecognizer,
+              let canvas = press.view as? InkCanvasView else { return true }
+        return controller?.wantsLongPress(at: canvas.canvasLocation(of: press)) ?? false
     }
 
     @objc func swiped(_ recognizer: UISwipeGestureRecognizer) {

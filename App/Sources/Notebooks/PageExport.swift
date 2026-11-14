@@ -99,6 +99,9 @@ enum PageExporter {
 /// iPad, from the bottom on iPhone.
 @MainActor
 enum SharePresenter {
+    /// Where the share button is, in window coordinates.
+    static var anchor: CGRect?
+
     static func present(_ url: URL) {
         let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
         guard let scene = scenes.first(where: { $0.activationState == .foregroundActive }) ?? scenes.first,
@@ -113,7 +116,8 @@ enum SharePresenter {
         let activity = UIActivityViewController(activityItems: [url], applicationActivities: nil)
         if let popover = activity.popoverPresentationController {
             popover.sourceView = window
-            popover.sourceRect = CGRect(x: window.bounds.maxX - 150, y: window.safeAreaInsets.top + 8, width: 44, height: 36)
+            popover.sourceRect = anchor.flatMap { $0.isEmpty ? nil : $0 }
+                ?? CGRect(x: window.bounds.maxX - 98, y: window.safeAreaInsets.top + 4, width: 44, height: 44)
             popover.permittedArrowDirections = [.up]
         }
         top.present(activity, animated: true)
