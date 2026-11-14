@@ -253,6 +253,12 @@ struct TypedListTests {
 
 @Suite("Journal and sketch templates")
 struct NotebookTemplateTests {
+    /// Inter is registered before any text is measured: CoreText remembers a font name it
+    /// could not find, and would keep measuring with a fallback font.
+    init() {
+        _ = TestFonts.registered
+    }
+
     private let english = Locale(identifier: "en_US")
     private let greek = Locale(identifier: "el_GR")
     private let saturday = PlannerDate(year: 2026, month: 11, day: 14)

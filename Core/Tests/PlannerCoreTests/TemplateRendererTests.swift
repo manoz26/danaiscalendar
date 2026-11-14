@@ -87,6 +87,12 @@ struct PageBitmap {
 
 @Suite("Template renderer")
 struct TemplateRendererTests {
+    /// Inter is registered before any text is measured: CoreText remembers a font name it
+    /// could not find, and would keep measuring with a fallback font.
+    init() {
+        _ = TestFonts.registered
+    }
+
     private let english = Locale(identifier: "en_US")
     private let greek = Locale(identifier: "el_GR")
     private let greekLabels = MonthPageLabels(
