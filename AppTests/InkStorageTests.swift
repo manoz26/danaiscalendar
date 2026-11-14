@@ -133,8 +133,8 @@ struct InkStorageTests {
     @Test func highlighterOpacityIsTheInksAlpha() throws {
         var state = InkToolState()
         state.select(.highlighter)
-        let medium = try #require(InkToolFactory.tool(for: state) as? PKInkingTool)
-        #expect(abs(medium.color.cgColor.alpha - 0.6) < 0.02)
+        let strong = try #require(InkToolFactory.tool(for: state) as? PKInkingTool)
+        #expect(strong.color.cgColor.alpha == 1)
         state.selectHighlighterOpacity(0)
         let faint = try #require(InkToolFactory.tool(for: state) as? PKInkingTool)
         #expect(abs(faint.color.cgColor.alpha - 0.3) < 0.02)
@@ -156,11 +156,11 @@ struct InkStorageTests {
         #expect(points.count > 20)
         #expect(points.allSatisfy { $0.location.y == 20 && $0.size.width == 11 })
 
-        state.selectHighlighterOpacity(2)
+        state.selectHighlighterOpacity(1)
         let look = StrokeLook(size: CGSize(width: 0.4, height: 0.5), force: 0.7, opacity: 0.9, azimuth: 1, altitude: 1.2)
         let marked = try #require(StraightStroke.make(from: .zero, to: CGPoint(x: 50, y: 50), tools: state, scale: 1, look: look))
         #expect(marked.ink.inkType == .marker)
-        #expect(abs(marked.ink.color.cgColor.alpha - 0.9) < 0.02)
+        #expect(abs(marked.ink.color.cgColor.alpha - 0.6) < 0.02)
         // Drawn like PencilKit's latest marker stroke: about 40% of the medium width (17), its
         // force and opacity. (PencilKit keeps its own precision for the points' values.)
         let point = try #require(Array(marked.path).first)

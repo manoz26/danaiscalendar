@@ -244,6 +244,9 @@ final class NotebookTests: XCTestCase {
             XCTAssertEqual(XCTWaiter().wait(for: [ticked], timeout: 10), .completed, "Item \(line) was not ticked")
         }
         tapText(app, "tobuy.item.4")
+        XCTAssertTrue(element(app, "list.deleteTicked").waitForExistence(timeout: 10), "No Delete ticked items")
+        settle()
+        save(app, "en-portrait-tobuy-list-ticked")
         tap(app, "list.deleteTicked")
         confirm(app, "list.confirmDeleteTicked", label: "Delete")
         waitForCount(app, "list.item.delete", 1)
