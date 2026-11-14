@@ -83,7 +83,7 @@ final class StrokeTracker: UIGestureRecognizer {
 enum StraightStroke {
     /// `from`/`to` in PencilKit units; `scale`: PencilKit units per canvas unit.
     static func make(from start: CGPoint, to end: CGPoint, tools: InkToolState, scale: CGFloat) -> PKStroke? {
-        guard let inkType = inkType(for: tools.tool), let width = tools.width else { return nil }
+        guard let type = Self.inkType(for: tools.tool), let width = tools.width else { return nil }
         let size = width * scale
         let length = hypot(end.x - start.x, end.y - start.y)
         // A point every 2 units at the canvas's scale, like the strokes PencilKit makes.
@@ -99,7 +99,7 @@ enum StraightStroke {
             )
         }
         let color = tools.color.uiColor.withAlphaComponent(tools.opacity)
-        return PKStroke(ink: PKInk(inkType, color: color), path: PKStrokePath(controlPoints: points, creationDate: creation))
+        return PKStroke(ink: PKInk(type, color: color), path: PKStrokePath(controlPoints: points, creationDate: creation))
     }
 
     static func inkType(for tool: InkTool) -> PKInk.InkType? {
