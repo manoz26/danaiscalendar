@@ -199,9 +199,10 @@ struct InkToolStateTests {
 
     @Test func highlighterOpacity() {
         var state = InkToolState()
-        // Strong, as the highlighter was before it had levels.
-        #expect(state.highlighterOpacityIndex == 2)
+        #expect(state.highlighterOpacityIndex == 1)
         #expect(state.opacity == 1)
+        state.select(.highlighter)
+        #expect(state.opacity == 0.6)
         state.selectHighlighterOpacity(0)
         #expect(state.tool == .highlighter)
         #expect(state.opacity == 0.3)
@@ -226,8 +227,8 @@ struct InkToolStateTests {
     @Test func opacityLevelsGrowToTheFullColour() {
         #expect(InkOpacities.highlighter.count == 3)
         #expect(InkOpacities.highlighter == InkOpacities.highlighter.sorted())
-        #expect(InkOpacities.highlighter.last == 1)
-        #expect(InkOpacities.highlighter.allSatisfy { $0 > 0 && $0 <= 1 })
+        // Never fully opaque (PencilKit's marker would be a thin felt pen).
+        #expect(InkOpacities.highlighter.allSatisfy { $0 > 0 && $0 < 1 })
     }
 
     @Test func widthsGrow() {

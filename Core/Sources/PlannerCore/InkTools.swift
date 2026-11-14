@@ -133,11 +133,13 @@ public struct InkToolState: Sendable, Equatable, Codable {
     }
 }
 
-/// How see-through the highlighter is: three levels, from faint to the full colour.
+/// How see-through the highlighter is: three levels, from faint to strong. Even the strongest
+/// stays a little see-through: with a fully opaque colour PencilKit draws its marker as a thin
+/// felt pen (a third of its width, seen in the CI), not as a highlighter.
 public enum InkOpacities {
-    public static let highlighter: [Double] = [0.3, 0.6, 1]
-    /// Strong: the highlighter as it was before it had levels.
-    public static let defaultIndex = 2
+    public static let highlighter: [Double] = [0.3, 0.6, 0.9]
+    /// Medium.
+    public static let defaultIndex = 1
 }
 
 /// The three widths of each tool, in canvas units (a page is 1000 wide).

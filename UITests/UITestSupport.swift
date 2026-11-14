@@ -276,6 +276,22 @@ struct ScreenPixels {
         return points
     }
 
+    /// How tall the ink (anything not white) is in the column at `x`, within 30 points of `y`.
+    func inkHeight(atX x: CGFloat, around y: CGFloat) -> CGFloat {
+        let column = min(max(0, Int(x * scale)), width - 1)
+        let y0 = max(0, Int((y - 30) * scale)), y1 = min(height, Int((y + 30) * scale))
+        var top: Int?, bottom: Int?
+        for row in y0..<y1 {
+            let index = (row * width + column) * 4
+            if bytes[index] < 250 || bytes[index + 1] < 250 || bytes[index + 2] < 250 {
+                top = top ?? row
+                bottom = row
+            }
+        }
+        guard let top, let bottom else { return 0 }
+        return CGFloat(bottom - top + 1) / scale
+    }
+
     /// Average colour (0–255 per channel) of the pixels inside `rect`.
     func averageColor(in rect: CGRect) -> (red: Double, green: Double, blue: Double) {
         let area = rect.intersection(CGRect(origin: .zero, size: size))

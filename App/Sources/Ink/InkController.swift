@@ -72,6 +72,9 @@ final class InkController {
     @ObservationIgnored private var lineEnd = CGPoint.zero
     /// The stroke became a straight line and the pencil is still down.
     @ObservationIgnored private var activeLine: ActiveLine?
+    /// How PencilKit draws each ink just now (from the user's latest stroke with it), for straight lines.
+    @ObservationIgnored private var strokeLooks: [PKInk.InkType: StrokeLook] = [:]
+    @ObservationIgnored private var lookedAtStroke: Date?
 
     init(library: InkLibrary? = nil, canDraw: Bool? = nil) {
         self.canDraw = canDraw ?? (UIDevice.current.userInterfaceIdiom == .pad)
@@ -298,6 +301,18 @@ final class InkController {
         #endif
         replacedDrawing = nil
         library.update(drawing, scale: canvas.drawingScale, for: page, layout: layout)
+        learnLook(from: drawing)
+    }
+
+    /// A stroke the user just drew shows how PencilKit draws its ink now (`StrokeLook`).
+    private func learnLook(from drawing: PKDrawing) {
+        guard let stroke = drawing.strokes.last, stroke.path.creationDate != lookedAtStroke,
+              stroke.path.creationDate.timeIntervalSinceNow > -10,
+              let type = StraightStroke.inkType(for: tools.tool), stroke.ink.inkType == type,
+              let width = tools.width,
+              let look = StrokeLook(stroke, toolWidth: width * canvas.drawingScale) else { return }
+        lookedAtStroke = stroke.path.creationDate
+        strokeLooks[type] = look
     }
 
     fileprivate func tapped(_ recognizer: UITapGestureRecognizer) {
@@ -447,7 +462,10 @@ final class InkController {
         guard var line = activeLine else { return }
         let now = ProcessInfo.processInfo.systemUptime
         guard force || (lineEnd != line.shownEnd && now - line.shownAt >= 1.0 / 60) else { return }
-        guard let stroke = StraightStroke.make(from: lineStart, to: lineEnd, tools: tools, scale: canvas.drawingScale) else { return }
+        let look = StraightStroke.inkType(for: tools.tool).flatMap { strokeLooks[$0] } ?? .plain
+        guard let stroke = StraightStroke.make(
+            from: lineStart, to: lineEnd, tools: tools, scale: canvas.drawingScale, look: look
+        ) else { return }
         var drawing = line.before
         drawing.strokes.append(stroke)
         setCanvasDrawing(drawing)
