@@ -12,6 +12,9 @@ struct InkToolbarOverlay: View {
     private static let width: CGFloat = 52
     private static let toolSize: CGFloat = 38
     private static let colorRow: CGFloat = 28
+    /// Under the colours: the highlighter's opacity, when it is selected (empty otherwise, so
+    /// the buttons below never move).
+    private static let opacityRow: CGFloat = 28
 
     var body: some View {
         GeometryReader { proxy in
@@ -99,11 +102,14 @@ struct InkToolbarOverlay: View {
                     ForEach(InkPalette.colors.indices, id: \.self) { index in
                         colorButton(index)
                     }
+                    .opacity(ink.tools.tool.drawsInk ? 1 : 0.35)
+                    if ink.tools.tool == .highlighter {
+                        highlighterOpacities
+                    }
                 }
-                .opacity(ink.tools.tool.drawsInk ? 1 : 0.35)
             }
         }
-        .frame(height: Self.colorRow * CGFloat(InkPalette.colors.count), alignment: .top)
+        .frame(height: Self.colorRow * CGFloat(InkPalette.colors.count) + Self.opacityRow, alignment: .top)
         divider
         iconButton("arrow.uturn.backward", label: Text("Undo"), identifier: "toolbar.undo", enabled: ink.canUndo) {
             ink.undo()
@@ -206,6 +212,44 @@ struct InkToolbarOverlay: View {
         .accessibilityLabel(Self.name(of: color))
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibilityIdentifier("toolbar.color.\(color.key)")
+    }
+
+    /// Three levels side by side, faint to strong: small upright marks in black at each
+    /// opacity (black and white, like the rest of the bar).
+    private var highlighterOpacities: some View {
+        HStack(spacing: 0) {
+            ForEach(InkOpacities.highlighter.indices, id: \.self) { index in
+                opacityButton(index)
+            }
+        }
+        .frame(width: Self.width - 4, height: Self.opacityRow)
+    }
+
+    private func opacityButton(_ index: Int) -> some View {
+        let selected = ink.tools.highlighterOpacityIndex == index
+        let names = [Text("Faint highlighter"), Text("Medium highlighter"), Text("Strong highlighter")]
+        return Button {
+            ink.selectHighlighterOpacity(index)
+        } label: {
+            RoundedRectangle(cornerRadius: 2.5, style: .continuous)
+                .fill(Paper.ink.opacity(InkOpacities.highlighter[index]))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 2.5, style: .continuous)
+                        .stroke(Paper.hairline, lineWidth: 0.5)
+                )
+                .frame(width: 8, height: 15)
+                .padding(2.5)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                        .stroke(selected ? Paper.ink : Color.clear, lineWidth: 1.5)
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(names[index])
+        .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityIdentifier("toolbar.opacity.\(index + 1)")
     }
 
     private var eraserModes: some View {

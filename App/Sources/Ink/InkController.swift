@@ -63,6 +63,16 @@ final class InkController {
     /// The page's ink was just put on the canvas; PencilKit has not drawn it yet.
     @ObservationIgnored private var awaitingRender = false
 
+    /// Hold at the end of a stroke to make it a straight line (`StraightLineHold`).
+    private let strokeTracker = StrokeTracker()
+    @ObservationIgnored private var lineHold = StraightLineHold()
+    @ObservationIgnored private var lineTimer: Timer?
+    /// Where the followed stroke began and where it is now, in PencilKit units.
+    @ObservationIgnored private var lineStart = CGPoint.zero
+    @ObservationIgnored private var lineEnd = CGPoint.zero
+    /// The stroke became a straight line and the pencil is still down.
+    @ObservationIgnored private var activeLine: ActiveLine?
+
     init(library: InkLibrary? = nil, canDraw: Bool? = nil) {
         self.canDraw = canDraw ?? (UIDevice.current.userInterfaceIdiom == .pad)
         self.library = library ?? InkLibrary()
@@ -113,6 +123,7 @@ final class InkController {
             let pencil = UIPencilInteraction()
             pencil.delegate = helper
             canvas.addInteraction(pencil)
+            setUpStraightLines()
         } else {
             canvas.drawingGestureRecognizer.isEnabled = false
         }
@@ -132,6 +143,7 @@ final class InkController {
             return
         }
 
+        finishLine()
         if let page {
             library.save(page)
         }
@@ -211,6 +223,11 @@ final class InkController {
         toolsChanged()
     }
 
+    func selectHighlighterOpacity(_ index: Int) {
+        tools.selectHighlighterOpacity(index)
+        toolsChanged()
+    }
+
     func selectEraserMode(_ mode: EraserMode) {
         tools.eraserMode = mode
         tools.select(.eraser)
@@ -228,11 +245,13 @@ final class InkController {
     }
 
     func undo() {
+        finishLine()
         canvas.undoManager?.undo()
         refreshUndoState()
     }
 
     func redo() {
+        finishLine()
         canvas.undoManager?.redo()
         refreshUndoState()
     }
@@ -254,6 +273,17 @@ final class InkController {
     fileprivate func drawingDidChange() {
         Task { [weak self] in self?.refreshUndoState() }
         guard !isReplacingDrawing, let page else { return }
+        if let line = activeLine {
+            // While a straight line is drawn, the canvas shows exactly that. A stroke more is
+            // the one PencilKit was drawing when it was told to drop it.
+            if canvas.drawing.strokes.count != line.before.strokes.count + 1 {
+                #if DEBUG
+                canvas.noteDebugEvent("dropped stroke came back")
+                #endif
+                showLine(force: true)
+            }
+            return
+        }
         let drawing = canvas.drawing
         if let replaced = replacedDrawing, Date() < echoDeadline,
            replaced.strokes.count == drawing.strokes.count, replaced.bounds == drawing.bounds {
@@ -327,6 +357,177 @@ final class InkController {
         }
     }
 
+    // MARK: - Straight lines
+
+    /// A stroke with pen, pencil or highlighter that is held still at its end for half a second
+    /// becomes a straight line (as in Apple Notes); moving on without lifting moves its end.
+    /// PencilKit gives no access to the stroke it is drawing, so the touch is followed here as
+    /// well (`StrokeTracker`). At the hold PencilKit is told to drop its stroke (its drawing
+    /// gesture is switched off until the touch lifts), and the canvas shows the page's ink plus
+    /// the straight line, redrawn as the end moves. On lifting it is one edit, undone in one step.
+    private func setUpStraightLines() {
+        strokeTracker.delaysTouchesBegan = false
+        strokeTracker.delaysTouchesEnded = false
+        strokeTracker.cancelsTouchesInView = false
+        strokeTracker.canFollow = { [weak self] touch in
+            self?.drawsInk(with: touch) ?? false
+        }
+        strokeTracker.onBegin = { [weak self] touch in
+            self?.strokeBegan(touch)
+        }
+        strokeTracker.onMove = { [weak self] samples, touch in
+            self?.strokeMoved(samples, latest: touch)
+        }
+        strokeTracker.onEnd = { [weak self] touch, _ in
+            self?.strokeEnded(touch)
+        }
+        canvas.addGestureRecognizer(strokeTracker)
+    }
+
+    /// PencilKit draws ink with this touch: pen, pencil or highlighter, with the Apple Pencil
+    /// (or a finger, with "Draw with finger too").
+    private func drawsInk(with touch: UITouch) -> Bool {
+        canDraw && page != nil && activeLine == nil && tools.tool.drawsInk
+            && canvas.drawingGestureRecognizer.isEnabled
+            && (touch.type == .pencil || (drawWithFinger && touch.type == .direct))
+    }
+
+    private func strokeBegan(_ touch: UITouch) {
+        lineStart = drawingLocation(of: touch)
+        lineEnd = lineStart
+        lineHold.begin(at: touch.location(in: nil), time: touch.timestamp)
+        startLineTimer()
+    }
+
+    private func strokeMoved(_ samples: [UITouch], latest touch: UITouch) {
+        for sample in samples {
+            lineHold.move(to: sample.location(in: nil), time: sample.timestamp)
+        }
+        lineEnd = drawingLocation(of: touch)
+        if activeLine != nil {
+            showLine(force: false)
+        } else if lineHold.checkHold(at: touch.timestamp) {
+            straighten()
+        }
+    }
+
+    /// Every 0.05 s while a stroke is followed: a finger held still sends no touches.
+    private func lineTick() {
+        if activeLine != nil {
+            showLine(force: false)
+        } else if lineHold.checkHold(at: ProcessInfo.processInfo.systemUptime) {
+            straighten()
+        }
+    }
+
+    private func strokeEnded(_ touch: UITouch) {
+        stopLineTimer()
+        guard activeLine != nil else { return }
+        lineEnd = drawingLocation(of: touch)
+        showLine(force: true)
+        finishLine()
+    }
+
+    private func straighten() {
+        guard page != nil, let undoManager = canvas.undoManager, activeLine == nil else { return }
+        // The page's ink without the stroke being drawn (PencilKit adds it only on lifting).
+        let before = canvas.drawing
+        // Nothing PencilKit does now is an edit of its own: the line is one edit, at the end.
+        undoManager.disableUndoRegistration()
+        canvas.drawingGestureRecognizer.isEnabled = false
+        activeLine = ActiveLine(before: before)
+        showLine(force: true)
+        #if DEBUG
+        canvas.noteDebugEvent("straight(\(before.strokes.count))")
+        #endif
+    }
+
+    /// Shows the straight line to the current end (at most once a frame, unless `force`).
+    private func showLine(force: Bool) {
+        guard var line = activeLine else { return }
+        let now = ProcessInfo.processInfo.systemUptime
+        guard force || (lineEnd != line.shownEnd && now - line.shownAt >= 1.0 / 60) else { return }
+        guard let stroke = StraightStroke.make(from: lineStart, to: lineEnd, tools: tools, scale: canvas.drawingScale) else { return }
+        var drawing = line.before
+        drawing.strokes.append(stroke)
+        setCanvasDrawing(drawing)
+        line.shownEnd = lineEnd
+        line.shownAt = now
+        activeLine = line
+    }
+
+    /// The pencil lifted (or the page is going away): the straight line becomes an edit of
+    /// the page, undone in one step. `drawingScale`: the scale of the canvas's drawing, if it
+    /// just changed.
+    private func finishLine(drawingScale: CGFloat? = nil) {
+        guard let line = activeLine else { return }
+        activeLine = nil
+        stopLineTimer()
+        canvas.drawingGestureRecognizer.isEnabled = true
+        canvas.undoManager?.enableUndoRegistration()
+        let after = canvas.drawing
+        registerLineUndo(restoring: line.before, redoing: after)
+        if let page {
+            library.update(after, scale: drawingScale ?? canvas.drawingScale, for: page, layout: layout)
+        }
+        refreshUndoState()
+        #if DEBUG
+        canvas.noteDebugEvent("line(\(after.strokes.count))")
+        #endif
+    }
+
+    /// Undo puts back the ink as it was before the line; redo brings the line back.
+    private func registerLineUndo(restoring drawing: PKDrawing, redoing other: PKDrawing) {
+        let restore = DrawingBox(drawing: drawing)
+        let redo = DrawingBox(drawing: other)
+        canvas.undoManager?.registerUndo(withTarget: helper) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.undoLine(restore: restore, redo: redo)
+            }
+        }
+    }
+
+    private func undoLine(restore: DrawingBox, redo: DrawingBox) {
+        setCanvasDrawing(restore.drawing)
+        if let page {
+            library.update(restore.drawing, scale: canvas.drawingScale, for: page, layout: layout)
+        }
+        registerLineUndo(restoring: redo.drawing, redoing: restore.drawing)
+        Task { [weak self] in self?.refreshUndoState() }
+    }
+
+    /// Puts a drawing on the canvas that is not PencilKit's own edit (it is never one of
+    /// PencilKit's undo steps).
+    private func setCanvasDrawing(_ drawing: PKDrawing) {
+        let undoManager = canvas.undoManager
+        let pause = undoManager?.isUndoRegistrationEnabled == true
+        if pause { undoManager?.disableUndoRegistration() }
+        isReplacingDrawing = true
+        canvas.drawing = drawing
+        isReplacingDrawing = false
+        if pause { undoManager?.enableUndoRegistration() }
+    }
+
+    /// PencilKit units of a touch.
+    private func drawingLocation(of touch: UITouch) -> CGPoint {
+        let point = touch.location(in: canvas.templateView)
+        return CGPoint(x: point.x * canvas.drawingScale, y: point.y * canvas.drawingScale)
+    }
+
+    private func startLineTimer() {
+        lineTimer?.invalidate()
+        let timer = Timer(timeInterval: 0.05, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.lineTick() }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        lineTimer = timer
+    }
+
+    private func stopLineTimer() {
+        lineTimer?.invalidate()
+        lineTimer = nil
+    }
+
     // MARK: - Private
 
     private func setTemplate(_ content: PlannerPageContent) {
@@ -347,6 +548,7 @@ final class InkController {
         #if DEBUG
         canvas.noteDebugEvent("scale \(old)->\(new) page=\(page?.description ?? "none")")
         #endif
+        finishLine(drawingScale: old)
         applyTool()
         putInkOnCanvas(resetZoom: false)
     }
@@ -461,12 +663,22 @@ final class InkController {
     #endif
 }
 
+/// A stroke that became a straight line while the pencil is still down.
+private struct ActiveLine {
+    /// The page's ink without it.
+    let before: PKDrawing
+    /// The end of the line on the canvas now, and when it was put there.
+    var shownEnd: CGPoint?
+    var shownAt: TimeInterval = 0
+}
+
 /// PencilKit tools for the toolbar's state.
 enum InkToolFactory {
     /// `scale`: PencilKit units per canvas unit (the widths are in canvas units).
     static func tool(for state: InkToolState, scale: CGFloat = 1) -> any PKTool {
         let width = (state.width ?? 1) * scale
-        let color = state.color.uiColor
+        // The highlighter's opacity; the other tools are never see-through.
+        let color = state.color.uiColor.withAlphaComponent(state.opacity)
         switch state.tool {
         case .pen:
             return PKInkingTool(.pen, color: color, width: width)

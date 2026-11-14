@@ -256,6 +256,48 @@ struct ScreenPixels {
         return red > 170 && green < 100 && blue < 100
     }
 
+    /// The red pixels inside `rect` (their centres, in points), skipping `excluded` areas.
+    func redPoints(in rect: CGRect, excluding excluded: [CGRect] = []) -> [CGPoint] {
+        let area = rect.intersection(CGRect(origin: .zero, size: size))
+        guard !area.isNull, width > 0 else { return [] }
+        let x0 = max(0, Int((area.minX * scale).rounded(.down)))
+        let x1 = min(width, Int((area.maxX * scale).rounded(.up)))
+        let y0 = max(0, Int((area.minY * scale).rounded(.down)))
+        let y1 = min(height, Int((area.maxY * scale).rounded(.up)))
+        var points: [CGPoint] = []
+        for y in y0..<y1 {
+            for x in x0..<x1 where isRed(x: x, y: y) {
+                let point = CGPoint(x: (CGFloat(x) + 0.5) / scale, y: (CGFloat(y) + 0.5) / scale)
+                if !excluded.contains(where: { $0.contains(point) }) {
+                    points.append(point)
+                }
+            }
+        }
+        return points
+    }
+
+    /// Average colour (0–255 per channel) of the pixels inside `rect`.
+    func averageColor(in rect: CGRect) -> (red: Double, green: Double, blue: Double) {
+        let area = rect.intersection(CGRect(origin: .zero, size: size))
+        guard !area.isNull, width > 0 else { return (0, 0, 0) }
+        let x0 = max(0, Int((area.minX * scale).rounded(.down)))
+        let x1 = min(width, Int((area.maxX * scale).rounded(.up)))
+        let y0 = max(0, Int((area.minY * scale).rounded(.down)))
+        let y1 = min(height, Int((area.maxY * scale).rounded(.up)))
+        var red = 0.0, green = 0.0, blue = 0.0, count = 0.0
+        for y in y0..<y1 {
+            for x in x0..<x1 {
+                let index = (y * width + x) * 4
+                red += Double(bytes[index])
+                green += Double(bytes[index + 1])
+                blue += Double(bytes[index + 2])
+                count += 1
+            }
+        }
+        guard count > 0 else { return (0, 0, 0) }
+        return (red / count, green / count, blue / count)
+    }
+
     /// Bounding box (in points) of the red pixels inside `rect`, skipping `excluded` areas.
     func redBounds(in rect: CGRect, excluding excluded: [CGRect] = []) -> CGRect? {
         let area = rect.intersection(CGRect(origin: .zero, size: size))

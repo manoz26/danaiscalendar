@@ -613,6 +613,24 @@
         }
       }
     },
+    "Faint highlighter" : {
+      "comment" : "Toolbar: the most see-through of the highlighter's three opacity levels (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αχνός μαρκαδόρος"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faint highlighter"
+          }
+        }
+      }
+    },
     "Goals" : {
       "comment" : "Label of the goals box on the month page (printed in capitals).",
       "extractionState" : "manual",
@@ -933,6 +951,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Medium"
+          }
+        }
+      }
+    },
+    "Medium highlighter" : {
+      "comment" : "Toolbar: the middle opacity level of the highlighter (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μεσαίος μαρκαδόρος"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medium highlighter"
           }
         }
       }
@@ -1887,6 +1923,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sketches of %@"
+          }
+        }
+      }
+    },
+    "Strong highlighter" : {
+      "comment" : "Toolbar: the highlighter at full colour, its strongest opacity level (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Έντονος μαρκαδόρος"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Strong highlighter"
           }
         }
       }

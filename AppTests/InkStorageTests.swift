@@ -130,6 +130,41 @@ struct InkStorageTests {
         #expect(InkToolFactory.tool(for: state) is PKLassoTool)
     }
 
+    @Test func highlighterOpacityIsTheInksAlpha() throws {
+        var state = InkToolState()
+        state.select(.highlighter)
+        let strong = try #require(InkToolFactory.tool(for: state) as? PKInkingTool)
+        #expect(strong.color.cgColor.alpha == 1)
+        state.selectHighlighterOpacity(0)
+        let faint = try #require(InkToolFactory.tool(for: state) as? PKInkingTool)
+        #expect(abs(faint.color.cgColor.alpha - 0.3) < 0.02)
+        // The pen is never see-through.
+        state.select(.pen)
+        let pen = try #require(InkToolFactory.tool(for: state) as? PKInkingTool)
+        #expect(pen.color.cgColor.alpha == 1)
+    }
+
+    @Test func straightStrokes() throws {
+        var state = InkToolState()
+        state.selectWidth(2)
+        state.selectColor(2)
+        let line = try #require(StraightStroke.make(from: CGPoint(x: 10, y: 20), to: CGPoint(x: 210, y: 20), tools: state, scale: 2))
+        #expect(line.ink.inkType == .pen)
+        let points = Array(line.path)
+        #expect(points.first?.location == CGPoint(x: 10, y: 20))
+        #expect(points.last?.location == CGPoint(x: 210, y: 20))
+        #expect(points.count > 20)
+        #expect(points.allSatisfy { $0.location.y == 20 && $0.size.width == 11 })
+
+        state.selectHighlighterOpacity(1)
+        let marked = try #require(StraightStroke.make(from: .zero, to: CGPoint(x: 50, y: 50), tools: state, scale: 1))
+        #expect(marked.ink.inkType == .marker)
+        #expect(abs(marked.ink.color.cgColor.alpha - 0.6) < 0.02)
+
+        state.select(.eraser)
+        #expect(StraightStroke.make(from: .zero, to: CGPoint(x: 50, y: 50), tools: state, scale: 1) == nil)
+    }
+
     @Test func inkColours() {
         var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
         #expect(InkPalette.colors[2].uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha))

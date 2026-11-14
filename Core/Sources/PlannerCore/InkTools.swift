@@ -36,6 +36,8 @@ public struct InkToolState: Sendable, Equatable, Codable {
     public private(set) var colorIndex: Int
     /// Width (0...2) per tool, by `InkTool.rawValue`.
     private var widths: [String: Int]
+    /// How strong the highlighter is (see `InkOpacities`). Only new strokes use it.
+    private var highlighterOpacity: Int
 
     public init() {
         tool = .pen
@@ -44,6 +46,23 @@ public struct InkToolState: Sendable, Equatable, Codable {
         eraserMode = .partial
         colorIndex = InkPalette.defaultIndex
         widths = [:]
+        highlighterOpacity = InkOpacities.defaultIndex
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case tool, previousTool, lastInkTool, eraserMode, colorIndex, widths, highlighterOpacity
+    }
+
+    /// Tools saved by an older version (without the highlighter's opacity) keep everything else.
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        tool = try container.decode(InkTool.self, forKey: .tool)
+        previousTool = try container.decode(InkTool.self, forKey: .previousTool)
+        lastInkTool = try container.decode(InkTool.self, forKey: .lastInkTool)
+        eraserMode = try container.decode(EraserMode.self, forKey: .eraserMode)
+        colorIndex = try container.decode(Int.self, forKey: .colorIndex)
+        widths = try container.decode([String: Int].self, forKey: .widths)
+        highlighterOpacity = try container.decodeIfPresent(Int.self, forKey: .highlighterOpacity) ?? InkOpacities.defaultIndex
     }
 
     public mutating func select(_ newTool: InkTool) {
@@ -96,6 +115,29 @@ public struct InkToolState: Sendable, Equatable, Codable {
     public var width: CGFloat? {
         InkWidths.value(for: tool, index: widthIndex)
     }
+
+    /// The highlighter's opacity level (0 faint, 1 medium, 2 strong).
+    public var highlighterOpacityIndex: Int {
+        min(max(highlighterOpacity, 0), InkOpacities.highlighter.count - 1)
+    }
+
+    /// Picks the highlighter's opacity, and the highlighter with it.
+    public mutating func selectHighlighterOpacity(_ index: Int) {
+        highlighterOpacity = min(max(index, 0), InkOpacities.highlighter.count - 1)
+        select(.highlighter)
+    }
+
+    /// Opacity of the ink of the selected tool: the highlighter's level, otherwise 1.
+    public var opacity: Double {
+        tool == .highlighter ? InkOpacities.highlighter[highlighterOpacityIndex] : 1
+    }
+}
+
+/// How see-through the highlighter is: three levels, from faint to the full colour.
+public enum InkOpacities {
+    public static let highlighter: [Double] = [0.3, 0.6, 1]
+    /// Strong: the highlighter as it was before it had levels.
+    public static let defaultIndex = 2
 }
 
 /// The three widths of each tool, in canvas units (a page is 1000 wide).

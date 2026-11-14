@@ -177,8 +177,57 @@ struct InkToolStateTests {
         state.selectWidth(2)
         state.selectColor(3)
         state.eraserMode = .wholeStroke
+        state.selectHighlighterOpacity(0)
         let data = try JSONEncoder().encode(state)
-        #expect(try JSONDecoder().decode(InkToolState.self, from: data) == state)
+        let loaded = try JSONDecoder().decode(InkToolState.self, from: data)
+        #expect(loaded == state)
+        #expect(loaded.highlighterOpacityIndex == 0)
+    }
+
+    @Test func toolsSavedBeforeOpacityLevelsStillLoad() throws {
+        // As the version before prompt 5δ saved them.
+        let saved = #"{"tool":"pencil","previousTool":"pen","lastInkTool":"pencil","eraserMode":"wholeStroke","colorIndex":3,"widths":{"pencil":2,"highlighter":0}}"#
+        let state = try JSONDecoder().decode(InkToolState.self, from: Data(saved.utf8))
+        #expect(state.tool == .pencil)
+        #expect(state.previousTool == .pen)
+        #expect(state.eraserMode == .wholeStroke)
+        #expect(state.color.key == "blue")
+        #expect(state.widthIndex == 2)
+        #expect(state.widthIndex(for: .highlighter) == 0)
+        #expect(state.highlighterOpacityIndex == InkOpacities.defaultIndex)
+    }
+
+    @Test func highlighterOpacity() {
+        var state = InkToolState()
+        // Strong, as the highlighter was before it had levels.
+        #expect(state.highlighterOpacityIndex == 2)
+        #expect(state.opacity == 1)
+        state.selectHighlighterOpacity(0)
+        #expect(state.tool == .highlighter)
+        #expect(state.opacity == 0.3)
+        // The other tools are never see-through, and the highlighter keeps its level.
+        state.select(.pen)
+        #expect(state.opacity == 1)
+        state.selectColor(2)
+        state.select(.highlighter)
+        #expect(state.opacity == 0.3)
+        #expect(state.color.key == "red")
+        state.selectHighlighterOpacity(9)
+        #expect(state.highlighterOpacityIndex == 2)
+        state.selectHighlighterOpacity(-1)
+        #expect(state.highlighterOpacityIndex == 0)
+        // Picking a level with the eraser selected goes to the highlighter.
+        state.select(.eraser)
+        state.selectHighlighterOpacity(1)
+        #expect(state.tool == .highlighter)
+        #expect(state.opacity == 0.6)
+    }
+
+    @Test func opacityLevelsGrowToTheFullColour() {
+        #expect(InkOpacities.highlighter.count == 3)
+        #expect(InkOpacities.highlighter == InkOpacities.highlighter.sorted())
+        #expect(InkOpacities.highlighter.last == 1)
+        #expect(InkOpacities.highlighter.allSatisfy { $0 > 0 && $0 <= 1 })
     }
 
     @Test func widthsGrow() {
