@@ -347,6 +347,13 @@ struct RootView: View {
                 open(.month(month))
                 return
             }
+            // The text of a typed item opens its list (to change or delete it).
+            for list in [listKind(.todo), listKind(.tobuy)].compactMap({ $0 }) {
+                if let line = list.line(of: region.id), lists.items(list).contains(where: { $0.line == line }) {
+                    openList(list, template: template, focusNew: false)
+                    return
+                }
+            }
         }
     }
 

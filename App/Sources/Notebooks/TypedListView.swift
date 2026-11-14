@@ -1,9 +1,10 @@
 import SwiftUI
 import PlannerCore
 
-/// Typed items of a list (the printed + of the month's to-do list or of the To Buy page):
-/// type a new one, tick, change or swipe to delete. Each new item takes the first line of
-/// the page that has neither an item nor handwriting, and is printed there under the ink.
+/// Typed items of a list (the printed + of the month's to-do list or of the To Buy page, or a
+/// typed item's text on the page): type a new one, tick, change, delete with the bin on its
+/// row (or a swipe), and delete all the ticked ones at once. Each new item takes the first
+/// line of the page that has neither an item nor handwriting, and is printed there under the ink.
 struct TypedListView: View {
     let lists: ListBook
     let kind: TypedListKind
@@ -15,6 +16,7 @@ struct TypedListView: View {
 
     @Environment(\.dismiss) private var dismiss
     @State private var newText = ""
+    @State private var confirmDeleteTicked = false
     @FocusState private var newFieldFocused: Bool
 
     var body: some View {
@@ -30,7 +32,8 @@ struct TypedListView: View {
                                     get: { lists.items(kind).first { $0.id == item.id }?.text ?? item.text },
                                     set: { lists.setText(item.id, $0, in: kind) }
                                 ),
-                                onToggle: { lists.setDone(item.id, !item.done, in: kind) }
+                                onToggle: { lists.setDone(item.id, !item.done, in: kind) },
+                                onDelete: { lists.delete(item.id, from: kind) }
                             )
                             .listRowBackground(Paper.background)
                         }
@@ -62,9 +65,28 @@ struct TypedListView: View {
                 } footer: {
                     (items.isEmpty
                         ? Text("Typed items are printed on the page's lines, under your handwriting. Tap the circle or box on the page to tick one.")
-                        : Text("Swipe an item to delete it."))
+                        : Text("Tap the bin next to an item (or swipe it) to delete it."))
                         .font(.inter(.regular, size: 13, relativeTo: .footnote))
                         .foregroundStyle(Paper.secondary)
+                }
+                if items.contains(where: \.done) {
+                    Section {
+                        Button {
+                            confirmDeleteTicked = true
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "trash")
+                                    .font(.system(size: 17, weight: .regular))
+                                    .frame(width: 26)
+                                Text("Delete ticked items")
+                                    .font(.inter(.regular, size: 18, relativeTo: .body))
+                            }
+                            .foregroundStyle(Paper.ink)
+                            .frame(minHeight: 36)
+                        }
+                        .accessibilityIdentifier("list.deleteTicked")
+                        .listRowBackground(Paper.background)
+                    }
                 }
             }
             .listStyle(.insetGrouped)
@@ -86,6 +108,18 @@ struct TypedListView: View {
             }
         }
         .tint(Paper.ink)
+        .confirmationDialog(Text("Delete the ticked items?"), isPresented: $confirmDeleteTicked, titleVisibility: .visible) {
+            Button {
+                lists.deleteTicked(in: kind)
+            } label: {
+                Text("Delete")
+            }
+            .accessibilityIdentifier("list.confirmDeleteTicked")
+            Button(role: .cancel) {
+            } label: {
+                Text("Cancel")
+            }
+        }
         .task {
             guard focusNew else { return }
             // The field exists once the sheet is on screen.
@@ -105,12 +139,14 @@ struct TypedListView: View {
     }
 }
 
-/// One typed item: its circle (to-do) or box (to buy), and its text, which can be changed.
+/// One typed item: its circle (to-do) or box (to buy), its text, which can be changed, and a
+/// bin to delete it.
 private struct TypedItemRow: View {
     let item: ListItem
     let kind: TypedListKind
     @Binding var text: String
     let onToggle: () -> Void
+    let onDelete: () -> Void
 
     var body: some View {
         HStack(spacing: 12) {
@@ -139,6 +175,18 @@ private struct TypedItemRow: View {
                         .foregroundStyle(Paper.secondary)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            Button(action: onDelete) {
+                Image(systemName: "trash")
+                    .font(.system(size: 17, weight: .regular))
+                    .foregroundStyle(Paper.secondary)
+                    .frame(width: 36, height: 36)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(Text("Delete item"))
+            .accessibilityIdentifier("list.item.delete")
         }
         .frame(minHeight: 36)
     }

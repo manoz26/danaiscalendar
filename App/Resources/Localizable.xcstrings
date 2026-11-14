@@ -379,6 +379,24 @@
         }
       }
     },
+    "Delete item" : {
+      "comment" : "Typed list: the bin button on an item's row (VoiceOver).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σβήσιμο στοιχείου"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete item"
+          }
+        }
+      }
+    },
     "Delete page" : {
       "comment" : "Button that deletes a journal page.",
       "extractionState" : "manual",
@@ -393,6 +411,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delete page"
+          }
+        }
+      }
+    },
+    "Delete the ticked items?" : {
+      "comment" : "Typed list: confirmation before deleting all ticked items.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Να σβηστούν όσα τσεκαρίστηκαν;"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete the ticked items?"
           }
         }
       }
@@ -447,6 +483,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delete this sketch?"
+          }
+        }
+      }
+    },
+    "Delete ticked items" : {
+      "comment" : "Typed list (to-do or to buy): button that deletes all ticked items at once.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σβήσε όσα τσεκαρίστηκαν"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete ticked items"
           }
         }
       }
@@ -1945,24 +1999,6 @@
         }
       }
     },
-    "Swipe an item to delete it." : {
-      "comment" : "Footer of a typed list with items.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Σύρε ένα στοιχείο προς τα αριστερά για να το σβήσεις."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Swipe an item to delete it."
-          }
-        }
-      }
-    },
     "Tap + (or the sketch button in the top bar) for a blank page." : {
       "comment" : "Empty sketches grid on iPad.",
       "extractionState" : "manual",
@@ -2013,6 +2049,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tap + to add a friend's name and birthday. Its day gets a small gift on the month page, with a line in the notes."
+          }
+        }
+      }
+    },
+    "Tap the bin next to an item (or swipe it) to delete it." : {
+      "comment" : "Footer of a typed list that has items.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πάτα τον κάδο δίπλα σε ένα στοιχείο (ή σύρε το προς τα αριστερά) για να το σβήσεις."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the bin next to an item (or swipe it) to delete it."
           }
         }
       }

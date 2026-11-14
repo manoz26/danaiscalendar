@@ -342,6 +342,14 @@ final class ListBook {
         change(list) { items in items.removeAll { $0.id == id } }
     }
 
+    /// Deletes every ticked item of a list (only this month's, for to-dos).
+    func deleteTicked(in list: TypedListKind) {
+        let ticked = Set(items(list).filter(\.done).map(\.id))
+        guard !ticked.isEmpty else { return }
+        change(list) { items in items.removeAll { ticked.contains($0.id) } }
+        AppLog.info("Ticked typed items deleted (\(list.logName), \(ticked.count))")
+    }
+
     /// Items whose text was erased are removed (when the list closes).
     func removeEmptyItems(in list: TypedListKind) {
         let empty = items(list).filter { $0.trimmedText.isEmpty }.map(\.id)

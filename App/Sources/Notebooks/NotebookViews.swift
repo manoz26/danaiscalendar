@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import UniformTypeIdentifiers
 import PlannerCore
 
 /// The calendar of the date pickers: the app's language, weeks starting on Monday like the planner.
@@ -83,6 +84,8 @@ struct JournalPagesView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var thumbnails: PageThumbnails
     @State private var pendingDelete: JournalPage?
+    /// The page being dragged in the grid.
+    @State private var dragging: UUID?
 
     init(
         journal: JournalBook, ink: InkController, currentPage: UUID?, canDraw: Bool, today: PlannerDate,
@@ -169,25 +172,31 @@ struct JournalPagesView: View {
         .tint(Paper.ink)
     }
 
+    /// One page: a tap opens it; a long press gives its menu (duplicate, move, delete), and
+    /// dragging it moves it, the other pages making room as it goes. The drag starts from the
+    /// cell itself, not from a button inside it, so that it is not lost to the button's touch.
     private func cell(_ page: JournalPage, number: Int, count: Int, image: UIImage, locale: Locale) -> some View {
         let caption = Self.caption(page, number: number, locale: locale)
-        return Button {
-            onOpen(page.id)
-        } label: {
-            VStack(spacing: 6) {
-                PageThumbnail(image: image, isCurrent: page.id == currentPage)
-                Text(verbatim: caption)
-                    .font(.inter(.semibold, size: 14, relativeTo: .subheadline))
-                    .foregroundStyle(Paper.ink)
-                    .lineLimit(1)
-                Text(verbatim: String(number))
-                    .font(.inter(.regular, size: 12, relativeTo: .caption))
-                    .foregroundStyle(Paper.secondary)
-            }
-            .contentShape(Rectangle())
+        return VStack(spacing: 6) {
+            PageThumbnail(image: image, isCurrent: page.id == currentPage)
+            Text(verbatim: caption)
+                .font(.inter(.semibold, size: 14, relativeTo: .subheadline))
+                .foregroundStyle(Paper.ink)
+                .lineLimit(1)
+            Text(verbatim: String(number))
+                .font(.inter(.regular, size: 12, relativeTo: .caption))
+                .foregroundStyle(Paper.secondary)
         }
-        .buttonStyle(.plain)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onOpen(page.id)
+        }
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: "\(number). \(caption)"))
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAction {
+            onOpen(page.id)
+        }
         .accessibilityIdentifier("journal.pages.cell")
         .contextMenu {
             if canDraw {
@@ -215,15 +224,14 @@ struct JournalPagesView: View {
                 Label("Delete", systemImage: "trash")
             }
         }
-        .draggable(page.id.uuidString) {
+        .onDrag {
+            dragging = page.id
+            return NSItemProvider(object: page.id.uuidString as NSString)
+        } preview: {
             PageThumbnail(image: image, isCurrent: false)
                 .frame(width: 120)
         }
-        .dropDestination(for: String.self) { ids, _ in
-            guard let text = ids.first, let id = UUID(uuidString: text), id != page.id else { return false }
-            journal.move(id, to: number - 1)
-            return true
-        }
+        .onDrop(of: [.text], delegate: JournalPageDrop(target: page.id, journal: journal, dragging: $dragging))
     }
 
     /// The title, or the day, or "Page 3".
@@ -231,6 +239,36 @@ struct JournalPagesView: View {
         if !page.trimmedTitle.isEmpty { return page.trimmedTitle }
         if let date = page.date { return JournalHeading.shortDate(date, locale: locale) }
         return String(localized: "Page \(number)", comment: "Caption of a journal page without title or date in the pages grid, e.g. 'Page 3'.")
+    }
+}
+
+/// Dragging a page over another moves it to that place at once, so the grid shows the new
+/// order while the finger is still down; letting go keeps it.
+@MainActor
+private struct JournalPageDrop: @preconcurrency DropDelegate {
+    let target: UUID
+    let journal: JournalBook
+    @Binding var dragging: UUID?
+
+    func validateDrop(info: DropInfo) -> Bool {
+        dragging != nil
+    }
+
+    func dropEntered(info: DropInfo) {
+        guard let dragging, dragging != target,
+              let index = journal.pages.firstIndex(where: { $0.id == target }) else { return }
+        withAnimation(.snappy(duration: 0.25)) {
+            journal.move(dragging, to: index)
+        }
+    }
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        DropProposal(operation: .move)
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        dragging = nil
+        return true
     }
 }
 

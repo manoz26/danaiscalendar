@@ -202,6 +202,102 @@ final class NotebookTests: XCTestCase {
         save(app, "en-portrait-tobuy-typed")
     }
 
+    /// Danai could not find how to delete a typed thing to buy: each row of the list has a bin,
+    /// the ticked ones go all at once, and the text of a printed item opens its list.
+    @MainActor
+    func testDeletingTypedItems() throws {
+        continueAfterFailure = false
+        XCUIDevice.shared.orientation = .portrait
+        let app = launch(language: "en", region: "US", extraArguments: ["-DCOpenPage", "tobuy"])
+        waitForOrientation(app, landscape: false)
+        waitForPage(app, "tobuy")
+
+        tapOnPage(app, "tobuy.add")
+        let field = app.textFields["list.new"]
+        XCTAssertTrue(field.waitForExistence(timeout: 10), "The To Buy list did not open")
+        field.tap()
+        for thing in ["Milk", "Bread", "Eggs", "Soap"] {
+            field.typeText("\(thing)\n")
+        }
+        tap(app, "list.done")
+        XCTAssertTrue(element(app, "tobuy.item.4").waitForExistence(timeout: 10), "The typed items are not on the page")
+
+        // The text of a printed item (right of its box) opens the list; a bin deletes "Bread".
+        tapText(app, "tobuy.item.2")
+        let bins = cells(app, "list.item.delete")
+        XCTAssertTrue(bins.firstMatch.waitForExistence(timeout: 10), "The list did not open from the item's text")
+        XCTAssertEqual(bins.count, 4)
+        settle()
+        save(app, "en-portrait-tobuy-list-bins")
+        bins.element(boundBy: 1).tap()
+        waitForCount(app, "list.item.delete", 3)
+        tap(app, "list.done")
+        waitUntilGone(app, "tobuy.item.2")
+        XCTAssertEqual(element(app, "tobuy.item.1").label, "Milk")
+        XCTAssertEqual(element(app, "tobuy.item.3").label, "Eggs")
+
+        // Tick two on the page, then delete the ticked ones at once (after a confirmation).
+        for line in [1, 3] {
+            let item = element(app, "tobuy.item.\(line)")
+            tapOnPage(app, "tobuy.item.\(line)")
+            let ticked = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == %@", "Ticked"), object: item)
+            XCTAssertEqual(XCTWaiter().wait(for: [ticked], timeout: 10), .completed, "Item \(line) was not ticked")
+        }
+        tapText(app, "tobuy.item.4")
+        tap(app, "list.deleteTicked")
+        confirm(app, "list.confirmDeleteTicked", label: "Delete")
+        waitForCount(app, "list.item.delete", 1)
+        XCTAssertFalse(element(app, "list.deleteTicked").exists, "Delete ticked items is still there with nothing ticked")
+        tap(app, "list.done")
+        waitUntilGone(app, "tobuy.item.1")
+        waitUntilGone(app, "tobuy.item.3")
+        XCTAssertEqual(element(app, "tobuy.item.4").label, "Soap")
+        settle()
+        save(app, "en-portrait-tobuy-after-delete")
+    }
+
+    /// Danai's drag of a page in the pages grid did not move it: page 1 dragged onto page 3
+    /// goes to third place, and stays there after the app is closed (`journal.json`).
+    @MainActor
+    func testDraggingAJournalPage() throws {
+        guard isPad else { throw XCTSkip("The pages grid is checked on the iPad.") }
+        continueAfterFailure = false
+        XCUIDevice.shared.orientation = .portrait
+        var app = launch(language: "en", region: "US", extraArguments: ["-DCSampleNotebooks", "YES", "-DCOpenPage", "journal"])
+        waitForOrientation(app, landscape: false)
+        waitForPage(app, "journal:1")
+        tap(app, "nav.journal.pages")
+        let grid = cells(app, "journal.pages.cell")
+        XCTAssertTrue(grid.firstMatch.waitForExistence(timeout: 10), "The pages grid did not open")
+        settle()
+        XCTAssertEqual(grid.count, 4)
+        XCTAssertTrue(grid.element(boundBy: 0).label.hasPrefix("1. Ideas"), grid.element(boundBy: 0).label)
+        XCTAssertTrue(grid.element(boundBy: 2).label.hasPrefix("3. Garden"), grid.element(boundBy: 2).label)
+
+        let from = grid.element(boundBy: 0).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.4))
+        let to = grid.element(boundBy: 2).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.4))
+        from.press(forDuration: 1.0, thenDragTo: to, withVelocity: .slow, thenHoldForDuration: 0.8)
+        settle(1.5)
+        save(app, "en-portrait-journal-pages-dragged")
+        let order = pageOrder(app)
+        XCTAssertEqual(order.count, 4, "\(order)")
+        XCTAssertTrue(order[2].hasPrefix("3. Ideas"), "Page 1 did not move to third place: \(order)")
+        XCTAssertTrue(order[0].hasPrefix("1. "), "\(order)")
+        XCTAssertTrue(order[1].hasPrefix("2. Garden"), "\(order)")
+        tap(app, "journal.done")
+
+        XCUIDevice.shared.press(.home)
+        settle(2)
+        app.terminate()
+        app = launch(language: "en", region: "US", extraArguments: ["-DCOpenPage", "journal"], reset: false)
+        waitForOrientation(app, landscape: false)
+        waitForPage(app, "journal:1")
+        tap(app, "nav.journal.pages")
+        XCTAssertTrue(cells(app, "journal.pages.cell").firstMatch.waitForExistence(timeout: 10), "The pages grid did not open")
+        settle()
+        XCTAssertEqual(pageOrder(app), order, "The new order was not kept")
+    }
+
     /// In Greek, with sample pages, sketches and typed items: the month page, the To Buy
     /// page, a journal page, the pages grid and the sketches (on iPhone through the … menu).
     @MainActor
@@ -262,6 +358,27 @@ final class NotebookTests: XCTestCase {
             RunLoop.current.run(until: Date().addingTimeInterval(0.3))
         }
         XCTAssertEqual(cells(app, identifier).count, count, "Expected \(count) × \(identifier)")
+    }
+
+    /// Taps the text of a typed item printed on the page, right of its circle or box.
+    @MainActor
+    private func tapText(_ app: XCUIApplication, _ identifier: String) {
+        let marker = element(app, identifier)
+        XCTAssertTrue(marker.waitForExistence(timeout: 10), "\(identifier) did not appear")
+        marker.coordinate(withNormalizedOffset: CGVector(dx: 5, dy: 0.5)).tap()
+    }
+
+    @MainActor
+    private func waitUntilGone(_ app: XCUIApplication, _ identifier: String) {
+        let gone = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: element(app, identifier))
+        XCTAssertEqual(XCTWaiter().wait(for: [gone], timeout: 10), .completed, "\(identifier) is still on the page")
+    }
+
+    /// The labels of the pages grid, in order ("1. Ideas", …).
+    @MainActor
+    private func pageOrder(_ app: XCUIApplication) -> [String] {
+        let grid = cells(app, "journal.pages.cell")
+        return (0..<grid.count).map { grid.element(boundBy: $0).label }
     }
 
     /// A button of a context menu or a menu, by its label.
