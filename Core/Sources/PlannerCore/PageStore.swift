@@ -13,10 +13,17 @@ public protocol PageStore: Sendable {
     /// without destroying it. Returns where it went (`nil` if there was no file).
     @discardableResult
     func setAside(_ page: PlannerPage) throws -> URL?
+    /// Removes a page's file (a deleted journal page or sketch). Nothing happens if there is none.
+    func delete(_ page: PlannerPage) throws
+    /// Copies a page's file to another page (a duplicated journal page), with the new page's
+    /// name inside. Returns `false` if the source has no file (nothing was written yet).
+    @discardableResult
+    func copy(_ source: PlannerPage, to target: PlannerPage) throws -> Bool
 }
 
 /// Page files in a folder on this device: one `<page>.dcpage` per page
-/// (`year-2026.dcpage`, `month-2026-11.dcpage`, `tobuy.dcpage`).
+/// (`year-2026.dcpage`, `month-2026-11.dcpage`, `tobuy.dcpage`, `journal-<uuid>.dcpage`,
+/// `sketch-<uuid>.dcpage`).
 public final class LocalPageStore: PageStore {
     public let folder: URL
 
@@ -70,15 +77,34 @@ public final class LocalPageStore: PageStore {
         try FileManager.default.moveItem(at: source, to: target)
         return target
     }
+
+    public func delete(_ page: PlannerPage) throws {
+        do {
+            try FileManager.default.removeItem(at: url(for: page))
+        } catch let error as CocoaError where error.code == .fileNoSuchFile || error.code == .fileReadNoSuchFile {
+            return
+        }
+    }
+
+    @discardableResult
+    public func copy(_ source: PlannerPage, to target: PlannerPage) throws -> Bool {
+        guard var file = try load(source) else { return false }
+        file.metadata.page = target.description
+        try save(file, for: target)
+        return true
+    }
 }
 
 extension PlannerPage {
-    /// File name without extension: "year-2026", "month-2026-11", "tobuy".
+    /// File name without extension: "year-2026", "month-2026-11", "tobuy",
+    /// "journal-<uuid>", "sketch-<uuid>" (lowercase uuid).
     public var fileStem: String {
         switch self {
         case .year(let year): String(format: "year-%04ld", year)
         case .month(let month): "month-\(month)"
         case .toBuy: "tobuy"
+        case .journal(let id): "journal-\(id.uuidString.lowercased())"
+        case .sketch(let id): "sketch-\(id.uuidString.lowercased())"
         }
     }
 
@@ -91,6 +117,10 @@ extension PlannerPage {
             self = .month(month)
         } else if fileStem == "tobuy" {
             self = .toBuy
+        } else if fileStem.hasPrefix("journal-"), let id = UUID(uuidString: String(fileStem.dropFirst(8))) {
+            self = .journal(id)
+        } else if fileStem.hasPrefix("sketch-"), let id = UUID(uuidString: String(fileStem.dropFirst(7))) {
+            self = .sketch(id)
         } else {
             return nil
         }

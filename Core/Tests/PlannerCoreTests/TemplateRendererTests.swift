@@ -149,7 +149,7 @@ struct TemplateRendererTests {
         let directory = URL(fileURLWithPath: folder, isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let today = PlannerDate(year: 2026, month: 11, day: 10)
-        let samples: [(String, PageTemplate)] = [
+        var samples: [(String, PageTemplate)] = [
             ("month-2026-11-en", MonthPageTemplate.make(month: YearMonth(year: 2026, month: 11), locale: english, labels: .english, today: today)),
             ("month-2028-02-el", MonthPageTemplate.make(month: YearMonth(year: 2028, month: 2), locale: greek, labels: greekLabels)),
             ("month-2027-02-en", MonthPageTemplate.make(month: YearMonth(year: 2027, month: 2), locale: english, labels: .english)),
@@ -166,7 +166,33 @@ struct TemplateRendererTests {
             ("year-2028-el", YearPageTemplate.make(year: 2028, locale: greek)),
             ("tobuy-en", ToBuyPageTemplate.make(locale: english, title: "To buy")),
             ("tobuy-el", ToBuyPageTemplate.make(locale: greek, title: "Να αγοράσω")),
+            ("tobuy-el-typed", ToBuyPageTemplate.make(
+                locale: greek, title: "Να αγοράσω",
+                items: [
+                    PrintedItem(line: 1, text: "Γάλα", done: false),
+                    PrintedItem(line: 2, text: "Ψωμί ολικής άλεσης", done: true),
+                    PrintedItem(line: 4, text: "Μπαταρίες AA για το τηλεχειριστήριο της τηλεόρασης του σαλονιού", done: false),
+                    PrintedItem(line: 37, text: "Δώρο για τη Μαρία", done: false),
+                ]
+            )),
+            ("month-2026-11-en-notebooks", MonthPageTemplate.make(
+                month: YearMonth(year: 2026, month: 11), locale: english, labels: .english, today: today,
+                journalDays: [PlannerDate(year: 2026, month: 11, day: 5), PlannerDate(year: 2026, month: 11, day: 10), PlannerDate(year: 2026, month: 11, day: 21)],
+                sketchDays: [PlannerDate(year: 2026, month: 11, day: 21), PlannerDate(year: 2026, month: 11, day: 27)],
+                todos: [
+                    PrintedItem(line: 1, text: "Call the bank", done: false),
+                    PrintedItem(line: 2, text: "Book the dentist", done: true),
+                    PrintedItem(line: 5, text: "A very long to-do that will not fit on its line at all", done: false),
+                ],
+                todoOverflow: 1
+            )),
         ]
+        let heading = JournalHeading.texts(title: "", date: today, locale: greek)
+        let titled = JournalHeading.texts(title: "Ideas for the summer", date: today, locale: english)
+        for style in PaperStyle.allCases {
+            samples.append(("journal-\(style.rawValue)-el", JournalPageTemplate.make(paper: style, label: heading.label, heading: heading.heading)))
+        }
+        samples.append(("journal-lined-en-title", JournalPageTemplate.make(paper: .lined, label: titled.label, heading: titled.heading)))
         for (name, template) in samples {
             try PageBitmap(template, scale: 1.5).writePNG(to: directory.appending(path: "\(name).png"))
         }

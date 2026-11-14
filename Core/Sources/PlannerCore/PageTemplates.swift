@@ -25,6 +25,8 @@ enum Stroke {
     static let strong: CGFloat = 1.5
     static let listTop: CGFloat = 1.1
     static let mark: CGFloat = 0.9
+    /// Grid paper: thinner than the rules, or the page turns grey.
+    static let grid: CGFloat = 0.55
 }
 
 /// Letter-spacing of small capitalised labels.
@@ -37,18 +39,27 @@ enum Tracking {
 public enum MonthPageTemplate {
     /// The printed month page. `today` gets a discreet black mark when it is a day of this
     /// month. Each of `birthdays` (see `Birthday.notes`) puts a small gift in its day's cell
-    /// and a line in the notes, printed under the ink like everything else.
+    /// and a line in the notes, printed under the ink like everything else. Days in
+    /// `journalDays` (a journal page) get a small dot under their number, days in
+    /// `sketchDays` (pinned sketches) a small sketch mark in their corner that opens them.
+    /// `todos` are the typed to-dos (see `TypedLists.printed`), on the lines of the to-do
+    /// list, with a + to add more.
     public static func make(
         month: YearMonth,
         firstWeekday: Weekday = .defaultFirst,
         locale: Locale,
         labels: MonthPageLabels,
         today: PlannerDate? = nil,
-        birthdays: [BirthdayNote] = []
+        birthdays: [BirthdayNote] = [],
+        journalDays: Set<PlannerDate> = [],
+        sketchDays: Set<PlannerDate> = [],
+        todos: [PrintedItem] = [],
+        todoOverflow: Int = 0
     ) -> PageTemplate {
         let layout = MonthPageLayout(month: month, firstWeekday: firstWeekday)
         let caps = { (text: String) in PlannerText.uppercased(text, locale: locale) }
         var shapes: [TemplateShape] = []
+        var controls: [PageRegion] = []
 
         // Year and title.
         shapes.append(.text(TemplateText(
@@ -130,6 +141,20 @@ public enum MonthPageTemplate {
                     size: 14, tone: .text
                 )
             }
+            if day.isInMonth, journalDays.contains(day.date) {
+                shapes.append(.circle(
+                    center: CGPoint(x: center.x, y: cell.frame.minY + MonthPageLayout.journalDotY),
+                    radius: 2.6, fill: .text, stroke: nil, lineWidth: 0
+                ))
+            }
+            if day.isInMonth, sketchDays.contains(day.date) {
+                let mark = CGPoint(x: cell.frame.maxX - 16, y: cell.frame.maxY - 14)
+                shapes += SketchMark.shapes(center: mark, size: 15, tone: .text)
+                controls.append(PageRegion(
+                    .sketchMark(day.date),
+                    CGRect(x: mark.x - 17, y: mark.y - 17, width: 34, height: 34).intersection(cell.frame)
+                ))
+            }
         }
 
         // TO DO LIST (circles) and MEMO (plain lines across the rest of the width).
@@ -137,7 +162,21 @@ public enum MonthPageTemplate {
         shapes += list(layout.memo, label: caps(labels.memo), marker: nil)
         shapes += birthdayLines(birthdays.filter { $0.date.yearMonth == month }, in: layout.memo)
 
-        return PageTemplate(shapes: shapes, regions: layout.regions)
+        // Typed to-dos on their lines, and the + that adds one (right end of the label row).
+        let typed = TypedItemPrinter.shapes(todos, overflow: todoOverflow, rows: layout.todo.rows, section: .todo)
+        shapes += typed.shapes
+        controls += typed.controls
+        let add = addButtonRect(rightEdge: layout.todo.frame.maxX, labelBaseline: layout.todo.labelAnchor.y)
+        shapes += TypedItemPrinter.addButton(add)
+        controls.append(PageRegion(.addItem(.todo), add.insetBy(dx: -10, dy: -10)))
+
+        return PageTemplate(shapes: shapes, regions: layout.regions, controls: controls)
+    }
+
+    /// The + of a list: 20 units square, on the middle of the label's capitals, flush right.
+    static func addButtonRect(rightEdge: CGFloat, labelBaseline: CGFloat) -> CGRect {
+        let middle = labelBaseline - MonthPageLayout.labelSize * PlannerFont.capHeight / 2
+        return CGRect(x: rightEdge - 20, y: middle - 10, width: 20, height: 20)
     }
 
     enum Marker { case circle, box }
@@ -298,8 +337,10 @@ public enum YearPageTemplate {
 }
 
 public enum ToBuyPageTemplate {
-    /// The printed shopping list page: its title and two columns of lines with boxes.
-    public static func make(locale: Locale, title: String) -> PageTemplate {
+    /// The printed shopping list page: its title, a + that adds a typed item, and two
+    /// columns of lines with boxes. `items` are the typed things to buy on their lines
+    /// (see `TypedLists.printed`).
+    public static func make(locale: Locale, title: String, items: [PrintedItem] = [], overflow: Int = 0) -> PageTemplate {
         let layout = ToBuyPageLayout()
         var shapes: [TemplateShape] = [.text(TemplateText(
             PlannerText.uppercased(title, locale: locale), font: .bold, size: ToBuyPageLayout.titleSize,
@@ -318,7 +359,15 @@ public enum ToBuyPageTemplate {
             ))
             shapes += MonthPageTemplate.markerShapes(.box, in: row)
         }
-        return PageTemplate(shapes: shapes, regions: layout.regions)
+
+        let typed = TypedItemPrinter.shapes(items, overflow: overflow, rows: layout.rows, section: .tobuy)
+        shapes += typed.shapes
+        // The + sits on the middle of the title's capitals, flush right, like the WEEKLY buttons.
+        let middle = layout.titleAnchor.y - ToBuyPageLayout.titleSize * PlannerFont.capHeight / 2
+        let add = CGRect(x: layout.frame.maxX - 26, y: middle - 13, width: 26, height: 26)
+        shapes += TypedItemPrinter.addButton(add)
+        let controls = typed.controls + [PageRegion(.addItem(.tobuy), add.insetBy(dx: -9, dy: -9))]
+        return PageTemplate(shapes: shapes, regions: layout.regions, controls: controls)
     }
 }
 

@@ -145,8 +145,9 @@ struct PageTemplateTests {
         let template = ToBuyPageTemplate.make(locale: greek, title: "Να αγοράσω")
         #expect(template.texts.map(\.string) == ["ΝΑ ΑΓΟΡΑΣΩ"])
         let layout = ToBuyPageLayout()
+        // A box per line, and the + button.
         let boxes = template.shapes.filter { if case .rect = $0 { true } else { false } }
-        #expect(boxes.count == layout.rows.count)
+        #expect(boxes.count == layout.rows.count + 1)
         #expect(layout.rows.count == ToBuyPageLayout.rowsPerColumn * ToBuyPageLayout.columnCount)
         #expect(template.region(.title) != nil)
         #expect(template.region(.section(.tobuy))?.rect == layout.frame)

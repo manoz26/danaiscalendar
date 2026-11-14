@@ -133,9 +133,9 @@ final class ScreenshotTests: XCTestCase {
         let app = launch(language: language, region: region)
         waitForOrientation(app, landscape: false)
 
-        let settingsButton = app.buttons["settings.button"]
-        XCTAssertTrue(settingsButton.waitForExistence(timeout: 15), "Settings button did not appear")
-        settingsButton.tap()
+        // On iPhone the gear is in the … menu of the top bar.
+        XCTAssertTrue(app.buttons["nav.today"].waitForExistence(timeout: 15), "The top bar did not appear")
+        tapBarButton(app, "settings.button", label: language == "el" ? "Ρυθμίσεις" : "Settings")
 
         let version = app.buttons["settings.version"]
         XCTAssertTrue(version.waitForExistence(timeout: 10), "Settings did not open")

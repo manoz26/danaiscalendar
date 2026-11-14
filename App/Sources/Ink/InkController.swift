@@ -42,6 +42,11 @@ final class InkController {
 
     /// A finger tap on the page, in canvas units.
     @ObservationIgnored var onTap: ((CGPoint) -> Void)?
+    /// A long press of a finger on the page (e.g. on a day, to open its journal page), in canvas units.
+    @ObservationIgnored var onLongPress: ((CGPoint) -> Void)?
+    /// A finger swiped across the page while it is not zoomed in: 1 to the next page
+    /// (swipe to the left), -1 to the previous one.
+    @ObservationIgnored var onSwipe: ((Int) -> Void)?
 
     private let library: InkLibrary
     private let helper = CanvasHelper()
@@ -81,6 +86,27 @@ final class InkController {
         tap.cancelsTouchesInView = false
         tap.delegate = helper
         canvas.addGestureRecognizer(tap)
+
+        // A long press (a day opens its journal page) and a swipe (turning journal pages)
+        // listen the same way. The tap waits for the long press to fail, which happens as
+        // soon as a short tap ends, so a long press never also counts as a tap.
+        let longPress = UILongPressGestureRecognizer(target: helper, action: #selector(CanvasHelper.longPressed(_:)))
+        longPress.minimumPressDuration = 0.5
+        longPress.delaysTouchesBegan = false
+        longPress.delaysTouchesEnded = false
+        longPress.cancelsTouchesInView = false
+        longPress.delegate = helper
+        canvas.addGestureRecognizer(longPress)
+        tap.require(toFail: longPress)
+        for direction: UISwipeGestureRecognizer.Direction in [.left, .right] {
+            let swipe = UISwipeGestureRecognizer(target: helper, action: #selector(CanvasHelper.swiped(_:)))
+            swipe.direction = direction
+            swipe.delaysTouchesBegan = false
+            swipe.delaysTouchesEnded = false
+            swipe.cancelsTouchesInView = false
+            swipe.delegate = helper
+            canvas.addGestureRecognizer(swipe)
+        }
 
         if self.canDraw {
             let pencil = UIPencilInteraction()
@@ -123,6 +149,38 @@ final class InkController {
         drawWithFinger = on
         canvas.drawingPolicy = on ? .anyInput : .pencilOnly
         AppLog.info("Drawing with finger: \(on ? "on" : "off")")
+    }
+
+    /// Reads pages in the background so they open instantly (e.g. the journal pages next
+    /// to the open one).
+    func preload(_ pages: [PlannerPage]) {
+        library.preload(pages)
+    }
+
+    /// The ink of any page, in canvas units (thumbnails, exports).
+    func drawing(of page: PlannerPage) -> PKDrawing {
+        library.peekDrawing(for: page)
+    }
+
+    func hasInk(_ page: PlannerPage) -> Bool {
+        !library.peekDrawing(for: page).strokes.isEmpty
+    }
+
+    /// The regions of a page that have ink (the region of each stroke, see `InkAnchor`).
+    func inkedRegions(of page: PlannerPage, template: PageTemplate) -> Set<RegionID> {
+        Set(library.peekDrawing(for: page).strokes.compactMap { stroke in
+            InkAnchor.region(forStrokeBounds: stroke.renderBounds, in: template)
+        })
+    }
+
+    /// A journal page or sketch was deleted: its ink goes too. It must not be the open page.
+    func deleteInk(of page: PlannerPage) {
+        library.forget(page)
+    }
+
+    /// A duplicated journal page gets a copy of the original's ink.
+    func copyInk(from source: PlannerPage, to target: PlannerPage) {
+        library.copy(source, to: target)
     }
 
     /// Writes unsaved ink to disk before returning (the app is going to the background).
@@ -214,6 +272,17 @@ final class InkController {
     fileprivate func tapped(_ recognizer: UITapGestureRecognizer) {
         guard recognizer.state == .ended else { return }
         onTap?(canvas.canvasLocation(of: recognizer))
+    }
+
+    fileprivate func longPressed(_ recognizer: UILongPressGestureRecognizer) {
+        guard recognizer.state == .began else { return }
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        onLongPress?(canvas.canvasLocation(of: recognizer))
+    }
+
+    fileprivate func swiped(_ recognizer: UISwipeGestureRecognizer) {
+        guard recognizer.state == .ended, !canvas.isZoomedIn else { return }
+        onSwipe?(recognizer.direction == .left ? 1 : -1)
     }
 
     /// Double tap (Apple Pencil 2, Pro) and squeeze (Pro), as chosen in the iPad's
@@ -414,17 +483,29 @@ private final class CanvasHelper: NSObject, PKCanvasViewDelegate, UIGestureRecog
         controller?.tapped(recognizer)
     }
 
+    @objc func longPressed(_ recognizer: UILongPressGestureRecognizer) {
+        controller?.longPressed(recognizer)
+    }
+
+    @objc func swiped(_ recognizer: UISwipeGestureRecognizer) {
+        controller?.swiped(recognizer)
+    }
+
     /// The Apple Pencil writes; only fingers tap (a dot on a month title must not open it).
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
         touch.type != .pencil
     }
 
-    /// With "Draw with finger too", a finger tap may also start a stroke.
+    /// With "Draw with finger too", a finger tap may also start a stroke. A long press and
+    /// a swipe only listen: they never stop scrolling, zooming or drawing.
     func gestureRecognizer(
         _ gestureRecognizer: UIGestureRecognizer,
         shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
     ) -> Bool {
-        otherGestureRecognizer === (gestureRecognizer.view as? PKCanvasView)?.drawingGestureRecognizer
+        if gestureRecognizer is UILongPressGestureRecognizer || gestureRecognizer is UISwipeGestureRecognizer {
+            return true
+        }
+        return otherGestureRecognizer === (gestureRecognizer.view as? PKCanvasView)?.drawingGestureRecognizer
     }
 
     /// iOS 17.0–17.4.

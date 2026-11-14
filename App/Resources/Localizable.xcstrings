@@ -19,6 +19,24 @@
         }
       }
     },
+    "A day with a page gets a small dot on the month page. Hold a finger on a day to open its page." : {
+      "comment" : "Footer under the date of a journal page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μια μέρα με σελίδα έχει μια μικρή κουκκίδα στη σελίδα του μήνα. Κράτα το δάχτυλο πάνω σε μια μέρα για να ανοίξει η σελίδα της."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A day with a page gets a small dot on the month page. Hold a finger on a day to open its page."
+          }
+        }
+      }
+    },
     "About" : {
       "comment" : "Settings section header.",
       "extractionState" : "manual",
@@ -37,6 +55,42 @@
         }
       }
     },
+    "Add a typed item" : {
+      "comment" : "VoiceOver: the printed + at the top of the To Buy page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πληκτρολόγηση στο «Να αγοράσω»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a typed item"
+          }
+        }
+      }
+    },
+    "Add a typed to-do" : {
+      "comment" : "VoiceOver: the printed + next to the to-do list of the month page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πληκτρολόγηση στο «Να κάνω»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a typed to-do"
+          }
+        }
+      }
+    },
     "Add birthday" : {
       "comment" : "VoiceOver label of the + button in the birthdays list.",
       "extractionState" : "manual",
@@ -51,6 +105,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Add birthday"
+          }
+        }
+      }
+    },
+    "All pages" : {
+      "comment" : "Top bar button on a journal page: all the journal's pages as small pictures.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Όλες οι σελίδες"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All pages"
           }
         }
       }
@@ -159,6 +231,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Black"
+          }
+        }
+      }
+    },
+    "Blank" : {
+      "comment" : "Paper of a journal page: nothing printed.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κενό"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blank"
           }
         }
       }
@@ -289,6 +379,24 @@
         }
       }
     },
+    "Delete page" : {
+      "comment" : "Button that deletes a journal page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Διαγραφή σελίδας"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete page"
+          }
+        }
+      }
+    },
     "Delete this birthday?" : {
       "comment" : "Question before deleting a birthday.",
       "extractionState" : "manual",
@@ -303,6 +411,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delete this birthday?"
+          }
+        }
+      }
+    },
+    "Delete this page?" : {
+      "comment" : "Confirmation before deleting a journal page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Διαγραφή αυτής της σελίδας;"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this page?"
+          }
+        }
+      }
+    },
+    "Delete this sketch?" : {
+      "comment" : "Confirmation before deleting a sketch.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Διαγραφή αυτού του σκίτσου;"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this sketch?"
           }
         }
       }
@@ -343,6 +487,24 @@
         }
       }
     },
+    "Dotted" : {
+      "comment" : "Paper of a journal page: dots.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τελείες"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dotted"
+          }
+        }
+      }
+    },
     "Draw with finger too" : {
       "comment" : "Settings switch: a finger writes on the page like the Apple Pencil.",
       "extractionState" : "manual",
@@ -357,6 +519,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Draw with finger too"
+          }
+        }
+      }
+    },
+    "Duplicate" : {
+      "comment" : "Menu of a journal page in the pages grid: a copy right after it.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αντιγραφή"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duplicate"
           }
         }
       }
@@ -469,6 +649,24 @@
         }
       }
     },
+    "Grid" : {
+      "comment" : "Paper of a journal page: squares.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Καρέ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grid"
+          }
+        }
+      }
+    },
     "Hide tools" : {
       "comment" : "Toolbar: folds the tool bar to a small button (VoiceOver).",
       "extractionState" : "manual",
@@ -541,6 +739,114 @@
         }
       }
     },
+    "Image" : {
+      "comment" : "Share menu: the page as a picture.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εικόνα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Image"
+          }
+        }
+      }
+    },
+    "Item" : {
+      "comment" : "Placeholder of a typed to-do or thing to buy whose text was erased.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Στοιχείο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Item"
+          }
+        }
+      }
+    },
+    "Its handwriting is deleted too." : {
+      "comment" : "Message of the confirmation before deleting a journal page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σβήνεται και ό,τι έχεις γράψει πάνω της."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Its handwriting is deleted too."
+          }
+        }
+      }
+    },
+    "Journal" : {
+      "comment" : "The journal ('Τετράδιο'): free pages to write on. Top bar button, printed in capitals.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τετράδιο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Journal"
+          }
+        }
+      }
+    },
+    "Journal page" : {
+      "comment" : "VoiceOver: this day has a journal page (it shows a dot).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σελίδα τετραδίου"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Journal page"
+          }
+        }
+      }
+    },
+    "Journal page %lld" : {
+      "comment" : "VoiceOver: a page of the journal, e.g. 'Journal page 3'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σελίδα τετραδίου %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Journal page %lld"
+          }
+        }
+      }
+    },
     "Lasso" : {
       "comment" : "Toolbar: the lasso tool that selects ink to move it (VoiceOver).",
       "extractionState" : "manual",
@@ -555,6 +861,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lasso"
+          }
+        }
+      }
+    },
+    "Lined" : {
+      "comment" : "Paper of a journal page: lines.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Γραμμές"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lined"
           }
         }
       }
@@ -667,6 +991,60 @@
         }
       }
     },
+    "More" : {
+      "comment" : "VoiceOver: the … button of the top bar on narrow screens.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Περισσότερα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More"
+          }
+        }
+      }
+    },
+    "Move earlier" : {
+      "comment" : "Menu of a journal page in the pages grid.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μετακίνηση πιο μπροστά"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move earlier"
+          }
+        }
+      }
+    },
+    "Move later" : {
+      "comment" : "Menu of a journal page in the pages grid.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μετακίνηση πιο πίσω"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move later"
+          }
+        }
+      }
+    },
     "Move tools" : {
       "comment" : "Toolbar: the grip that drags the tool bar to the other side (VoiceOver).",
       "extractionState" : "manual",
@@ -739,6 +1117,60 @@
         }
       }
     },
+    "New item" : {
+      "comment" : "Placeholder of the field that adds a typed to-do or thing to buy.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Νέο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New item"
+          }
+        }
+      }
+    },
+    "New page" : {
+      "comment" : "Top bar button on a journal page: a new journal page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Νέα σελίδα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New page"
+          }
+        }
+      }
+    },
+    "New sketch" : {
+      "comment" : "Top bar button: a new blank sketch at once.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Νέο σκίτσο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New sketch"
+          }
+        }
+      }
+    },
     "Next month" : {
       "comment" : "Arrow button on a month page.",
       "extractionState" : "manual",
@@ -753,6 +1185,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Next month"
+          }
+        }
+      }
+    },
+    "Next page" : {
+      "comment" : "VoiceOver: the right arrow of the top bar on a journal page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επόμενη σελίδα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next page"
           }
         }
       }
@@ -793,6 +1243,60 @@
         }
       }
     },
+    "No free line on the page" : {
+      "comment" : "Under a typed item that could not be printed: every line of the page has handwriting or another item.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δεν υπάρχει ελεύθερη γραμμή στη σελίδα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No free line on the page"
+          }
+        }
+      }
+    },
+    "No pages yet" : {
+      "comment" : "Empty journal.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Καμία σελίδα ακόμα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pages yet"
+          }
+        }
+      }
+    },
+    "No sketches yet" : {
+      "comment" : "Empty sketches grid.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κανένα σκίτσο ακόμα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No sketches yet"
+          }
+        }
+      }
+    },
     "Not signed in" : {
       "comment" : "Diagnostics check result: no iCloud account on the device.",
       "extractionState" : "manual",
@@ -807,6 +1311,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Not signed in"
+          }
+        }
+      }
+    },
+    "Not ticked" : {
+      "comment" : "VoiceOver: a typed to-do or thing to buy is not ticked yet.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δεν έγινε"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not ticked"
           }
         }
       }
@@ -847,6 +1369,132 @@
         }
       }
     },
+    "Optional" : {
+      "comment" : "Placeholder of a journal page's title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προαιρετικό"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional"
+          }
+        }
+      }
+    },
+    "Page" : {
+      "comment" : "Title of a journal page's details (title, paper, date).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σελίδα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Page"
+          }
+        }
+      }
+    },
+    "Page %lld" : {
+      "comment" : "Caption of a journal page without title or date in the pages grid, e.g. 'Page 3'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σελίδα %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Page %lld"
+          }
+        }
+      }
+    },
+    "Page title, paper and date" : {
+      "comment" : "Top bar button on a journal page: its title, paper and date.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τίτλος, χαρτί και ημερομηνία"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Page title, paper and date"
+          }
+        }
+      }
+    },
+    "Pages written on the iPad appear here." : {
+      "comment" : "Empty journal on iPhone.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι σελίδες που γράφεις στο iPad εμφανίζονται εδώ."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pages written on the iPad appear here."
+          }
+        }
+      }
+    },
+    "Paper" : {
+      "comment" : "A journal page's paper: blank, lined, grid or dotted.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Χαρτί"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paper"
+          }
+        }
+      }
+    },
+    "PDF" : {
+      "comment" : "Share menu: the page as a PDF file.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF"
+          }
+        }
+      }
+    },
     "Pen" : {
       "comment" : "Toolbar: the pen tool (VoiceOver).",
       "extractionState" : "manual",
@@ -883,6 +1531,42 @@
         }
       }
     },
+    "Pin" : {
+      "comment" : "Confirms pinning a sketch to the chosen day.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Καρφίτσωμα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pin"
+          }
+        }
+      }
+    },
+    "Pin to a day" : {
+      "comment" : "Pins a sketch to a day of the calendar (button and title).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Καρφίτσωμα σε μέρα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pin to a day"
+          }
+        }
+      }
+    },
     "Pink" : {
       "comment" : "Toolbar: ink colour (VoiceOver).",
       "extractionState" : "manual",
@@ -901,6 +1585,42 @@
         }
       }
     },
+    "Pinned sketch" : {
+      "comment" : "VoiceOver: one sketch is pinned to this day.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Καρφιτσωμένο σκίτσο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pinned sketch"
+          }
+        }
+      }
+    },
+    "Pinned sketches: %lld" : {
+      "comment" : "VoiceOver: how many sketches are pinned to this day.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Καρφιτσωμένα σκίτσα: %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pinned sketches: %lld"
+          }
+        }
+      }
+    },
     "Previous month" : {
       "comment" : "Arrow button on a month page.",
       "extractionState" : "manual",
@@ -915,6 +1635,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Previous month"
+          }
+        }
+      }
+    },
+    "Previous page" : {
+      "comment" : "VoiceOver: the left arrow of the top bar on a journal page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προηγούμενη σελίδα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previous page"
           }
         }
       }
@@ -1045,6 +1783,24 @@
         }
       }
     },
+    "Share page" : {
+      "comment" : "Top bar button: share the open page as a PDF or an image.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κοινοποίηση σελίδας"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share page"
+          }
+        }
+      }
+    },
     "Show tools" : {
       "comment" : "Toolbar: unfolds the tool bar (VoiceOver).",
       "extractionState" : "manual",
@@ -1063,6 +1819,132 @@
         }
       }
     },
+    "Sketch" : {
+      "comment" : "A sketch (a blank page from the sketch button): VoiceOver name of the page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σκίτσο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sketch"
+          }
+        }
+      }
+    },
+    "Sketches" : {
+      "comment" : "The sketches: top bar button (printed in capitals) and title of their grid.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σκίτσα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sketches"
+          }
+        }
+      }
+    },
+    "Sketches drawn on the iPad appear here." : {
+      "comment" : "Empty sketches grid on iPhone.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα σκίτσα που φτιάχνεις στο iPad εμφανίζονται εδώ."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sketches drawn on the iPad appear here."
+          }
+        }
+      }
+    },
+    "Sketches of %@" : {
+      "comment" : "Sketches pinned to a day: VoiceOver name of the sketch mark in a day, and title of their grid, e.g. 'Sketches of Mar 21, 2029'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σκίτσα: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sketches of %@"
+          }
+        }
+      }
+    },
+    "Swipe an item to delete it." : {
+      "comment" : "Footer of a typed list with items.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σύρε ένα στοιχείο προς τα αριστερά για να το σβήσεις."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swipe an item to delete it."
+          }
+        }
+      }
+    },
+    "Tap + (or the sketch button in the top bar) for a blank page." : {
+      "comment" : "Empty sketches grid on iPad.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πάτα + (ή το κουμπί σκίτσου στην πάνω μπάρα) για μια λευκή σελίδα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap + (or the sketch button in the top bar) for a blank page."
+          }
+        }
+      }
+    },
+    "Tap + for a new page." : {
+      "comment" : "Empty journal on iPad.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πάτα + για νέα σελίδα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap + for a new page."
+          }
+        }
+      }
+    },
     "Tap + to add a friend's name and birthday. Its day gets a small gift on the month page, with a line in the notes." : {
       "comment" : "Birthdays list when it is empty, under 'No birthdays yet'.",
       "extractionState" : "manual",
@@ -1077,6 +1959,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tap + to add a friend's name and birthday. Its day gets a small gift on the month page, with a line in the notes."
+          }
+        }
+      }
+    },
+    "The day gets a small sketch mark on the month page. Tap the mark to open the sketch." : {
+      "comment" : "Footer of the day picker that pins a sketch.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η μέρα παίρνει ένα μικρό σημάδι σκίτσου στη σελίδα του μήνα. Πάτα το σημάδι για να ανοίξει το σκίτσο."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The day gets a small sketch mark on the month page. Tap the mark to open the sketch."
+          }
+        }
+      }
+    },
+    "The handwriting stays where it is when the paper changes." : {
+      "comment" : "Footer under the paper choices of a journal page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ό,τι έχεις γράψει μένει στη θέση του όταν αλλάζει το χαρτί."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The handwriting stays where it is when the paper changes."
           }
         }
       }
@@ -1153,6 +2071,42 @@
         }
       }
     },
+    "Ticked" : {
+      "comment" : "VoiceOver: a typed to-do or thing to buy is ticked (done).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Έγινε"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ticked"
+          }
+        }
+      }
+    },
+    "Title" : {
+      "comment" : "A journal page's title (header and field label).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τίτλος"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Title"
+          }
+        }
+      }
+    },
     "To buy" : {
       "comment" : "Title of the shopping list page (printed in capitals) and VoiceOver label of the bag button in the top bar.",
       "extractionState" : "manual",
@@ -1207,6 +2161,24 @@
         }
       }
     },
+    "To-dos for %@" : {
+      "comment" : "Title of the typed to-dos of a month, e.g. 'To-dos for November 2026'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Να κάνω — %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To-dos for %@"
+          }
+        }
+      }
+    },
     "Today" : {
       "comment" : "Button that opens the current month.",
       "extractionState" : "manual",
@@ -1243,6 +2215,24 @@
         }
       }
     },
+    "Typed items are printed on the page's lines, under your handwriting. Tap the circle or box on the page to tick one." : {
+      "comment" : "Footer of an empty typed list.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ό,τι πληκτρολογείς τυπώνεται στις γραμμές της σελίδας, κάτω από τα γράμματά σου. Πάτα το κυκλάκι ή το κουτάκι στη σελίδα για να το τσεκάρεις."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Typed items are printed on the page's lines, under your handwriting. Tap the circle or box on the page to tick one."
+          }
+        }
+      }
+    },
     "Unavailable" : {
       "comment" : "Diagnostics check result: does not work.",
       "extractionState" : "manual",
@@ -1275,6 +2265,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Undo"
+          }
+        }
+      }
+    },
+    "Unpin" : {
+      "comment" : "Removes a sketch from the day it was pinned to.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ξεκαρφίτσωμα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unpin"
           }
         }
       }
@@ -1383,6 +2391,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "You can also write the name with Apple Pencil: it turns into text."
+          }
+        }
+      }
+    },
+    "You can also write the title with Apple Pencil: it turns into text." : {
+      "comment" : "Footer under a journal page's title on iPad.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μπορείς να γράψεις τον τίτλο και με το Apple Pencil: γίνεται κείμενο."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can also write the title with Apple Pencil: it turns into text."
           }
         }
       }

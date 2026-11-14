@@ -54,6 +54,8 @@ public struct MonthPageLayout: Sendable {
 
     /// Centre of a day number, from the top-left corner of its cell.
     public static let dayNumberOffset = CGPoint(x: 21, y: 21)
+    /// Height of the dot of a day with a journal page, from the top of its cell (under the number).
+    public static let journalDotY: CGFloat = 41
 
     // MARK: Layout
 

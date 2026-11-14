@@ -6,6 +6,10 @@ struct DanaisCalendarApp: App {
     @State private var ink: InkController
     /// Friends' birthdays, shown on the month pages.
     @State private var birthdays: BirthdayBook
+    /// The journal's pages, the sketches and the typed lists.
+    @State private var journal: JournalBook
+    @State private var sketches: SketchBook
+    @State private var lists: ListBook
 
     init() {
         Chrome.apply()
@@ -19,11 +23,22 @@ struct DanaisCalendarApp: App {
         birthdays.addSamplesIfRequested()
         #endif
         _birthdays = State(initialValue: birthdays)
+        let journal = JournalBook()
+        let sketches = SketchBook()
+        let lists = ListBook()
+        #if DEBUG
+        journal.addSamplesIfRequested()
+        sketches.addSamplesIfRequested()
+        lists.addSamplesIfRequested()
+        #endif
+        _journal = State(initialValue: journal)
+        _sketches = State(initialValue: sketches)
+        _lists = State(initialValue: lists)
     }
 
     var body: some Scene {
         WindowGroup {
-            RootView(ink: ink, birthdays: birthdays)
+            RootView(ink: ink, birthdays: birthdays, journal: journal, sketches: sketches, lists: lists)
         }
     }
 }

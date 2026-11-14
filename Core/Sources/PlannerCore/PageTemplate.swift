@@ -8,11 +8,27 @@ import Foundation
 /// same on screen, in an image and in a PDF.
 public struct PageTemplate: Sendable, Equatable {
     public var shapes: [TemplateShape]
+    /// The fixed areas of the layout. The ink is anchored to them (`InkAnchor`).
     public var regions: [PageRegion]
+    /// Printed things a finger taps that come and go with her data (the + buttons, the
+    /// boxes of typed items, sketch marks). Never used to anchor ink.
+    public var controls: [PageRegion]
 
-    public init(shapes: [TemplateShape] = [], regions: [PageRegion] = []) {
+    public init(shapes: [TemplateShape] = [], regions: [PageRegion] = [], controls: [PageRegion] = []) {
         self.shapes = shapes
         self.regions = regions
+        self.controls = controls
+    }
+
+    /// The control under a point, if any (the smallest one first).
+    public func control(at point: CGPoint) -> PageRegion? {
+        controls
+            .filter { $0.rect.contains(point) }
+            .min { $0.rect.width * $0.rect.height < $1.rect.width * $1.rect.height }
+    }
+
+    public func control(_ id: RegionID) -> PageRegion? {
+        controls.first { $0.id == id }
     }
 
     public func region(_ id: RegionID) -> PageRegion? {
@@ -50,6 +66,8 @@ public struct PageRegion: Sendable, Equatable {
 public enum RegionID: Hashable, Sendable, CustomStringConvertible {
     public enum Section: String, Sendable, CaseIterable {
         case goals, todo, memo, tobuy
+        /// The writing area of a journal page or a sketch.
+        case body
     }
 
     /// The page title ("NOVEMBER", "2026", "TO BUY").
@@ -72,6 +90,12 @@ public enum RegionID: Hashable, Sendable, CustomStringConvertible {
     case monthTitle(YearMonth)
     /// Year page: the grey notes box under a small month.
     case monthNotes(YearMonth)
+    /// Control: the printed + that adds a typed item to the to-do list or the To Buy page.
+    case addItem(Section)
+    /// Control: the circle or box of a typed item on a line, numbered from 1.
+    case itemMarker(Section, Int)
+    /// Control: the small mark of the sketches pinned to a day (month page).
+    case sketchMark(PlannerDate)
 
     public var description: String {
         switch self {
@@ -85,6 +109,9 @@ public enum RegionID: Hashable, Sendable, CustomStringConvertible {
         case .month(let month): "month:\(month)"
         case .monthTitle(let month): "month-title:\(month)"
         case .monthNotes(let month): "notes:\(month)"
+        case .addItem(let section): "add:\(section.rawValue)"
+        case .itemMarker(let section, let line): "check:\(section.rawValue):\(line)"
+        case .sketchMark(let date): "sketches:\(date)"
         }
     }
 
@@ -107,6 +134,13 @@ public enum RegionID: Hashable, Sendable, CustomStringConvertible {
         case "month": guard let month = YearMonth(value) else { return nil }; self = .month(month)
         case "month-title": guard let month = YearMonth(value) else { return nil }; self = .monthTitle(month)
         case "notes": guard let month = YearMonth(value) else { return nil }; self = .monthNotes(month)
+        case "add": guard let section = Section(rawValue: value) else { return nil }; self = .addItem(section)
+        case "check":
+            let parts = value.split(separator: ":")
+            guard parts.count == 2, let section = Section(rawValue: String(parts[0])),
+                  let line = Int(parts[1]), line > 0 else { return nil }
+            self = .itemMarker(section, line)
+        case "sketches": guard let date = PlannerDate(value) else { return nil }; self = .sketchMark(date)
         default: return nil
         }
     }

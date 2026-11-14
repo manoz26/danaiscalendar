@@ -132,6 +132,8 @@ public struct PageLayoutStamp: Sendable, Equatable {
         case .year: PageLayoutStamp(name: "year-v1", firstWeekday: firstWeekday)
         case .month: PageLayoutStamp(name: "month-v2", firstWeekday: firstWeekday)
         case .toBuy: PageLayoutStamp(name: "tobuy-v1", firstWeekday: firstWeekday)
+        case .journal: PageLayoutStamp(name: "journal-v1", firstWeekday: firstWeekday)
+        case .sketch: PageLayoutStamp(name: "sketch-v1", firstWeekday: firstWeekday)
         }
     }
 }

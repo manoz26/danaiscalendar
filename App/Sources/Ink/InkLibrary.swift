@@ -61,6 +61,30 @@ final class PageFiles: Sendable {
         queue.sync {}
     }
 
+    /// Deletes a page's file, after any save still in flight (a deleted journal page or sketch).
+    func delete(_ page: PlannerPage) {
+        let store = store
+        queue.async {
+            do {
+                try store.delete(page)
+            } catch {
+                AppLog.error("Could not delete page \(page.fileStem)", error)
+            }
+        }
+    }
+
+    /// Copies a page's file to another page, after any save still in flight (a duplicated journal page).
+    func copy(_ source: PlannerPage, to target: PlannerPage) {
+        let store = store
+        queue.async {
+            do {
+                try store.copy(source, to: target)
+            } catch {
+                AppLog.error("Could not copy page \(source.fileStem)", error)
+            }
+        }
+    }
+
     private static func read(_ page: PlannerPage, from store: LocalPageStore) -> DrawingBox {
         do {
             guard let file = try store.load(page) else { return DrawingBox(drawing: PKDrawing()) }
@@ -161,6 +185,30 @@ final class InkLibrary {
         entries[page] = entry
         touch(page)
         scheduleSave(page)
+    }
+
+    /// The ink of a page in canvas units, without making it the open page or keeping it in
+    /// memory (thumbnails, exports, the lines taken by handwriting).
+    func peekDrawing(for page: PlannerPage) -> PKDrawing {
+        if let entry = entries[page] {
+            return Self.rescaled(entry.drawing, from: entry.scale, to: 1)
+        }
+        return files.loadNow(page)
+    }
+
+    /// Forgets a deleted page: its ink in memory, any pending save, and its file.
+    func forget(_ page: PlannerPage) {
+        saveTasks[page]?.cancel()
+        saveTasks[page] = nil
+        entries[page] = nil
+        files.delete(page)
+    }
+
+    /// Copies a page's ink (saved first) to a new page.
+    func copy(_ source: PlannerPage, to target: PlannerPage) {
+        save(source)
+        entries[target] = nil
+        files.copy(source, to: target)
     }
 
     /// Reads pages in the background so they open instantly.

@@ -99,6 +99,107 @@ extension XCTestCase {
     }
 }
 
+/// Ink on screen (helpers shared by the ink and notebook tests).
+extension XCTestCase {
+    // MARK: - Checking ink on screen
+
+    /// Checks every target that is fully on screen: the red rectangle the app drew 20% inside
+    /// it must be found there, edge for edge.
+    @MainActor
+    func checkInk(_ app: XCUIApplication, page pageID: String, targets: [String], minimum: Int) {
+        let page = element(app, pageID)
+        XCTAssertTrue(page.waitForExistence(timeout: 5), "\(pageID) was not found")
+        let visible = page.frame.intersection(app.windows.firstMatch.frame)
+        let pixels = ScreenPixels(XCUIScreen.main.screenshot())
+        XCTAssertEqual(pixels.size.width, app.windows.firstMatch.frame.width, accuracy: 1, "Screenshot and window differ: \(pixels.size)")
+        let toolbar = element(app, "toolbar")
+        let excluded = toolbar.exists ? [toolbar.frame.insetBy(dx: -4, dy: -4)] : []
+
+        var checked: [String] = []
+        for id in targets {
+            let target = element(app, id)
+            XCTAssertTrue(target.exists, "\(id) was not found")
+            let frame = target.frame
+            let expected = frame.insetBy(dx: frame.width * 0.2, dy: frame.height * 0.2)
+            guard visible.insetBy(dx: -1, dy: -1).contains(frame),
+                  !excluded.contains(where: { $0.intersects(expected.insetBy(dx: -8, dy: -8)) }) else { continue }
+            guard let found = pixels.redBounds(in: frame.insetBy(dx: -12, dy: -12), excluding: excluded) else {
+                XCTFail("No ink found in \(id) (\(frame))")
+                continue
+            }
+            // The stroke's own width, plus a little: a misplaced stroke is off by much more.
+            let tolerance = 4 + 0.05 * min(frame.width, frame.height)
+            let off = [
+                abs(found.minX - expected.minX), abs(found.maxX - expected.maxX),
+                abs(found.minY - expected.minY), abs(found.maxY - expected.maxY),
+            ].max() ?? 0
+            XCTAssertLessThanOrEqual(
+                off, tolerance,
+                "Ink in \(id) at \(found), expected \(expected) (off by \(off), allowed \(tolerance)). \(element(app, "debug.inkGeometry").label)"
+            )
+            checked.append(id)
+        }
+        XCTAssertGreaterThanOrEqual(checked.count, minimum, "Too few boxes on screen to check: \(checked)")
+    }
+
+    /// No red ink on the page outside the boxes that have their own sample ink (ink of the
+    /// previous page left on screen would be).
+    @MainActor
+    func checkNoInkOutside(_ app: XCUIApplication, page pageID: String, targets: [String]) {
+        let page = element(app, pageID)
+        XCTAssertTrue(page.waitForExistence(timeout: 5), "\(pageID) was not found")
+        let visible = page.frame.intersection(app.windows.firstMatch.frame)
+        let toolbar = element(app, "toolbar")
+        var excluded = targets.map { element(app, $0).frame.insetBy(dx: -14, dy: -14) }
+        if toolbar.exists {
+            excluded.append(toolbar.frame.insetBy(dx: -4, dy: -4))
+        }
+        let stray = ScreenPixels(XCUIScreen.main.screenshot()).redBounds(in: visible, excluding: excluded)
+        XCTAssertNil(stray, "Ink of another page left on screen at \(String(describing: stray)). \(element(app, "debug.inkGeometry").label)")
+    }
+
+    @MainActor
+    func redBounds(_ app: XCUIApplication, in rect: CGRect) -> CGRect? {
+        let toolbar = element(app, "toolbar")
+        let excluded = toolbar.exists ? [toolbar.frame.insetBy(dx: -4, dy: -4)] : []
+        return ScreenPixels(XCUIScreen.main.screenshot()).redBounds(in: rect, excluding: excluded)
+    }
+
+    /// Taps a button of the top bar, or the same button in the "…" menu when the bar is
+    /// too narrow for it (iPhone). Menu items are found by identifier, else by label.
+    @MainActor
+    func tapBarButton(_ app: XCUIApplication, _ identifier: String, label: String) {
+        let direct = app.buttons[identifier]
+        if direct.waitForExistence(timeout: 4), direct.isHittable {
+            direct.tap()
+            return
+        }
+        let more = app.buttons["nav.more"]
+        XCTAssertTrue(more.waitForExistence(timeout: 5), "\(identifier) is not in the bar and there is no … menu")
+        more.tap()
+        var item = app.buttons[identifier]
+        if !item.waitForExistence(timeout: 3) || !item.isHittable {
+            item = app.buttons[label]
+        }
+        XCTAssertTrue(item.waitForExistence(timeout: 5), "\(label) is not in the … menu")
+        item.tap()
+    }
+
+    /// Holds a finger on something printed on the page.
+    @MainActor
+    func longPressOnPage(_ app: XCUIApplication, _ identifier: String) {
+        let target = element(app, identifier)
+        XCTAssertTrue(target.waitForExistence(timeout: 10), "\(identifier) did not appear")
+        target.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.6)).press(forDuration: 1.0)
+    }
+
+    /// The accessibility value of a page item, or "" when it has none.
+    @MainActor
+    func value(_ app: XCUIApplication, _ identifier: String) -> String {
+        element(app, identifier).value as? String ?? ""
+    }
+}
+
 /// The pixels of a screenshot, upright, in sRGB, addressed in points like element frames.
 struct ScreenPixels {
     let size: CGSize

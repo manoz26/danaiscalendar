@@ -18,7 +18,7 @@ jobs:
     name: Build, test, screenshots
     # Preview image with the newest stable Xcode. If it queues or misbehaves, use macos-26.
     runs-on: xcode-27
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       PROJECT: DanaisCalendar.xcodeproj
       SCHEME: DanaisCalendar

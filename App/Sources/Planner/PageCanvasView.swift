@@ -9,6 +9,8 @@ struct PlannerCanvas: UIViewRepresentable {
     let content: PlannerPageContent
     let drawWithFinger: Bool
     let onTap: (CGPoint) -> Void
+    let onLongPress: (CGPoint) -> Void
+    let onSwipe: (Int) -> Void
 
     func makeUIView(context: Context) -> InkCanvasView {
         ink.canvas
@@ -16,6 +18,8 @@ struct PlannerCanvas: UIViewRepresentable {
 
     func updateUIView(_ view: InkCanvasView, context: Context) {
         ink.onTap = onTap
+        ink.onLongPress = onLongPress
+        ink.onSwipe = onSwipe
         ink.setDrawWithFinger(drawWithFinger)
         ink.show(content)
     }

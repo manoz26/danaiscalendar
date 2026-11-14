@@ -162,6 +162,11 @@ final class InkCanvasView: PKCanvasView {
         }
     }
 
+    /// Zoomed in beyond the page's width (a swipe then scrolls instead of turning the page).
+    var isZoomedIn: Bool {
+        zoomScale > minimumZoomScale * 1.02
+    }
+
     /// A newly opened page: fitted to the width, scrolled to the top.
     func showWholeWidthFromTop() {
         guard fittedWidth > 0 else { return }

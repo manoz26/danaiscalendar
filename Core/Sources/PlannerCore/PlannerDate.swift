@@ -175,3 +175,39 @@ private enum Civil {
         return (year, month, day)
     }
 }
+
+// MARK: - In files
+
+/// Saved as its stable identifier, e.g. "2026-11-14".
+extension PlannerDate: Codable {
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let text = try container.decode(String.self)
+        guard let date = PlannerDate(text) else {
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Not a day: \(text)")
+        }
+        self = date
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(description)
+    }
+}
+
+/// Saved as its stable identifier, e.g. "2026-11".
+extension YearMonth: Codable {
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let text = try container.decode(String.self)
+        guard let month = YearMonth(text) else {
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Not a month: \(text)")
+        }
+        self = month
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(description)
+    }
+}
