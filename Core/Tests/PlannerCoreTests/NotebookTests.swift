@@ -146,7 +146,8 @@ struct JournalTests {
         journal.insert(a)
         #expect(journal.pages.count == 3, "a page is never in the journal twice")
 
-        let copy = try #require(journal.duplicate(c.id))
+        let duplicated = journal.duplicate(c.id)
+        let copy = try #require(duplicated)
         #expect(journal.pages.map(\.title) == ["A", "C", "C", "B"])
         #expect(journal.index(of: copy.id) == 2)
         #expect(copy.id != c.id)
