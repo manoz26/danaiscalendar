@@ -21,7 +21,8 @@ struct PlannerBarActions {
 }
 
 /// The thin bar above the page, white and black like the paper:
-/// - back (to the year on a month; to the year or month she came from elsewhere),
+/// - back (to the year on a month; to its month on a week; elsewhere to the week, month or
+///   year she came from),
 /// - JOURNAL and SKETCHES, the notebooks outside the planner (the year and months are the
 ///   tabs on the right),
 /// - the open page's own tools (journal: new page, page details, all pages; sketch: pin to a day),
@@ -34,8 +35,8 @@ struct PlannerTopBar: View {
     enum Style { case full, icons, minimal }
 
     let page: PlannerPage
-    /// The year or month page that "back" returns to from other pages.
-    let calendarPage: PlannerPage
+    /// Where "back" goes from pages other than a month (a month goes back to its year).
+    let backPage: PlannerPage
     let locale: Locale
     let compact: Bool
     /// iPad: there is something to draw with.
@@ -130,10 +131,10 @@ struct PlannerTopBar: View {
             }
             .accessibilityLabel(Text("Back to the year"))
             .accessibilityValue(Text(verbatim: String(month.year)))
-        case .toBuy, .journal, .sketch:
+        case .week, .toBuy, .journal, .sketch:
             // On narrow bars journal pages and sketches (which also have arrows or tools) keep only the chevron.
             BackButton(label: style == .minimal && page.isNotebookPage ? "" : backLabel, identifier: "nav.back") {
-                actions.open(calendarPage)
+                actions.open(backPage)
             }
             .accessibilityLabel(Text("Back"))
             .accessibilityValue(Text(verbatim: backLabel))
@@ -286,14 +287,17 @@ struct PlannerTopBar: View {
     // MARK: - Texts
 
     private var showsArrows: Bool {
-        if case .journal = page { return true }
-        return page.isCalendarPage
+        switch page {
+        case .journal, .week: true
+        default: page.isCalendarPage
+        }
     }
 
     private var previousLabel: Text {
         switch page {
         case .year: Text("Previous year")
         case .month: Text("Previous month")
+        case .week: Text("Previous week")
         default: Text("Previous page")
         }
     }
@@ -302,15 +306,17 @@ struct PlannerTopBar: View {
         switch page {
         case .year: Text("Next year")
         case .month: Text("Next month")
+        case .week: Text("Next week")
         default: Text("Next page")
         }
     }
 
-    /// Where "back" goes from the To Buy page, journal pages and sketches: the month's name, or the year.
+    /// Where "back" goes: the month's name, the year, or "Week 46".
     private var backLabel: String {
-        switch calendarPage {
+        switch backPage {
         case .month(let month): CalendarNames.monthName(month.month, locale: locale)
         case .year(let year): String(year)
+        case .week(let week): String(localized: "Week \(week.number)", comment: "VoiceOver: one of the WEEKLY 1-6 buttons on the month page.")
         default: ""
         }
     }
@@ -444,9 +450,12 @@ struct SettingsButton: View {
 /// Vertical tabs on the right edge, like the coloured tabs of a paper planner but in
 /// greys: the year, then its 12 months. The open page's tab is white, as if part of it.
 ///
-/// On the To Buy page they show the year she came from, with no tab open. Journal pages
-/// and sketches have no tabs: they are notebooks of their own and get the whole width.
+/// On a week page the tab of its month is open (the week is inside the month, like the
+/// week pages of a paper planner). On the To Buy page they show the year she came from,
+/// with no tab open. Journal pages and sketches have no tabs: they are notebooks of their
+/// own and get the whole width.
 struct PlannerTabs: View {
+    /// The page whose tab is open (a week page passes its month).
     let page: PlannerPage
     /// The year whose tabs are shown.
     let year: Int

@@ -35,6 +35,8 @@ final class InkController {
     private(set) var canRedo = false
     private(set) var toolbarSide: ToolbarSide
     private(set) var toolbarCollapsed: Bool
+    /// The weeks whose page has ink: their WEEKLY buttons on the month page get a dot.
+    private(set) var inkedWeeks: Set<PlannerWeek> = []
 
     /// iPad only; on iPhone the ink is read-only.
     let canDraw: Bool
@@ -84,6 +86,11 @@ final class InkController {
         let defaults = UserDefaults.standard
         toolbarSide = ToolbarSide(rawValue: defaults.string(forKey: InkDefaults.toolbarSide) ?? "") ?? .leading
         toolbarCollapsed = defaults.bool(forKey: InkDefaults.toolbarCollapsed)
+
+        inkedWeeks = self.library.files.weeksWithInk()
+        self.library.onInkChange = { [weak self] page, hasInk in
+            self?.inkChanged(page, hasInk: hasInk)
+        }
 
         helper.controller = self
         canvas.delegate = helper
@@ -345,11 +352,24 @@ final class InkController {
         }
     }
 
-    /// The long press begins only on a day (month page, or a small month on the year page).
+    /// The long press begins only on a day (month or week page, or a small month on the year page).
     fileprivate func wantsLongPress(at point: CGPoint) -> Bool {
         template?.regions(at: point).contains { region in
-            if case .day = region.id { true } else { false }
+            switch region.id {
+            case .day, .weekDay: true
+            default: false
+            }
         } ?? false
+    }
+
+    /// Keeps `inkedWeeks` up to date (changed only when a week gains its first stroke or loses its last).
+    private func inkChanged(_ page: PlannerPage, hasInk: Bool) {
+        guard case .week(let week) = page, inkedWeeks.contains(week) != hasInk else { return }
+        if hasInk {
+            inkedWeeks.insert(week)
+        } else {
+            inkedWeeks.remove(week)
+        }
     }
 
     fileprivate func swiped(_ recognizer: UISwipeGestureRecognizer) {

@@ -5,6 +5,8 @@ import Foundation
 public protocol PageStore: Sendable {
     /// The saved page, or `nil` if it was never saved.
     func load(_ page: PlannerPage) throws -> PageFile?
+    /// The JSON header of a saved page, without reading its drawing (`nil` if never saved).
+    func metadata(of page: PlannerPage) throws -> PageMetadata?
     /// Replaces the page's file in one step: a crash leaves either the old or the new file.
     func save(_ file: PageFile, for page: PlannerPage) throws
     /// Every page that has a file.
@@ -22,8 +24,8 @@ public protocol PageStore: Sendable {
 }
 
 /// Page files in a folder on this device: one `<page>.dcpage` per page
-/// (`year-2026.dcpage`, `month-2026-11.dcpage`, `tobuy.dcpage`, `journal-<uuid>.dcpage`,
-/// `sketch-<uuid>.dcpage`).
+/// (`year-2026.dcpage`, `month-2026-11.dcpage`, `week-2026-11-09.dcpage`, `tobuy.dcpage`,
+/// `journal-<uuid>.dcpage`, `sketch-<uuid>.dcpage`).
 public final class LocalPageStore: PageStore {
     public let folder: URL
 
@@ -43,6 +45,22 @@ public final class LocalPageStore: PageStore {
             return nil
         }
         return try PageFile(decoding: data)
+    }
+
+    public func metadata(of page: PlannerPage) throws -> PageMetadata? {
+        let file = url(for: page)
+        guard FileManager.default.fileExists(atPath: file.path(percentEncoded: false)) else { return nil }
+        let handle = try FileHandle(forReadingFrom: file)
+        defer { try? handle.close() }
+        let header = try handle.read(upToCount: PageFile.headerSize) ?? Data()
+        let length = try PageFile.metadataLength(header: header)
+        let json = try handle.read(upToCount: length) ?? Data()
+        guard json.count == length else { throw PageFileError.truncated }
+        do {
+            return try PageMetadata.makeDecoder().decode(PageMetadata.self, from: json)
+        } catch {
+            throw PageFileError.badMetadata(String(describing: error))
+        }
     }
 
     public func save(_ file: PageFile, for page: PlannerPage) throws {
@@ -96,12 +114,13 @@ public final class LocalPageStore: PageStore {
 }
 
 extension PlannerPage {
-    /// File name without extension: "year-2026", "month-2026-11", "tobuy",
+    /// File name without extension: "year-2026", "month-2026-11", "week-2026-11-09", "tobuy",
     /// "journal-<uuid>", "sketch-<uuid>" (lowercase uuid).
     public var fileStem: String {
         switch self {
         case .year(let year): String(format: "year-%04ld", year)
         case .month(let month): "month-\(month)"
+        case .week(let week): "week-\(week)"
         case .toBuy: "tobuy"
         case .journal(let id): "journal-\(id.uuidString.lowercased())"
         case .sketch(let id): "sketch-\(id.uuidString.lowercased())"
@@ -115,6 +134,9 @@ extension PlannerPage {
         } else if fileStem.hasPrefix("month-"), let month = YearMonth(String(fileStem.dropFirst(6))),
                   Self.years.contains(month.year) {
             self = .month(month)
+        } else if fileStem.hasPrefix("week-"), let week = PlannerWeek(String(fileStem.dropFirst(5))),
+                  Self.years.contains(week.start.year) {
+            self = .week(week)
         } else if fileStem == "tobuy" {
             self = .toBuy
         } else if fileStem.hasPrefix("journal-"), let id = UUID(uuidString: String(fileStem.dropFirst(8))) {
@@ -126,11 +148,15 @@ extension PlannerPage {
         }
     }
 
-    /// Pages one step away (previous, next, and a month's year page). They are loaded in
-    /// advance so that turning to them is instant.
+    /// Pages one step away (previous, next, a month's year page, a week's month). They are
+    /// loaded in advance so that turning to them is instant.
     public var neighbors: [PlannerPage] {
         var pages = [previous, next]
-        if case .month(let month) = self { pages.append(.year(month.year)) }
+        switch self {
+        case .month(let month): pages.append(.year(month.year))
+        case .week(let week): pages.append(.month(week.month))
+        default: break
+        }
         return pages.filter { $0 != self }
     }
 }

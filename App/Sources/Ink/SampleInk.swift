@@ -12,7 +12,8 @@ enum SampleInk {
     static let inset: CGFloat = 0.2
 
     /// Month page: goals, the 3rd and the 15th, to-do list, memo. Year page: the notes
-    /// of February and July, and the small November. To Buy page: a line in each column.
+    /// of February and July, and the small November. Week page: its first and sixth days
+    /// and the notes. To Buy page: a line in each column.
     /// Journal pages: the heading and the paper. Sketches: the writing area.
     static func regions(for page: PlannerPage) -> [RegionID] {
         switch page {
@@ -30,6 +31,8 @@ enum SampleInk {
                 .monthNotes(YearMonth(year: year, month: 7)),
                 .month(YearMonth(year: year, month: 11)),
             ]
+        case .week(let week):
+            [.weekDay(week.start), .weekDay(week.start.adding(days: 5)), .section(.weekNotes)]
         case .toBuy:
             [.toBuyLine(1), .toBuyLine(ToBuyPageLayout.rowsPerColumn + 2)]
         case .journal:

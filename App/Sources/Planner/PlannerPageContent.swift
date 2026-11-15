@@ -3,19 +3,22 @@ import UIKit
 import PlannerCore
 
 /// Everything of the user's that pages print: birthdays, journal pages (a dot on their
-/// day), pinned sketches (a mark on their day) and typed list items.
+/// day), pinned sketches (a mark on their day), typed list items, and the weeks with ink
+/// (a dot on their WEEKLY button).
 struct PlannerData: Equatable {
     var birthdays: [Birthday] = []
     var journal = Journal()
     var sketches: [Sketch] = []
     var todos: [ListItem] = []
     var toBuy: [ListItem] = []
+    var inkedWeeks: Set<PlannerWeek> = []
 }
 
 /// What one planner page shows: its printed template, and the parts VoiceOver and the
 /// UI tests can find on it. Texts come from the String Catalog and the calendar of the
 /// app's language. Month pages also print the month's birthdays, the days with journal
-/// pages and pinned sketches, and typed to-dos; the To Buy page its typed items.
+/// pages and pinned sketches, typed to-dos and which weeks have ink; week pages the days
+/// with journal pages and birthdays; the To Buy page its typed items.
 struct PlannerPageContent: Equatable {
     let page: PlannerPage
     let template: PageTemplate
@@ -26,7 +29,8 @@ struct PlannerPageContent: Equatable {
     let accessibilityLabel: String
     let accessibilityItems: [PageAccessibilityItem]
 
-    init(page: PlannerPage, today: PlannerDate, locale: Locale, data: PlannerData = PlannerData()) {
+    /// `month` is the month she is in: a week page prints the days of other months in grey.
+    init(page: PlannerPage, today: PlannerDate, locale: Locale, data: PlannerData = PlannerData(), month: YearMonth? = nil) {
         self.page = page
         layout = PageLayoutStamp.current(for: page)
         switch page {
@@ -40,17 +44,34 @@ struct PlannerPageContent: Equatable {
             let notes = Self.birthdayNotes(for: month, in: data.birthdays)
             let todos = TypedLists.printed(data.todos.filter { $0.month == month }, lineCount: MonthPageLayout.listRowCount)
             let pinned = Sketch.pinned(data.sketches)
+            let inkedWeeks = Set(PlannerWeek.weeks(of: month).enumerated()
+                .filter { data.inkedWeeks.contains($0.element) }
+                .map { $0.offset + 1 })
             template = MonthPageTemplate.make(
                 month: month, locale: locale, labels: Self.labels, today: today, birthdays: notes,
                 journalDays: data.journal.datedDays, sketchDays: Set(pinned.keys),
-                todos: todos.items, todoOverflow: todos.overflow
+                todos: todos.items, todoOverflow: todos.overflow, inkedWeeks: inkedWeeks
             )
             identifier = "page.month"
             let name = "\(MonthTitle.text(for: month, locale: locale)) \(month.year)"
             accessibilityLabel = String(localized: "Month page for \(name)", comment: "VoiceOver: the month page, e.g. 'Month page for NOVEMBER 2026'.")
             accessibilityItems = Self.monthItems(
                 month: month, template: template, locale: locale, birthdays: notes,
-                journalDays: data.journal.datedDays, pinned: pinned, todos: todos.items
+                journalDays: data.journal.datedDays, pinned: pinned, todos: todos.items, inkedWeeks: inkedWeeks
+            )
+        case .week(let week):
+            let notes = week.months
+                .flatMap { Self.birthdayNotes(for: $0, in: data.birthdays) }
+                .filter { week.contains($0.date) }
+            template = WeekPageTemplate.make(
+                week: week, locale: locale, labels: Self.weekLabels, month: month ?? week.month, today: today,
+                journalDays: data.journal.datedDays, birthdayDays: Set(notes.map(\.date))
+            )
+            identifier = "page.week"
+            let name = "\(WeekTitle.days(of: week, locale: locale)) \(WeekTitle.years(of: week))"
+            accessibilityLabel = String(localized: "Week page for \(name)", comment: "VoiceOver: the week page, e.g. 'Week page for 9 – 15 November 2026'.")
+            accessibilityItems = Self.weekItems(
+                week: week, template: template, locale: locale, birthdays: notes, journalDays: data.journal.datedDays
             )
         case .toBuy:
             let items = TypedLists.printed(data.toBuy, lineCount: TypedListKind.toBuy.lineCount)
@@ -99,6 +120,13 @@ struct PlannerPageContent: Equatable {
         }
     }
 
+    static var weekLabels: WeekPageLabels {
+        WeekPageLabels(
+            week: String(localized: "Week", comment: "Printed in capitals at the top right of the week page, before the week's number, e.g. 'WEEK 46'."),
+            notes: String(localized: "Notes", comment: "Label of the notes box on the week page.")
+        )
+    }
+
     static var labels: MonthPageLabels {
         MonthPageLabels(
             goals: String(localized: "Goals", comment: "Label of the goals box on the month page."),
@@ -112,7 +140,7 @@ struct PlannerPageContent: Equatable {
 
     private static func monthItems(
         month: YearMonth, template: PageTemplate, locale: Locale, birthdays: [BirthdayNote],
-        journalDays: Set<PlannerDate>, pinned: [PlannerDate: [Sketch]], todos: [PrintedItem]
+        journalDays: Set<PlannerDate>, pinned: [PlannerDate: [Sketch]], todos: [PrintedItem], inkedWeeks: Set<Int>
     ) -> [PageAccessibilityItem] {
         let title = MonthTitle.text(for: month, locale: locale)
         var items: [PageAccessibilityItem] = []
@@ -125,15 +153,15 @@ struct PlannerPageContent: Equatable {
                 traits: [.header, .staticText]
             ))
         }
-        // The weekly pages arrive later; the buttons are printed but not yet active.
+        // WEEKLY 1-6 open the week pages; a week with ink says so.
         for region in template.regions {
             guard case .weekly(let number) = region.id else { continue }
             items.append(PageAccessibilityItem(
                 identifier: "month.weekly.\(number)",
                 label: String(localized: "Week \(number)", comment: "VoiceOver: one of the WEEKLY 1-6 buttons on the month page."),
-                value: nil,
+                value: inkedWeeks.contains(number) ? hasInkText : nil,
                 rect: region.rect,
-                traits: [.button, .notEnabled]
+                traits: .button
             ))
         }
 
@@ -206,6 +234,66 @@ struct PlannerPageContent: Equatable {
             items.append(PageAccessibilityItem(
                 identifier: "day.sketches.\(date)",
                 label: String(localized: "Sketches of \(days.name(of: date))", comment: "VoiceOver: the small sketch mark in a day of the month page, e.g. 'Sketches of Saturday 21 March 2029'."),
+                value: nil,
+                rect: control.rect,
+                traits: .button
+            ))
+        }
+        return items
+    }
+
+    /// VoiceOver: a WEEKLY button whose week page has ink (it shows a dot).
+    static var hasInkText: String {
+        String(localized: "Has handwriting", comment: "VoiceOver: the week page of this WEEKLY button has handwriting (the button shows a dot).")
+    }
+
+    private static func weekItems(
+        week: PlannerWeek, template: PageTemplate, locale: Locale, birthdays: [BirthdayNote], journalDays: Set<PlannerDate>
+    ) -> [PageAccessibilityItem] {
+        var items: [PageAccessibilityItem] = []
+        if let region = template.region(.title) {
+            items.append(PageAccessibilityItem(
+                identifier: "page.title",
+                label: "\(WeekTitle.text(for: week, locale: locale)) \(WeekTitle.years(of: week))",
+                value: PlannerPage.week(week).description,
+                rect: region.rect,
+                traits: [.header, .staticText]
+            ))
+        }
+        let days = DayNames(locale: locale)
+        for region in template.regions {
+            switch region.id {
+            case .weekDay(let date):
+                var parts = birthdays.filter { $0.date == date }.map(\.text)
+                if journalDays.contains(date) {
+                    parts.append(String(localized: "Journal page", comment: "VoiceOver: this day has a journal page (it shows a dot)."))
+                }
+                items.append(PageAccessibilityItem(
+                    identifier: "week.day.\(date)",
+                    label: days.name(of: date),
+                    value: parts.isEmpty ? nil : parts.joined(separator: ", "),
+                    rect: region.rect,
+                    traits: .staticText
+                ))
+            case .section(.weekNotes):
+                items.append(PageAccessibilityItem(
+                    identifier: "section.week-notes",
+                    label: weekLabels.notes,
+                    value: nil,
+                    rect: region.rect,
+                    traits: .staticText
+                ))
+            default:
+                break
+            }
+        }
+        // The header of a day opens its journal page.
+        for control in template.controls {
+            guard case .dayPage(let date) = control.id else { continue }
+            let name = days.name(of: date)
+            items.append(PageAccessibilityItem(
+                identifier: "week.header.\(date)",
+                label: String(localized: "Journal page of \(name)", comment: "VoiceOver: the header of a day on the week page, which opens the day's journal page, e.g. 'Journal page of Saturday 14 November 2026'."),
                 value: nil,
                 rect: control.rect,
                 traits: .button
@@ -382,8 +470,8 @@ enum LaunchOptions {
     }
     #endif
 
-    /// `-DCOpenPage <page>`: a page identifier (`year:2028`, `month:2027-02`, `tobuy`), or
-    /// `journal` for the first journal page.
+    /// `-DCOpenPage <page>`: a page identifier (`year:2028`, `month:2027-02`,
+    /// `week:2026-12-28`, `tobuy`), or `journal` for the first journal page.
     static var openPageArgument: String? {
         let arguments = ProcessInfo.processInfo.arguments
         guard let index = arguments.firstIndex(of: "-DCOpenPage"), index + 1 < arguments.count else { return nil }

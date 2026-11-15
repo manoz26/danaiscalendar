@@ -739,6 +739,24 @@
         }
       }
     },
+    "Has handwriting" : {
+      "comment" : "VoiceOver: the week page of this WEEKLY button has handwriting (the button shows a dot).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Έχει χειρόγραφο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Has handwriting"
+          }
+        }
+      }
+    },
     "Hide tools" : {
       "comment" : "Toolbar: folds the tool bar to a small button (VoiceOver).",
       "extractionState" : "manual",
@@ -915,6 +933,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Journal page %lld"
+          }
+        }
+      }
+    },
+    "Journal page of %@" : {
+      "comment" : "VoiceOver: the header of a day on the week page, which opens the day's journal page, e.g. 'Journal page of Saturday 14 November 2026'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σελίδα τετραδίου: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Journal page of %@"
           }
         }
       }
@@ -1297,6 +1333,24 @@
         }
       }
     },
+    "Next week" : {
+      "comment" : "VoiceOver: the right arrow of the top bar on a week page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επόμενη εβδομάδα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next week"
+          }
+        }
+      }
+    },
     "Next year" : {
       "comment" : "Arrow button on the year page.",
       "extractionState" : "manual",
@@ -1419,6 +1473,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Not ticked"
+          }
+        }
+      }
+    },
+    "Notes" : {
+      "comment" : "Label of the notes box on the week page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σημειώσεις"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notes"
           }
         }
       }
@@ -1743,6 +1815,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Previous page"
+          }
+        }
+      }
+    },
+    "Previous week" : {
+      "comment" : "VoiceOver: the left arrow of the top bar on a week page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προηγούμενη εβδομάδα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previous week"
           }
         }
       }
@@ -2413,6 +2503,24 @@
         }
       }
     },
+    "Week" : {
+      "comment" : "Printed in capitals at the top right of the week page, before the week's number, e.g. 'WEEK 46'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εβδομάδα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Week"
+          }
+        }
+      }
+    },
     "Week %lld" : {
       "comment" : "VoiceOver: one of the WEEKLY 1-6 buttons on the month page.",
       "extractionState" : "manual",
@@ -2427,6 +2535,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Week %lld"
+          }
+        }
+      }
+    },
+    "Week page for %@" : {
+      "comment" : "VoiceOver: the week page, e.g. 'Week page for 9 – 15 November 2026'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σελίδα εβδομάδας: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Week page for %@"
           }
         }
       }

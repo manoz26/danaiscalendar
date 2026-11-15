@@ -61,6 +61,33 @@ final class PageFiles: Sendable {
         queue.sync {}
     }
 
+    /// The weeks whose page file has strokes, from the files' headers (their drawings are not
+    /// read). Waits for any save still in flight.
+    func weeksWithInk() -> Set<PlannerWeek> {
+        let store = store
+        return queue.sync {
+            let pages: [PlannerPage]
+            do {
+                pages = try store.savedPages()
+            } catch {
+                AppLog.error("Could not list the page files", error)
+                return []
+            }
+            var weeks: Set<PlannerWeek> = []
+            for page in pages {
+                guard case .week(let week) = page else { continue }
+                do {
+                    if let metadata = try store.metadata(of: page), metadata.strokeCount > 0 {
+                        weeks.insert(week)
+                    }
+                } catch {
+                    AppLog.warning("Could not read the header of page \(page.fileStem)")
+                }
+            }
+            return weeks
+        }
+    }
+
     /// Deletes a page's file, after any save still in flight (a deleted journal page or sketch).
     func delete(_ page: PlannerPage) {
         let store = store
@@ -148,6 +175,9 @@ final class InkLibrary {
     }
 
     let files: PageFiles
+    /// Called when the user changes a page's ink, with whether the page has strokes now
+    /// (`false` when a page is forgotten).
+    var onInkChange: ((PlannerPage, Bool) -> Void)?
     private var entries: [PlannerPage: Entry] = [:]
     private var loading: Set<PlannerPage> = []
     private var saveTasks: [PlannerPage: Task<Void, Never>] = [:]
@@ -185,6 +215,7 @@ final class InkLibrary {
         entries[page] = entry
         touch(page)
         scheduleSave(page)
+        onInkChange?(page, !drawing.strokes.isEmpty)
     }
 
     /// The ink of a page in canvas units, without making it the open page or keeping it in
@@ -202,6 +233,7 @@ final class InkLibrary {
         saveTasks[page] = nil
         entries[page] = nil
         files.delete(page)
+        onInkChange?(page, false)
     }
 
     /// Copies a page's ink (saved first) to a new page.

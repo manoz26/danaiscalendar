@@ -115,6 +115,35 @@ struct InkStorageTests {
         #expect(try LocalPageStore(folder: folder).savedPages().isEmpty)
     }
 
+    /// The WEEKLY buttons know which weeks have ink: from the files' headers at launch, then
+    /// from every change.
+    @Test func weeksWithInkComeFromTheFilesAndFromEdits() throws {
+        let folder = temporaryFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let written = PlannerWeek(start: PlannerDate(year: 2026, month: 12, day: 28))
+        let erased = PlannerWeek(start: PlannerDate(year: 2027, month: 1, day: 4))
+        let files = PageFiles(folder: folder)
+        files.save(DrawingBox(drawing: sampleDrawing()), page: .week(written), layout: .current(for: .week(written)), writtenBy: "tests")
+        files.save(DrawingBox(drawing: PKDrawing()), page: .week(erased), layout: .current(for: .week(erased)), writtenBy: "tests")
+        files.save(DrawingBox(drawing: sampleDrawing()), page: page, layout: .current(for: page), writtenBy: "tests")
+        files.waitUntilSaved()
+
+        let library = InkLibrary(folder: folder)
+        #expect(library.files.weeksWithInk() == [written])
+
+        var changes: [(PlannerPage, Bool)] = []
+        library.onInkChange = { changes.append(($0, $1)) }
+        library.update(sampleDrawing(), for: .week(erased), layout: .current(for: .week(erased)))
+        library.update(PKDrawing(), for: .week(written), layout: .current(for: .week(written)))
+        #expect(changes.map { $0.0 } == [.week(erased), .week(written)])
+        #expect(changes.map { $0.1 } == [true, false])
+        library.saveAll(wait: true)
+        #expect(library.files.weeksWithInk() == [erased])
+
+        let controller = InkController(library: InkLibrary(folder: folder), canDraw: false)
+        #expect(controller.inkedWeeks == [erased])
+    }
+
     @Test func toolsMapToPencilKit() {
         var state = InkToolState()
         #expect((InkToolFactory.tool(for: state) as? PKInkingTool)?.inkType == .pen)

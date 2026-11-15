@@ -41,7 +41,8 @@ public struct PageFile: Sendable, Equatable {
         return data
     }
 
-    public init(decoding data: Data) throws {
+    /// Checks the first `headerSize` bytes of a file and returns the length of its JSON.
+    static func metadataLength(header data: Data) throws -> Int {
         let header = [UInt8](data.prefix(Self.headerSize))
         guard header.count >= 4, Array(header[0..<4]) == Self.signature else {
             throw PageFileError.notAPageFile
@@ -50,7 +51,11 @@ public struct PageFile: Sendable, Equatable {
         guard header[4] == Self.containerVersion else {
             throw PageFileError.unsupportedVersion(Int(header[4]))
         }
-        let length = Int(header[5]) << 24 | Int(header[6]) << 16 | Int(header[7]) << 8 | Int(header[8])
+        return Int(header[5]) << 24 | Int(header[6]) << 16 | Int(header[7]) << 8 | Int(header[8])
+    }
+
+    public init(decoding data: Data) throws {
+        let length = try Self.metadataLength(header: data)
         guard data.count >= Self.headerSize + length else { throw PageFileError.truncated }
 
         let jsonStart = data.startIndex + Self.headerSize
@@ -131,6 +136,7 @@ public struct PageLayoutStamp: Sendable, Equatable {
         switch page {
         case .year: PageLayoutStamp(name: "year-v1", firstWeekday: firstWeekday)
         case .month: PageLayoutStamp(name: "month-v2", firstWeekday: firstWeekday)
+        case .week: PageLayoutStamp(name: "week-v1", firstWeekday: firstWeekday)
         case .toBuy: PageLayoutStamp(name: "tobuy-v1", firstWeekday: firstWeekday)
         case .journal: PageLayoutStamp(name: "journal-v1", firstWeekday: firstWeekday)
         case .sketch: PageLayoutStamp(name: "sketch-v1", firstWeekday: firstWeekday)

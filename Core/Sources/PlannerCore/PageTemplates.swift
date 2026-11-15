@@ -43,7 +43,8 @@ public enum MonthPageTemplate {
     /// `journalDays` (a journal page) get a small dot under their number, days in
     /// `sketchDays` (pinned sketches) a small sketch mark in their corner that opens them.
     /// `todos` are the typed to-dos (see `TypedLists.printed`), on the lines of the to-do
-    /// list, with a + to add more.
+    /// list, with a + to add more. The WEEKLY buttons in `inkedWeeks` (numbered from 1:
+    /// their week page has ink) get a small dot under their number.
     public static func make(
         month: YearMonth,
         firstWeekday: Weekday = .defaultFirst,
@@ -54,7 +55,8 @@ public enum MonthPageTemplate {
         journalDays: Set<PlannerDate> = [],
         sketchDays: Set<PlannerDate> = [],
         todos: [PrintedItem] = [],
-        todoOverflow: Int = 0
+        todoOverflow: Int = 0,
+        inkedWeeks: Set<Int> = []
     ) -> PageTemplate {
         let layout = MonthPageLayout(month: month, firstWeekday: firstWeekday)
         let caps = { (text: String) in PlannerText.uppercased(text, locale: locale) }
@@ -77,12 +79,19 @@ public enum MonthPageTemplate {
             tracking: Tracking.label, tone: .label, anchor: layout.weeklyLabelAnchor, alignment: .right
         )))
         for (index, button) in layout.weeklyButtons.enumerated() {
+            // A week with ink: a darker number, raised over a small dot (like a day with a journal page).
+            let inked = inkedWeeks.contains(index + 1)
             shapes.append(.rect(button, fill: .button, stroke: nil, lineWidth: 0, cornerRadius: 4))
             shapes.append(.text(TemplateText(
-                String(index + 1), font: .medium, size: 12, tone: .label,
-                anchor: CGPoint(x: button.midX, y: TemplateText.baseline(centeredOn: button.midY, size: 12)),
+                String(index + 1), font: inked ? .semibold : .medium, size: 12, tone: inked ? .text : .label,
+                anchor: CGPoint(x: button.midX, y: TemplateText.baseline(centeredOn: button.midY - (inked ? 3 : 0), size: 12)),
                 alignment: .center
             )))
+            if inked {
+                shapes.append(.circle(
+                    center: CGPoint(x: button.midX, y: button.midY + 7.5), radius: 1.9, fill: .text, stroke: nil, lineWidth: 0
+                ))
+            }
         }
 
         // GOALS.

@@ -27,8 +27,8 @@ enum PlannerSheet: Identifiable {
     }
 }
 
-/// The planner: the bar on top, the open page (year, month, To Buy, a journal page or a
-/// sketch) with the ink and the tool bar, and on planner pages the tabs on the right.
+/// The planner: the bar on top, the open page (year, month, week, To Buy, a journal page
+/// or a sketch) with the ink and the tool bar, and on planner pages the tabs on the right.
 /// Opens on the current month.
 struct RootView: View {
     let ink: InkController
@@ -41,8 +41,12 @@ struct RootView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var now = Date()
     @State private var page: PlannerPage
-    /// The last year or month page: where other pages go back to, and whose tabs the To Buy page shows.
+    /// The last year or month page: where other pages go back to, and whose tabs the To Buy
+    /// page shows. On a week page it is the week's month: the one she came from while the
+    /// week has days in it, otherwise the month with most of its days.
     @State private var calendarPage: PlannerPage
+    /// The week page she left for the To Buy page, a journal page or a sketch: "back" goes there.
+    @State private var returnWeek: PlannerWeek?
     /// The journal page last open: JOURNAL opens it again.
     @State private var lastJournalPage: UUID?
     /// Pages the app made without being asked for one (a day's page from a long press, a
@@ -65,7 +69,7 @@ struct RootView: View {
             first = page.page
         }
         _page = State(initialValue: first)
-        _calendarPage = State(initialValue: first.isCalendarPage ? first : .month(month))
+        _calendarPage = State(initialValue: first.isCalendarPage ? first : .month(first.week?.month ?? month))
         if case .journal(let id) = first {
             _lastJournalPage = State(initialValue: id)
         }
@@ -74,11 +78,11 @@ struct RootView: View {
     var body: some View {
         let locale = AppLocale.current
         let compact = horizontalSizeClass == .compact
-        let content = PlannerPageContent(page: page, today: today, locale: locale, data: data)
+        let content = PlannerPageContent(page: page, today: today, locale: locale, data: data, month: calendarMonth)
         VStack(spacing: 0) {
             PlannerTopBar(
                 page: page,
-                calendarPage: calendarPage,
+                backPage: backPage,
                 locale: locale,
                 compact: compact,
                 canDraw: ink.canDraw,
@@ -102,7 +106,7 @@ struct RootView: View {
                 }
                 if !page.isNotebookPage {
                     PlannerTabs(
-                        page: page,
+                        page: page.week == nil ? page : calendarPage,
                         year: calendarPage.year ?? currentMonth.year,
                         locale: locale,
                         compact: compact,
@@ -160,8 +164,24 @@ struct RootView: View {
             journal: journal.journal,
             sketches: sketches.sketches,
             todos: lists.todos,
-            toBuy: lists.toBuy
+            toBuy: lists.toBuy,
+            inkedWeeks: ink.inkedWeeks
         )
+    }
+
+    /// The month of `calendarPage`, when it is a month.
+    private var calendarMonth: YearMonth? {
+        if case .month(let month) = calendarPage { return month }
+        return nil
+    }
+
+    /// Where "back" goes from a week page (its month), and from the To Buy page, journal
+    /// pages and sketches (the week she left, or the last year or month page).
+    private var backPage: PlannerPage {
+        if page.week == nil, let returnWeek {
+            return .week(returnWeek)
+        }
+        return calendarPage
     }
 
     private var calendar: Calendar {
@@ -189,7 +209,7 @@ struct RootView: View {
             next: { step(1) },
             today: { open(.month(currentMonth)) },
             birthdays: { sheet = .birthdays },
-            toBuy: { open(page == .toBuy ? calendarPage : .toBuy) },
+            toBuy: { open(page == .toBuy ? backPage : .toBuy) },
             journal: openJournal,
             sketches: { sheet = .sketches(nil) },
             newSketch: newSketch,
@@ -213,6 +233,15 @@ struct RootView: View {
         let leaving = page
         if target.isCalendarPage {
             calendarPage = target
+            returnWeek = nil
+        } else if let week = target.week {
+            // A week keeps the month she came from while it has days in it.
+            if !(calendarMonth.map(week.touches) ?? false) {
+                calendarPage = .month(week.month)
+            }
+            returnWeek = nil
+        } else if let week = leaving.week {
+            returnWeek = week
         }
         if case .journal(let id) = target {
             lastJournalPage = id
@@ -221,7 +250,7 @@ struct RootView: View {
         discardIfEmpty(leaving)
     }
 
-    /// Previous/next: months and years, or the journal's pages.
+    /// Previous/next: months, weeks and years, or the journal's pages.
     private func step(_ offset: Int) {
         if case .journal(let id) = page {
             if let neighbor = journal.journal.neighbor(of: id, offset: offset) {
@@ -318,7 +347,8 @@ struct RootView: View {
     // MARK: - Touches on the page
 
     /// A finger tap: the printed + of a list, the circle or box of a typed item, the sketch
-    /// mark of a day, or a small month on the year page.
+    /// mark of a day, a day's header on the week page, a WEEKLY button, or a small month
+    /// on the year page.
     private func handleTap(at point: CGPoint, in template: PageTemplate) {
         if let control = template.control(at: point) {
             switch control.id {
@@ -337,6 +367,8 @@ struct RootView: View {
                 } else if !pinned.isEmpty {
                     sheet = .sketches(date)
                 }
+            case .dayPage(let date):
+                openDayPage(date)
             default:
                 break
             }
@@ -345,6 +377,13 @@ struct RootView: View {
         for region in template.regions(at: point) {
             if case .month(let month) = region.id {
                 open(.month(month))
+                return
+            }
+            if case .weekly(let number) = region.id, case .month(let month) = page {
+                let weeks = PlannerWeek.weeks(of: month)
+                if weeks.indices.contains(number - 1) {
+                    open(.week(weeks[number - 1]))
+                }
                 return
             }
             // The text of a typed item opens its list (to change or delete it).
@@ -357,21 +396,26 @@ struct RootView: View {
         }
     }
 
-    /// A long press on a day (month page, or a small month on the year page) opens its page.
+    /// A long press on a day (month or week page, or a small month on the year page) opens its page.
     private func handleLongPress(at point: CGPoint, in template: PageTemplate) {
-        guard page.isCalendarPage else { return }
+        guard page.isCalendarPage || page.week != nil else { return }
         for region in template.regions(at: point) {
-            if case .day(let date) = region.id {
+            switch region.id {
+            case .day(let date), .weekDay(let date):
                 openDayPage(date)
                 return
+            default:
+                continue
             }
         }
     }
 
-    /// A swipe turns the journal's pages.
+    /// A swipe turns the journal's pages and the weeks.
     private func handleSwipe(_ offset: Int) {
-        guard case .journal = page else { return }
-        step(offset)
+        switch page {
+        case .journal, .week: step(offset)
+        default: break
+        }
     }
 
     private func listKind(_ section: RegionID.Section) -> TypedListKind? {
@@ -395,7 +439,7 @@ struct RootView: View {
         if page == target {
             // Leave it first: the next page, the one before, or the calendar.
             let neighbor = journal.journal.neighbor(of: id, offset: 1) ?? journal.journal.neighbor(of: id, offset: -1)
-            open(neighbor?.page ?? calendarPage)
+            open(neighbor?.page ?? backPage)
         }
         journal.delete(id)
         ink.deleteInk(of: target)
@@ -413,7 +457,7 @@ struct RootView: View {
         let target = PlannerPage.sketch(id)
         provisional.remove(target)
         if page == target {
-            open(calendarPage)
+            open(backPage)
         }
         sketches.delete(id)
         ink.deleteInk(of: target)
@@ -423,7 +467,7 @@ struct RootView: View {
 
     private func share(_ format: PageExportFormat) {
         let locale = AppLocale.current
-        let content = PlannerPageContent(page: page, today: today, locale: locale, data: data)
+        let content = PlannerPageContent(page: page, today: today, locale: locale, data: data, month: calendarMonth)
         do {
             let url = try PageExporter.export(
                 template: content.template, drawing: ink.drawing(of: page),
@@ -438,14 +482,16 @@ struct RootView: View {
         }
     }
 
-    /// The shared file's name: "November 2026", "2026", "To buy", the journal page's title
-    /// or day, or "Sketch".
+    /// The shared file's name: "November 2026", "2026", "9 – 15 November 2026", "To buy",
+    /// the journal page's title or day, or "Sketch".
     private func exportName(locale: Locale) -> String {
         switch page {
         case .year(let year):
             return String(year)
         case .month(let month):
             return "\(CalendarNames.monthName(month.month, locale: locale)) \(month.year)"
+        case .week(let week):
+            return "\(WeekTitle.days(of: week, locale: locale)) \(WeekTitle.years(of: week))"
         case .toBuy:
             return PlannerPageContent.toBuyTitle
         case .journal(let id):

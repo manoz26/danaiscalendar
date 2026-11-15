@@ -10,8 +10,8 @@ public struct PageTemplate: Sendable, Equatable {
     public var shapes: [TemplateShape]
     /// The fixed areas of the layout. The ink is anchored to them (`InkAnchor`).
     public var regions: [PageRegion]
-    /// Printed things a finger taps that come and go with her data (the + buttons, the
-    /// boxes of typed items, sketch marks). Never used to anchor ink.
+    /// Printed things a finger taps (the + buttons, the boxes of typed items, sketch marks,
+    /// the day headers of the week page). Never used to anchor ink.
     public var controls: [PageRegion]
 
     public init(shapes: [TemplateShape] = [], regions: [PageRegion] = [], controls: [PageRegion] = []) {
@@ -68,6 +68,8 @@ public enum RegionID: Hashable, Sendable, CustomStringConvertible {
         case goals, todo, memo, tobuy
         /// The writing area of a journal page or a sketch.
         case body
+        /// The notes box of the week page.
+        case weekNotes = "week-notes"
     }
 
     /// The page title ("NOVEMBER", "2026", "TO BUY").
@@ -78,6 +80,8 @@ public enum RegionID: Hashable, Sendable, CustomStringConvertible {
     case weekday(Weekday)
     /// A day cell (month page) or day number (small month on the year page).
     case day(PlannerDate)
+    /// Week page: the box of a day (its header and lines).
+    case weekDay(PlannerDate)
     /// Month page: goals box, to-do list, memo. To-buy page: the whole list.
     case section(Section)
     /// Month page: a to-do line, numbered from 1.
@@ -96,6 +100,8 @@ public enum RegionID: Hashable, Sendable, CustomStringConvertible {
     case itemMarker(Section, Int)
     /// Control: the small mark of the sketches pinned to a day (month page).
     case sketchMark(PlannerDate)
+    /// Control: the header of a day on the week page, which opens the day's journal page.
+    case dayPage(PlannerDate)
 
     public var description: String {
         switch self {
@@ -103,6 +109,7 @@ public enum RegionID: Hashable, Sendable, CustomStringConvertible {
         case .weekly(let number): "weekly:\(number)"
         case .weekday(let day): "weekday:\(day.key)"
         case .day(let date): "day:\(date)"
+        case .weekDay(let date): "week-day:\(date)"
         case .section(let section): "section:\(section.rawValue)"
         case .todoLine(let number): "todo:\(number)"
         case .toBuyLine(let number): "tobuy:\(number)"
@@ -112,6 +119,7 @@ public enum RegionID: Hashable, Sendable, CustomStringConvertible {
         case .addItem(let section): "add:\(section.rawValue)"
         case .itemMarker(let section, let line): "check:\(section.rawValue):\(line)"
         case .sketchMark(let date): "sketches:\(date)"
+        case .dayPage(let date): "day-page:\(date)"
         }
     }
 
@@ -128,6 +136,7 @@ public enum RegionID: Hashable, Sendable, CustomStringConvertible {
         case "weekly": guard let n = Int(value), n > 0 else { return nil }; self = .weekly(n)
         case "weekday": guard let day = Weekday(key: value) else { return nil }; self = .weekday(day)
         case "day": guard let date = PlannerDate(value) else { return nil }; self = .day(date)
+        case "week-day": guard let date = PlannerDate(value) else { return nil }; self = .weekDay(date)
         case "section": guard let section = Section(rawValue: value) else { return nil }; self = .section(section)
         case "todo": guard let n = Int(value), n > 0 else { return nil }; self = .todoLine(n)
         case "tobuy": guard let n = Int(value), n > 0 else { return nil }; self = .toBuyLine(n)
@@ -141,6 +150,7 @@ public enum RegionID: Hashable, Sendable, CustomStringConvertible {
                   let line = Int(parts[1]), line > 0 else { return nil }
             self = .itemMarker(section, line)
         case "sketches": guard let date = PlannerDate(value) else { return nil }; self = .sketchMark(date)
+        case "day-page": guard let date = PlannerDate(value) else { return nil }; self = .dayPage(date)
         default: return nil
         }
     }

@@ -199,6 +199,36 @@ struct TemplateRendererTests {
             samples.append(("journal-\(style.rawValue)-el", JournalPageTemplate.make(paper: style, label: heading.label, heading: heading.heading)))
         }
         samples.append(("journal-lined-en-title", JournalPageTemplate.make(paper: .lined, label: titled.label, heading: titled.heading)))
+
+        // Week pages: in the middle of a month, across two months, across two years.
+        let greekWeek = WeekPageLabels(week: "Εβδομάδα", notes: "Σημειώσεις")
+        func weekOf(_ year: Int, _ month: Int, _ day: Int) -> PlannerWeek {
+            PlannerWeek(start: PlannerDate(year: year, month: month, day: day))
+        }
+        samples += [
+            ("week-2026-11-09-en", WeekPageTemplate.make(
+                week: weekOf(2026, 11, 9), locale: english, labels: .english,
+                month: YearMonth(year: 2026, month: 11), today: today,
+                journalDays: [PlannerDate(year: 2026, month: 11, day: 12)],
+                birthdayDays: [PlannerDate(year: 2026, month: 11, day: 13)]
+            )),
+            ("week-2026-11-09-el", WeekPageTemplate.make(
+                week: weekOf(2026, 11, 9), locale: greek, labels: greekWeek,
+                month: YearMonth(year: 2026, month: 11), today: today
+            )),
+            ("week-2026-03-30-el", WeekPageTemplate.make(
+                week: weekOf(2026, 3, 30), locale: greek, labels: greekWeek, month: YearMonth(year: 2026, month: 3)
+            )),
+            ("week-2026-09-28-el", WeekPageTemplate.make(
+                week: weekOf(2026, 9, 28), locale: greek, labels: greekWeek, month: YearMonth(year: 2026, month: 10)
+            )),
+            ("week-2026-12-28-en", WeekPageTemplate.make(
+                week: weekOf(2026, 12, 28), locale: english, labels: .english, month: YearMonth(year: 2026, month: 12)
+            )),
+            ("month-2026-11-en-weekly-ink", MonthPageTemplate.make(
+                month: YearMonth(year: 2026, month: 11), locale: english, labels: .english, today: today, inkedWeeks: [1, 3]
+            )),
+        ]
         for (name, template) in samples {
             try PageBitmap(template, scale: 1.5).writePNG(to: directory.appending(path: "\(name).png"))
         }
