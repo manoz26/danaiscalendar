@@ -160,7 +160,7 @@ struct WeekPageTests {
         let layout = WeekPageLayout(week: week(2026, 11, 9))
         #expect(layout.days.count == 7)
         #expect(layout.boxes.count == 8)
-        #expect(layout.days.map(\.date) == week(2026, 11, 9).days)
+        #expect(layout.days.compactMap(\.date) == week(2026, 11, 9).days)
         #expect(layout.notes.date == nil)
 
         let page = CGRect(origin: .zero, size: PageCanvas.size)

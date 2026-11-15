@@ -84,12 +84,12 @@ public enum MonthPageTemplate {
             shapes.append(.rect(button, fill: .button, stroke: nil, lineWidth: 0, cornerRadius: 4))
             shapes.append(.text(TemplateText(
                 String(index + 1), font: inked ? .semibold : .medium, size: 12, tone: inked ? .text : .label,
-                anchor: CGPoint(x: button.midX, y: TemplateText.baseline(centeredOn: button.midY - (inked ? 3 : 0), size: 12)),
+                anchor: CGPoint(x: button.midX, y: TemplateText.baseline(centeredOn: button.midY - (inked ? 3.5 : 0), size: 12)),
                 alignment: .center
             )))
             if inked {
                 shapes.append(.circle(
-                    center: CGPoint(x: button.midX, y: button.midY + 7.5), radius: 1.9, fill: .text, stroke: nil, lineWidth: 0
+                    center: CGPoint(x: button.midX, y: button.midY + 8.3), radius: 1.8, fill: .text, stroke: nil, lineWidth: 0
                 ))
             }
         }

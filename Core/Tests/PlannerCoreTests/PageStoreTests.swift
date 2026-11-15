@@ -173,7 +173,11 @@ struct LocalPageStoreTests {
         }
         #expect(PlannerPage(fileStem: "month-2026-13") == nil)
         #expect(PlannerPage(fileStem: "year-0") == nil)
-        #expect(PlannerPage(fileStem: "week-2026-11-14") == nil)
+        // Week pages are named by their first day; a day that does not exist is no page.
+        #expect(PlannerPage(fileStem: "week-2026-11-09") == .week(PlannerWeek(start: PlannerDate(year: 2026, month: 11, day: 9))))
+        #expect(PlannerPage(fileStem: "week-2026-11-31") == nil)
+        #expect(PlannerPage(fileStem: "week-0000-01-03") == nil)
+        #expect(PlannerPage(fileStem: "day-2026-11-14") == nil)
     }
 
     @Test func neighbors() {
