@@ -12,9 +12,10 @@ struct WishlistTests {
 
     /// Blue on the left half, red on the right one (or transparent there, with `alpha`).
     static func picture(width: Int, height: Int, alpha: Bool = false) throws -> CGImage {
+        let space = try #require(CGColorSpace(name: CGColorSpace.sRGB))
         let context = try #require(CGContext(
             data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
-            space: try #require(CGColorSpace(name: CGColorSpace.sRGB)),
+            space: space,
             bitmapInfo: alpha ? CGImageAlphaInfo.premultipliedLast.rawValue : CGImageAlphaInfo.noneSkipLast.rawValue
         ))
         if !alpha {
