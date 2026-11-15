@@ -85,6 +85,16 @@ struct SettingsView: View {
             }
         }
         .tint(Paper.ink)
+        #if DEBUG
+        .overlay(alignment: .topLeading) {
+            // The last backup made, for the UI tests.
+            Text(verbatim: sync.debugLastBackup)
+                .font(.system(size: 2))
+                .foregroundStyle(.clear)
+                .allowsHitTesting(false)
+                .accessibilityIdentifier("debug.lastBackup")
+        }
+        #endif
     }
 
     /// Apple Calendar: connect it; then events in the cells (on or off) and which calendars.

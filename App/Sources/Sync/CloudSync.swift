@@ -49,6 +49,8 @@ final class CloudSync {
     private(set) var downloading: Set<String> = []
     /// Counts since launch, for the UI tests ("debug.sync", Debug builds only).
     private(set) var debugSummary = "-"
+    /// The last backup made, e.g. "dcbackup 52311", for the UI tests ("debug.lastBackup").
+    private(set) var debugLastBackup = "-"
     @ObservationIgnored private var debugTotal = SyncReport()
 
     @ObservationIgnored let owner: AppSyncOwner
@@ -340,7 +342,7 @@ final class CloudSync {
     func exportBackup() async throws -> URL {
         owner.saveEverything()
         let writtenBy = AppInfo.versionAndBuild
-        return try await Task.detached(priority: .userInitiated) {
+        let made = try await Task.detached(priority: .userInitiated) { () throws -> (URL, Int) in
             let archive = try BackupArchive.collect(from: .applicationSupportDirectory, writtenBy: writtenBy)
             let data = try archive.encoded()
             let folder = FileManager.default.temporaryDirectory.appending(path: "Exports", directoryHint: .isDirectory)
@@ -353,8 +355,10 @@ final class CloudSync {
             let url = unique.appending(path: "Danai's Calendar \(formatter.string(from: Date())).\(BackupArchive.fileExtension)")
             try data.write(to: url, options: .atomic)
             AppLog.info("Backup made: \(archive.entries.count) files, \(data.count / 1024) KB")
-            return url
+            return (url, data.count)
         }.value
+        debugLastBackup = "\(made.0.pathExtension) \(made.1)"
+        return made.0
     }
 
     /// Settings → Backup → Restore: what the backup has comes back; nothing here is deleted.

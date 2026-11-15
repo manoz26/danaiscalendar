@@ -135,9 +135,6 @@ struct BackupSection: View {
     @State private var choosingFile = false
     @State private var chosen: URL?
     @State private var message: BackupMessage?
-    #if DEBUG
-    @State private var lastBackup = "-"
-    #endif
 
     private enum BackupMessage: Identifiable {
         case restored, notABackup, exportFailed
@@ -171,12 +168,6 @@ struct BackupSection: View {
             Text("One file with all your pages, lists, birthdays and photos. Restoring adds back what the backup has; nothing you have now is deleted.")
                 .font(.inter(.regular, size: 13, relativeTo: .footnote))
                 .foregroundStyle(Paper.secondary)
-            #if DEBUG
-            Text(verbatim: lastBackup)
-                .font(.system(size: 2))
-                .foregroundStyle(.clear)
-                .accessibilityIdentifier("debug.lastBackup")
-            #endif
         }
         .fileImporter(isPresented: $choosingFile, allowedContentTypes: [.item]) { result in
             switch result {
@@ -221,10 +212,6 @@ struct BackupSection: View {
             defer { working = false }
             do {
                 let url = try await sync.exportBackup()
-                #if DEBUG
-                let size = (try? Data(contentsOf: url).count) ?? 0
-                lastBackup = "\(url.pathExtension) \(size)"
-                #endif
                 SharePresenter.present(url)
             } catch {
                 AppLog.error("Could not make a backup", error)
