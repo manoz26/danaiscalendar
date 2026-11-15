@@ -67,8 +67,8 @@ public enum WishlistImages {
     public static let maxPixelSize = 2048
     /// The grid's small pictures.
     public static let thumbnailPixelSize = 512
-    static let quality: CGFloat = 0.85
-    static let thumbnailQuality: CGFloat = 0.8
+    public static let quality: CGFloat = 0.85
+    public static let thumbnailQuality: CGFloat = 0.8
 
     public static func prepare(_ data: Data, maxPixelSize: Int = maxPixelSize, quality: CGFloat = quality) throws -> PreparedPhoto {
         guard let source = CGImageSourceCreateWithData(data as CFData, [kCGImageSourceShouldCache: false] as CFDictionary),
