@@ -130,7 +130,9 @@ struct CalendarEventTests {
         #expect(year.contains(day(5)))
         #expect(year.isSuperset(of: Set((14...17).map { day($0) })))
         #expect(year.contains(day(2, month: 4)))
-        #expect(!year.contains(day(29)), "The concert is printed only on the day it starts")
+        let concert = SampleEvents.timed("Concert", day: 28, 22, minutes: 150)
+        let concertDays = EventLayout.days(with: [concert], from: day(1), through: day(31), calendar: calendar)
+        #expect(concertDays == [day(28)], "The concert is printed only on the day it starts")
         let march = EventLayout.days(with: events, from: day(1), through: day(31), calendar: calendar)
         #expect(!march.contains(day(1, month: 4)))
 
