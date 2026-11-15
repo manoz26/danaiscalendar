@@ -10,6 +10,8 @@ struct DanaisCalendarApp: App {
     @State private var journal: JournalBook
     @State private var sketches: SketchBook
     @State private var lists: ListBook
+    /// The photos of things she would like to buy.
+    @State private var wishlist: WishlistBook
 
     init() {
         Chrome.apply()
@@ -26,19 +28,22 @@ struct DanaisCalendarApp: App {
         let journal = JournalBook()
         let sketches = SketchBook()
         let lists = ListBook()
+        let wishlist = WishlistBook()
         #if DEBUG
         journal.addSamplesIfRequested()
         sketches.addSamplesIfRequested()
         lists.addSamplesIfRequested()
+        wishlist.addSamplesIfRequested()
         #endif
         _journal = State(initialValue: journal)
         _sketches = State(initialValue: sketches)
         _lists = State(initialValue: lists)
+        _wishlist = State(initialValue: wishlist)
     }
 
     var body: some Scene {
         WindowGroup {
-            RootView(ink: ink, birthdays: birthdays, journal: journal, sketches: sketches, lists: lists)
+            RootView(ink: ink, birthdays: birthdays, journal: journal, sketches: sketches, lists: lists, wishlist: wishlist)
         }
     }
 }

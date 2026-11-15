@@ -109,6 +109,60 @@
         }
       }
     },
+    "Add photos" : {
+      "comment" : "VoiceOver: the + of the wishlist, which opens the photo picker.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προσθήκη φωτογραφιών"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add photos"
+          }
+        }
+      }
+    },
+    "Add photos of things you'd like to buy." : {
+      "comment" : "The one line under the big + of the empty wishlist.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πρόσθεσε φωτογραφίες με πράγματα που θέλεις να αγοράσεις."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add photos of things you'd like to buy."
+          }
+        }
+      }
+    },
+    "Adding photos…" : {
+      "comment" : "VoiceOver: a place in the wishlist grid where a picked photo is still being added.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προστίθενται φωτογραφίες…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adding photos…"
+          }
+        }
+      }
+    },
     "All pages" : {
       "comment" : "Top bar button on a journal page: all the journal's pages as small pictures.",
       "extractionState" : "manual",
@@ -307,6 +361,24 @@
         }
       }
     },
+    "Close" : {
+      "comment" : "Closes a photo of the wishlist shown on the whole screen.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κλείσιμο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        }
+      }
+    },
     "Date" : {
       "comment" : "Birthday form: section header above the day and month wheels.",
       "extractionState" : "manual",
@@ -415,6 +487,24 @@
         }
       }
     },
+    "Delete photo" : {
+      "comment" : "Deletes a photo of the wishlist (menu of a photo, and the bin when it fills the screen).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Διαγραφή φωτογραφίας"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete photo"
+          }
+        }
+      }
+    },
     "Delete the ticked items?" : {
       "comment" : "Typed list: confirmation before deleting all ticked items.",
       "extractionState" : "manual",
@@ -465,6 +555,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delete this page?"
+          }
+        }
+      }
+    },
+    "Delete this photo?" : {
+      "comment" : "Confirmation before deleting a photo of the wishlist.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Διαγραφή της φωτογραφίας;"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this photo?"
           }
         }
       }
@@ -843,6 +951,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Image"
+          }
+        }
+      }
+    },
+    "It is deleted from the app only, not from your photo library." : {
+      "comment" : "Under 'Delete this photo?': the photo library keeps its own copy.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σβήνεται μόνο από την εφαρμογή, όχι από τις φωτογραφίες σου."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It is deleted from the app only, not from your photo library."
           }
         }
       }
@@ -1693,6 +1819,42 @@
         }
       }
     },
+    "Photo %lld" : {
+      "comment" : "VoiceOver: a photo in the wishlist grid, e.g. 'Photo 3'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Φωτογραφία %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo %lld"
+          }
+        }
+      }
+    },
+    "Photo %lld of %lld" : {
+      "comment" : "VoiceOver: the photo on the whole screen, e.g. 'Photo 2 of 5'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Φωτογραφία %1$lld από %2$lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo %1$lld of %2$lld"
+          }
+        }
+      }
+    },
     "Pin" : {
       "comment" : "Confirms pinning a sketch to the chosen day.",
       "extractionState" : "manual",
@@ -2067,6 +2229,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sketches of %@"
+          }
+        }
+      }
+    },
+    "Some photos could not be added." : {
+      "comment" : "Alert after picking photos for the wishlist when some of them could not be read.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κάποιες φωτογραφίες δεν μπόρεσαν να προστεθούν."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Some photos could not be added."
           }
         }
       }
@@ -2589,6 +2769,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "When this is off, only Apple Pencil writes and one finger moves the page. When it is on, your finger writes too and two fingers move the page."
+          }
+        }
+      }
+    },
+    "Wishlist" : {
+      "comment" : "The wishlist: photos of things she would like to buy. Button on the To Buy page (printed in capitals) and title of its screen.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Λίστα επιθυμιών"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wishlist"
           }
         }
       }

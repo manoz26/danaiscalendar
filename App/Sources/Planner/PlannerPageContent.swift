@@ -456,6 +456,9 @@ enum LaunchOptions {
     /// `-DCSampleLists YES`: typed to-dos for March 2029 and typed things to buy, if there are none.
     static var sampleLists: Bool { ProcessInfo.processInfo.arguments.contains("-DCSampleLists") }
 
+    /// `-DCSampleWishlist YES`: five made-up wishlist photos (drawn by the code), if there are none.
+    static var sampleWishlist: Bool { ProcessInfo.processInfo.arguments.contains("-DCSampleWishlist") }
+
     /// Called at launch, before the ink is loaded.
     @MainActor
     static func prepareTestData() {
@@ -463,6 +466,8 @@ enum LaunchOptions {
         try? FileManager.default.removeItem(at: InkLibrary.defaultFolder)
         try? FileManager.default.removeItem(at: BirthdayBook.defaultFolder)
         try? FileManager.default.removeItem(at: ListsFolder.url)
+        try? FileManager.default.removeItem(at: WishlistBook.defaultFolder)
+        try? FileManager.default.removeItem(at: WishlistBook.thumbnailFolder)
         for key in InkDefaults.all {
             UserDefaults.standard.removeObject(forKey: key)
         }

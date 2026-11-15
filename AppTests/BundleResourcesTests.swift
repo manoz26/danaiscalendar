@@ -51,6 +51,7 @@ struct BundleResourcesTests {
         ("Notes for %@", "Σημειώσεις: %@"),
         ("Birthdays", "Γενέθλια"),
         ("%@'s birthday", "%@ — γενέθλια"),
+        ("Wishlist", "Λίστα επιθυμιών"),
     ])
     func plannerTextsAreInGreek(key: String, greekText: String) throws {
         let greekPath = try #require(Bundle.main.path(forResource: "el", ofType: "lproj"))
@@ -63,6 +64,9 @@ struct BundleResourcesTests {
         #expect(info["ITSAppUsesNonExemptEncryption"] as? Bool == false)
         #expect(info["CFBundleDisplayName"] as? String == "Danai's Calendar")
         #expect(info["UIUserInterfaceStyle"] as? String == "Light")
+        // The wishlist uses the system's photo picker, which needs no access to the library.
+        #expect(info["NSPhotoLibraryUsageDescription"] == nil)
+        #expect(info["NSPhotoLibraryAddUsageDescription"] == nil)
     }
 
     @Test func buildInfoForDiagnostics() {

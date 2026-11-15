@@ -11,6 +11,8 @@ enum PlannerSheet: Identifiable {
     /// All sketches, or those pinned to one day.
     case sketches(PlannerDate?)
     case pin(UUID)
+    /// The photos of things to buy (from the To Buy page).
+    case wishlist
     /// Typed items of a list; `inkedLines` are the page's lines with handwriting.
     case list(TypedListKind, inkedLines: Set<Int>, focusNew: Bool)
 
@@ -22,6 +24,7 @@ enum PlannerSheet: Identifiable {
         case .journalPage(let id): "journalPage:\(id)"
         case .sketches(let day): "sketches:\(day?.description ?? "all")"
         case .pin(let id): "pin:\(id)"
+        case .wishlist: "wishlist"
         case .list(let kind, _, _): "list:\(kind.id)"
         }
     }
@@ -36,6 +39,7 @@ struct RootView: View {
     let journal: JournalBook
     let sketches: SketchBook
     let lists: ListBook
+    let wishlist: WishlistBook
     @AppStorage(InkDefaults.drawWithFinger) private var drawWithFinger = false
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -57,8 +61,9 @@ struct RootView: View {
     @State private var lastExport = ""
     #endif
 
-    init(ink: InkController, birthdays: BirthdayBook, journal: JournalBook, sketches: SketchBook, lists: ListBook) {
+    init(ink: InkController, birthdays: BirthdayBook, journal: JournalBook, sketches: SketchBook, lists: ListBook, wishlist: WishlistBook) {
         self.ink = ink
+        self.wishlist = wishlist
         self.birthdays = birthdays
         self.journal = journal
         self.sketches = sketches
@@ -145,6 +150,7 @@ struct RootView: View {
                 journal.waitUntilSaved()
                 sketches.waitUntilSaved()
                 lists.waitUntilSaved()
+                wishlist.waitUntilSaved()
                 AppLog.info("App in background")
             default:
                 break
@@ -221,6 +227,7 @@ struct RootView: View {
             pinSketch: {
                 if case .sketch(let id) = page { sheet = .pin(id) }
             },
+            wishlist: { sheet = .wishlist },
             share: share,
             settings: { sheet = .settings }
         )
@@ -548,6 +555,8 @@ struct RootView: View {
             )
         case .pin(let id):
             SketchPinView(book: sketches, id: id, today: today)
+        case .wishlist:
+            WishlistView(book: wishlist)
         case .list(let kind, let inkedLines, let focusNew):
             TypedListView(lists: lists, kind: kind, inkedLines: inkedLines, focusNew: focusNew, title: listTitle(kind))
         }

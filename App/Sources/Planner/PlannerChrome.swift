@@ -16,6 +16,7 @@ struct PlannerBarActions {
     var journalPageSettings: () -> Void
     var journalPages: () -> Void
     var pinSketch: () -> Void
+    var wishlist: () -> Void
     var share: (PageExportFormat) -> Void
     var settings: () -> Void
 }
@@ -25,7 +26,8 @@ struct PlannerBarActions {
 ///   year she came from),
 /// - JOURNAL and SKETCHES, the notebooks outside the planner (the year and months are the
 ///   tabs on the right),
-/// - the open page's own tools (journal: new page, page details, all pages; sketch: pin to a day),
+/// - the open page's own tools (journal: new page, page details, all pages; sketch: pin to a
+///   day; To Buy: the wishlist, also on the narrowest bar),
 /// - New sketch (always there on iPad), Birthdays (gift), To Buy (bag),
 /// - previous/next, Today, Share and Settings.
 ///
@@ -68,11 +70,14 @@ struct PlannerTopBar: View {
             Spacer(minLength: 4)
 
             if style != .minimal {
-                pageTools
+                pageTools(style)
                 if canDraw {
                     BarIconButton(systemName: "pencil.tip.crop.circle.badge.plus", identifier: "nav.newSketch", compact: compact, action: actions.newSketch)
                         .accessibilityLabel(Text("New sketch"))
                 }
+            } else if page == .toBuy {
+                // The To Buy page has no arrows: room for the wishlist even on the iPhone.
+                pageTools(style)
             }
 
             BarIconButton(systemName: "gift", identifier: "nav.birthdays", compact: compact, action: actions.birthdays)
@@ -166,7 +171,7 @@ struct PlannerTopBar: View {
 
     /// The open page's own tools.
     @ViewBuilder
-    private var pageTools: some View {
+    private func pageTools(_ style: Style) -> some View {
         switch page {
         case .journal:
             if canDraw {
@@ -180,9 +185,44 @@ struct PlannerTopBar: View {
         case .sketch:
             BarIconButton(systemName: "pin", identifier: "nav.sketch.pin", compact: compact, action: actions.pinSketch)
                 .accessibilityLabel(Text("Pin to a day"))
+        case .toBuy:
+            wishlistButton(withTitle: style == .full)
         default:
             EmptyView()
         }
+    }
+
+    /// The heart that opens the wishlist (the photos of things to buy), with its name when
+    /// there is room.
+    @ViewBuilder
+    private func wishlistButton(withTitle: Bool) -> some View {
+        if withTitle {
+            Button(action: actions.wishlist) {
+                HStack(spacing: 7) {
+                    Image(systemName: "heart")
+                        .font(.system(size: 18, weight: .semibold))
+                    Text(verbatim: PlannerText.uppercased(Self.wishlistTitle, locale: AppLocale.current))
+                        .font(.inter(.semibold, size: 13, relativeTo: .subheadline))
+                        .tracking(1.4)
+                        .lineLimit(1)
+                        .fixedSize()
+                }
+                .foregroundStyle(Paper.ink)
+                .padding(.horizontal, 10)
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(Text("Wishlist"))
+            .accessibilityIdentifier("nav.wishlist")
+        } else {
+            BarIconButton(systemName: "heart", identifier: "nav.wishlist", compact: compact, action: actions.wishlist)
+                .accessibilityLabel(Text("Wishlist"))
+        }
+    }
+
+    static var wishlistTitle: String {
+        String(localized: "Wishlist", comment: "The wishlist: photos of things she would like to buy. Button on the To Buy page (printed in capitals) and title of its screen.")
     }
 
     private var shareMenu: some View {
