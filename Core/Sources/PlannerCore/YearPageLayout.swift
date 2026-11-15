@@ -31,6 +31,8 @@ public struct YearPageLayout: Sendable {
     public static let miniTitleSize: CGFloat = 15
     public static let weekdaySize: CGFloat = 9
     public static let dayNumberSize: CGFloat = 11
+    /// The dot of a day with an event, under the middle of its number.
+    public static let eventDotOffset: CGFloat = 6.8
 
     static let titleBaseline: CGFloat = 102
     static let gridTop: CGFloat = 140

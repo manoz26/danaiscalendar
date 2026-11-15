@@ -19,6 +19,168 @@
         }
       }
     },
+    "%lld days before" : {
+      "comment" : "Reminder of an event, e.g. '2 days before'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld μέρες πριν"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld days before"
+          }
+        }
+      }
+    },
+    "%lld days before at %@" : {
+      "comment" : "Reminder of an all-day event, e.g. '2 days before at 9:00'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld μέρες πριν στις %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld days before at %2$@"
+          }
+        }
+      }
+    },
+    "%lld hours before" : {
+      "comment" : "Reminder of an event, e.g. '2 hours before'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ώρες πριν"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld hours before"
+          }
+        }
+      }
+    },
+    "%lld minutes before" : {
+      "comment" : "Reminder of an event, e.g. '15 minutes before'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld λεπτά πριν"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld minutes before"
+          }
+        }
+      }
+    },
+    "1 day before" : {
+      "comment" : "Reminder of an event.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 μέρα πριν"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 day before"
+          }
+        }
+      }
+    },
+    "1 day before at %@" : {
+      "comment" : "Reminder of an all-day event, e.g. '1 day before at 9:00'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 μέρα πριν στις %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 day before at %@"
+          }
+        }
+      }
+    },
+    "1 hour before" : {
+      "comment" : "Reminder of an event.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 ώρα πριν"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 hour before"
+          }
+        }
+      }
+    },
+    "1 week before" : {
+      "comment" : "Reminder of an event.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 εβδομάδα πριν"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 week before"
+          }
+        }
+      }
+    },
+    "1 week before at %@" : {
+      "comment" : "Reminder of an all-day event, e.g. '1 week before at 9:00'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 εβδομάδα πριν στις %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 week before at %@"
+          }
+        }
+      }
+    },
     "A day with a page gets a small dot on the month page. Hold a finger on a day to open its page." : {
       "comment" : "Footer under the date of a journal page.",
       "extractionState" : "manual",
@@ -51,6 +213,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "About"
+          }
+        }
+      }
+    },
+    "Add" : {
+      "comment" : "Saves a new event.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προσθήκη"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add"
           }
         }
       }
@@ -163,6 +343,24 @@
         }
       }
     },
+    "All day" : {
+      "comment" : "An all-day event: in a day's list (instead of its time) and the switch of the event form.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ολοήμερο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All day"
+          }
+        }
+      }
+    },
     "All pages" : {
       "comment" : "Top bar button on a journal page: all the journal's pages as small pictures.",
       "extractionState" : "manual",
@@ -199,6 +397,24 @@
         }
       }
     },
+    "Apple Calendar" : {
+      "comment" : "Settings section header (printed in capitals).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ημερολόγιο Apple"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Calendar"
+          }
+        }
+      }
+    },
     "Apple Pencil" : {
       "comment" : "Settings section header (product name, keep it).",
       "extractionState" : "manual",
@@ -213,6 +429,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apple Pencil"
+          }
+        }
+      }
+    },
+    "At time of event" : {
+      "comment" : "Reminder of an event: when it starts.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Την ώρα του συμβάντος"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At time of event"
           }
         }
       }
@@ -325,6 +559,42 @@
         }
       }
     },
+    "Calendar" : {
+      "comment" : "Event form: which of the device's calendars the event is in.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ημερολόγιο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendar"
+          }
+        }
+      }
+    },
+    "Calendars" : {
+      "comment" : "Settings: which of the device's calendars the pages print.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ημερολόγια"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendars"
+          }
+        }
+      }
+    },
     "Cancel" : {
       "comment" : "Keeps the birthday instead of deleting it.",
       "extractionState" : "manual",
@@ -375,6 +645,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Close"
+          }
+        }
+      }
+    },
+    "Connect Apple Calendar" : {
+      "comment" : "Button that asks iOS for access to the calendars.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σύνδεση με το Ημερολόγιο της Apple"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connect Apple Calendar"
+          }
+        }
+      }
+    },
+    "Custom" : {
+      "comment" : "Repeat of an event made in Apple Calendar that the form can't show (e.g. every weekday). It stays as it is.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προσαρμοσμένη"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom"
           }
         }
       }
@@ -433,6 +739,24 @@
         }
       }
     },
+    "Delete all future events" : {
+      "comment" : "Deletes this and the following occurrences of a repeating event.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Διαγραφή και όλων των επόμενων"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete all future events"
+          }
+        }
+      }
+    },
     "Delete birthday" : {
       "comment" : "Birthday form: button that deletes the birthday (asks first).",
       "extractionState" : "manual",
@@ -447,6 +771,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delete birthday"
+          }
+        }
+      }
+    },
+    "Delete event" : {
+      "comment" : "Deletes an event of the Apple Calendar.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Διαγραφή συμβάντος"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete event"
           }
         }
       }
@@ -537,6 +879,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delete this birthday?"
+          }
+        }
+      }
+    },
+    "Delete this event only" : {
+      "comment" : "Deletes one occurrence of a repeating event.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Διαγραφή μόνο αυτού"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this event only"
+          }
+        }
+      }
+    },
+    "Delete this event?" : {
+      "comment" : "Confirmation before deleting an event.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Διαγραφή του συμβάντος;"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this event?"
           }
         }
       }
@@ -721,6 +1099,24 @@
         }
       }
     },
+    "Ends" : {
+      "comment" : "Event form: the end.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τέλος"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ends"
+          }
+        }
+      }
+    },
     "Erase what you touch" : {
       "comment" : "Toolbar, eraser mode: erases only the parts of the ink it touches (VoiceOver).",
       "extractionState" : "manual",
@@ -771,6 +1167,150 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eraser"
+          }
+        }
+      }
+    },
+    "Event" : {
+      "comment" : "Title of the form of an existing event of the Apple Calendar.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Συμβάν"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Event"
+          }
+        }
+      }
+    },
+    "Events are kept in Apple Calendar: a change here shows there too, and the other way round." : {
+      "comment" : "Under a day's events.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα συμβάντα φυλάγονται στο Ημερολόγιο της Apple: μια αλλαγή εδώ φαίνεται κι εκεί, και αντίστροφα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Events are kept in Apple Calendar: a change here shows there too, and the other way round."
+          }
+        }
+      }
+    },
+    "Events are printed in the day cells, under your handwriting. Turn this off for purely handwritten pages; the day's list still shows them." : {
+      "comment" : "Settings footer under 'Show events in the cells'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα συμβάντα τυπώνονται στα κελιά των ημερών, κάτω από το χειρόγραφό σου. Κλείσ' το για σελίδες μόνο με χειρόγραφο· η λίστα της ημέρας τα δείχνει πάντα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Events are printed in the day cells, under your handwriting. Turn this off for purely handwritten pages; the day's list still shows them."
+          }
+        }
+      }
+    },
+    "Every 2 weeks" : {
+      "comment" : "Repeat of an event.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κάθε 2 εβδομάδες"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every 2 weeks"
+          }
+        }
+      }
+    },
+    "Every day" : {
+      "comment" : "Repeat of an event.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κάθε μέρα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every day"
+          }
+        }
+      }
+    },
+    "Every month" : {
+      "comment" : "Repeat of an event.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κάθε μήνα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every month"
+          }
+        }
+      }
+    },
+    "Every week" : {
+      "comment" : "Repeat of an event.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κάθε εβδομάδα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every week"
+          }
+        }
+      }
+    },
+    "Every year" : {
+      "comment" : "Repeat of an event.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κάθε χρόνο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every year"
           }
         }
       }
@@ -951,6 +1491,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Image"
+          }
+        }
+      }
+    },
+    "It is deleted from Apple Calendar too." : {
+      "comment" : "Under 'Delete this event?'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σβήνεται και από το Ημερολόγιο της Apple."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It is deleted from Apple Calendar too."
           }
         }
       }
@@ -1351,6 +1909,24 @@
         }
       }
     },
+    "Never" : {
+      "comment" : "Repeat of an event: it does not repeat.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ποτέ"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Never"
+          }
+        }
+      }
+    },
     "New birthday" : {
       "comment" : "Title of the birthday form when adding one.",
       "extractionState" : "manual",
@@ -1365,6 +1941,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "New birthday"
+          }
+        }
+      }
+    },
+    "New event" : {
+      "comment" : "Title of the form for a new event of the Apple Calendar, and VoiceOver of the + of a day's events.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Νέο συμβάν"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New event"
           }
         }
       }
@@ -1495,6 +2089,24 @@
         }
       }
     },
+    "No access to your calendar" : {
+      "comment" : "Title when access to the calendars was refused.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Χωρίς πρόσβαση στο ημερολόγιό σου"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No access to your calendar"
+          }
+        }
+      }
+    },
     "No birthdays yet" : {
       "comment" : "Birthdays list when it is empty.",
       "extractionState" : "manual",
@@ -1509,6 +2121,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No birthdays yet"
+          }
+        }
+      }
+    },
+    "No events on this day." : {
+      "comment" : "A day's events (Apple Calendar): there are none.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κανένα συμβάν αυτή τη μέρα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No events on this day."
           }
         }
       }
@@ -1563,6 +2193,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No sketches yet"
+          }
+        }
+      }
+    },
+    "None" : {
+      "comment" : "Event form: no reminder.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Καμία"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None"
+          }
+        }
+      }
+    },
+    "None of your calendars can be changed here." : {
+      "comment" : "Under a day's events when no calendar of the device accepts changes.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κανένα από τα ημερολόγιά σου δεν αλλάζει από εδώ."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None of your calendars can be changed here."
           }
         }
       }
@@ -1657,6 +2323,42 @@
         }
       }
     },
+    "On the day at %@" : {
+      "comment" : "Reminder of an all-day event, e.g. 'On the day at 9:00'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Την ίδια μέρα στις %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On the day at %@"
+          }
+        }
+      }
+    },
+    "Open Settings" : {
+      "comment" : "Opens the iOS Settings app at this app's page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Άνοιγμα Ρυθμίσεων"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Settings"
+          }
+        }
+      }
+    },
     "Optional" : {
       "comment" : "Placeholder of a journal page's title.",
       "extractionState" : "manual",
@@ -1671,6 +2373,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Optional"
+          }
+        }
+      }
+    },
+    "Other" : {
+      "comment" : "A reminder set in Apple Calendar that the form doesn't offer. It stays as it is.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Άλλη"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other"
           }
         }
       }
@@ -2071,6 +2791,60 @@
         }
       }
     },
+    "Reminder" : {
+      "comment" : "Event form: the alert before the event.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Υπενθύμιση"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reminder"
+          }
+        }
+      }
+    },
+    "Reminders are Apple Calendar's own: the iPad and the iPhone show them." : {
+      "comment" : "Event form, under the reminder.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι υπενθυμίσεις είναι του Ημερολογίου της Apple: τις δείχνουν το iPad και το iPhone."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reminders are Apple Calendar's own: the iPad and the iPhone show them."
+          }
+        }
+      }
+    },
+    "Repeat" : {
+      "comment" : "Event form: how it repeats.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επανάληψη"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repeat"
+          }
+        }
+      }
+    },
     "Save" : {
       "comment" : "Birthday form: saves the birthday.",
       "extractionState" : "manual",
@@ -2085,6 +2859,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Save"
+          }
+        }
+      }
+    },
+    "Save for future events" : {
+      "comment" : "Saves a change to this and the following occurrences of a repeating event.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αποθήκευση και για τα επόμενα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save for future events"
+          }
+        }
+      }
+    },
+    "Save for this event only" : {
+      "comment" : "Saves a change to one occurrence of a repeating event.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αποθήκευση μόνο γι' αυτό"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save for this event only"
           }
         }
       }
@@ -2139,6 +2949,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Share page"
+          }
+        }
+      }
+    },
+    "Show events in the cells" : {
+      "comment" : "Settings switch: print the Apple Calendar's events on the pages.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εμφάνιση συμβάντων στα κελιά"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show events in the cells"
           }
         }
       }
@@ -2251,6 +3079,24 @@
         }
       }
     },
+    "Starts" : {
+      "comment" : "Event form: the start.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αρχή"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starts"
+          }
+        }
+      }
+    },
     "Strong highlighter" : {
       "comment" : "Toolbar: the highlighter at full colour, its strongest opacity level (VoiceOver).",
       "extractionState" : "manual",
@@ -2341,6 +3187,24 @@
         }
       }
     },
+    "The app keeps no copy of your events. Without access it works as before, as a handwritten planner." : {
+      "comment" : "Under the button that connects the Apple Calendar.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Η εφαρμογή δεν κρατάει αντίγραφο των συμβάντων σου. Χωρίς πρόσβαση δουλεύει όπως πριν, ως χειρόγραφο planner."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The app keeps no copy of your events. Without access it works as before, as a handwritten planner."
+          }
+        }
+      }
+    },
     "The day gets a small sketch mark on the month page. Tap the mark to open the sketch." : {
       "comment" : "Footer of the day picker that pins a sketch.",
       "extractionState" : "manual",
@@ -2355,6 +3219,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "The day gets a small sketch mark on the month page. Tap the mark to open the sketch."
+          }
+        }
+      }
+    },
+    "The event could not be deleted." : {
+      "comment" : "Alert when deleting an event failed.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το συμβάν δεν μπόρεσε να σβηστεί."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The event could not be deleted."
+          }
+        }
+      }
+    },
+    "The event could not be saved." : {
+      "comment" : "Alert when saving an event failed.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το συμβάν δεν μπόρεσε να αποθηκευτεί."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The event could not be saved."
+          }
+        }
+      }
+    },
+    "The events of Apple Calendar (and of Google or Outlook accounts on this device) are printed in the day cells, under your handwriting." : {
+      "comment" : "Settings footer before access to the calendars.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα συμβάντα του Ημερολογίου της Apple (και των λογαριασμών Google ή Outlook αυτής της συσκευής) τυπώνονται στα κελιά των ημερών, κάτω από το χειρόγραφό σου."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The events of Apple Calendar (and of Google or Outlook accounts on this device) are printed in the day cells, under your handwriting."
+          }
+        }
+      }
+    },
+    "The events of Apple Calendar (and of Google or Outlook accounts on this device) are printed in the day cells, under your handwriting. Here you can add, change and delete them." : {
+      "comment" : "Explains connecting the Apple Calendar, before access.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα συμβάντα του Ημερολογίου της Apple (και των λογαριασμών Google ή Outlook αυτής της συσκευής) τυπώνονται στα κελιά των ημερών, κάτω από το χειρόγραφό σου. Εδώ μπορείς να τα προσθέτεις, να τα αλλάζεις και να τα σβήνεις."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The events of Apple Calendar (and of Google or Outlook accounts on this device) are printed in the day cells, under your handwriting. Here you can add, change and delete them."
           }
         }
       }
@@ -2395,6 +3331,24 @@
         }
       }
     },
+    "The pages print the events of the ticked calendars." : {
+      "comment" : "Under the list of calendars in Settings.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι σελίδες τυπώνουν τα συμβάντα των τσεκαρισμένων ημερολογίων."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The pages print the events of the ticked calendars."
+          }
+        }
+      }
+    },
     "Thick" : {
       "comment" : "Toolbar: thickest line width (VoiceOver).",
       "extractionState" : "manual",
@@ -2431,6 +3385,24 @@
         }
       }
     },
+    "This calendar can't be changed here." : {
+      "comment" : "Event form of an event in a calendar that accepts no changes (e.g. subscribed holidays).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αυτό το ημερολόγιο δεν αλλάζει από εδώ."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This calendar can't be changed here."
+          }
+        }
+      }
+    },
     "This device" : {
       "comment" : "Diagnostics section header: version, device model and system.",
       "extractionState" : "manual",
@@ -2445,6 +3417,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "This device"
+          }
+        }
+      }
+    },
+    "This is a repeating event." : {
+      "comment" : "Question before saving or deleting one occurrence of a repeating event.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Είναι συμβάν που επαναλαμβάνεται."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is a repeating event."
           }
         }
       }
@@ -2535,6 +3525,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "To do list"
+          }
+        }
+      }
+    },
+    "To see your events here, allow full access to Danai's Calendar in the Settings app, under Privacy & Security → Calendars." : {
+      "comment" : "When access to the calendars was refused: where iOS allows it.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Για να βλέπεις εδώ τα συμβάντα σου, δώσε πλήρη πρόσβαση στο Danai's Calendar από την εφαρμογή Ρυθμίσεις, στο Απόρρητο και ασφάλεια → Ημερολόγια."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To see your events here, allow full access to Danai's Calendar in the Settings app, under Privacy & Security → Calendars."
           }
         }
       }
@@ -2841,6 +3849,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "You can also write the title with Apple Pencil: it turns into text."
+          }
+        }
+      }
+    },
+    "Your Apple Calendar in the planner" : {
+      "comment" : "Title over the button that connects the Apple Calendar, before access.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το Ημερολόγιο της Apple στις σελίδες σου"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your Apple Calendar in the planner"
           }
         }
       }

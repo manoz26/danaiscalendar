@@ -1,9 +1,12 @@
 import SwiftUI
 import UIKit
+import PlannerCore
 
-/// Settings sheet: drawing with a finger (iPad), and the version; tapping the version
-/// 5 times opens Diagnostics.
+/// Settings sheet: drawing with a finger (iPad), the Apple Calendar (events in the cells,
+/// which calendars), and the version; tapping the version 5 times opens Diagnostics.
 struct SettingsView: View {
+    let calendar: CalendarBook
+
     @Environment(\.dismiss) private var dismiss
     @AppStorage(InkDefaults.drawWithFinger) private var drawWithFinger = false
     @State private var versionTaps = 0
@@ -31,6 +34,8 @@ struct SettingsView: View {
                             .foregroundStyle(Paper.secondary)
                     }
                 }
+
+                calendarSection
 
                 Section {
                     Button(action: versionTapped) {
@@ -76,6 +81,77 @@ struct SettingsView: View {
         .tint(Paper.ink)
     }
 
+    /// Apple Calendar: connect it; then events in the cells (on or off) and which calendars.
+    @ViewBuilder
+    private var calendarSection: some View {
+        Section {
+            switch calendar.access {
+            case .allowed:
+                Toggle(isOn: Binding(get: { calendar.showInCells }, set: { calendar.showInCells = $0 })) {
+                    Text("Show events in the cells")
+                        .font(.inter(.regular, size: 17, relativeTo: .body))
+                        .foregroundStyle(Paper.ink)
+                }
+                .tint(Paper.ink)
+                .accessibilityIdentifier("settings.showEvents")
+                .listRowBackground(Paper.background)
+                NavigationLink {
+                    CalendarChoiceView(book: calendar)
+                } label: {
+                    LabeledContent {
+                        Text(verbatim: "\(calendar.calendars.filter { calendar.isShown($0.id) }.count) / \(calendar.calendars.count)")
+                            .foregroundStyle(Paper.secondary)
+                    } label: {
+                        Text("Calendars")
+                            .foregroundStyle(Paper.ink)
+                    }
+                    .font(.inter(.regular, size: 17, relativeTo: .body))
+                }
+                .accessibilityIdentifier("settings.calendars")
+                .listRowBackground(Paper.background)
+            case .notAsked:
+                Button {
+                    Task {
+                        await calendar.requestAccess()
+                    }
+                } label: {
+                    Text("Connect Apple Calendar")
+                        .font(.inter(.regular, size: 17, relativeTo: .body))
+                        .foregroundStyle(Paper.ink)
+                }
+                .accessibilityIdentifier("settings.connectCalendar")
+                .listRowBackground(Paper.background)
+            case .writeOnly, .denied, .restricted:
+                Button {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                } label: {
+                    Text("Open Settings")
+                        .font(.inter(.regular, size: 17, relativeTo: .body))
+                        .foregroundStyle(Paper.ink)
+                }
+                .accessibilityIdentifier("settings.openSettings")
+                .listRowBackground(Paper.background)
+            }
+        } header: {
+            CapsLabel("Apple Calendar")
+        } footer: {
+            Group {
+                switch calendar.access {
+                case .allowed:
+                    Text("Events are printed in the day cells, under your handwriting. Turn this off for purely handwritten pages; the day's list still shows them.")
+                case .notAsked:
+                    Text("The events of Apple Calendar (and of Google or Outlook accounts on this device) are printed in the day cells, under your handwriting.")
+                case .writeOnly, .denied, .restricted:
+                    Text("To see your events here, allow full access to Danai's Calendar in the Settings app, under Privacy & Security → Calendars.")
+                }
+            }
+            .font(.inter(.regular, size: 13, relativeTo: .footnote))
+            .foregroundStyle(Paper.secondary)
+        }
+    }
+
     /// Five taps, each within a few seconds of the last, open the hidden Diagnostics screen.
     private func versionTapped() {
         let now = Date()
@@ -85,6 +161,65 @@ struct SettingsView: View {
             versionTaps = 0
             AppLog.info("Diagnostics opened")
             showDiagnostics = true
+        }
+    }
+}
+
+/// Which calendars' events the pages print, grouped by account; a tick for each shown one.
+struct CalendarChoiceView: View {
+    let book: CalendarBook
+
+    private struct Account: Identifiable {
+        let source: String
+        let calendars: [EventCalendar]
+        var id: String { source }
+    }
+
+    var body: some View {
+        let groups = Dictionary(grouping: book.calendars, by: \.source)
+            .map { Account(source: $0.key, calendars: $0.value) }
+            .sorted { $0.source.localizedStandardCompare($1.source) == .orderedAscending }
+        List {
+            ForEach(groups) { group in
+                Section {
+                    ForEach(group.calendars.sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }) { item in
+                        Button {
+                            book.setShown(!book.isShown(item.id), calendar: item.id)
+                        } label: {
+                            HStack {
+                                Text(verbatim: item.title)
+                                    .font(.inter(.regular, size: 17, relativeTo: .body))
+                                    .foregroundStyle(Paper.ink)
+                                Spacer()
+                                if book.isShown(item.id) {
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundStyle(Paper.ink)
+                                }
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(book.isShown(item.id) ? .isSelected : [])
+                        .accessibilityIdentifier("calendars.row")
+                        .listRowBackground(Paper.background)
+                    }
+                } header: {
+                    CapsLabel(verbatim: group.source)
+                }
+            }
+        }
+        .listStyle(.insetGrouped)
+        .textCase(nil)
+        .scrollContentBackground(.hidden)
+        .background(Paper.fill)
+        .navigationTitle(Text("Calendars"))
+        .navigationBarTitleDisplayMode(.inline)
+        .safeAreaInset(edge: .bottom) {
+            Text("The pages print the events of the ticked calendars.")
+                .font(.inter(.regular, size: 13, relativeTo: .footnote))
+                .foregroundStyle(Paper.secondary)
+                .padding()
         }
     }
 }

@@ -3,8 +3,8 @@ import UIKit
 import PlannerCore
 
 /// Everything of the user's that pages print: birthdays, journal pages (a dot on their
-/// day), pinned sketches (a mark on their day), typed list items, and the weeks with ink
-/// (a dot on their WEEKLY button).
+/// day), pinned sketches (a mark on their day), typed list items, the weeks with ink
+/// (a dot on their WEEKLY button), and the page's events of the Apple Calendar.
 struct PlannerData: Equatable {
     var birthdays: [Birthday] = []
     var journal = Journal()
@@ -12,6 +12,8 @@ struct PlannerData: Equatable {
     var todos: [ListItem] = []
     var toBuy: [ListItem] = []
     var inkedWeeks: Set<PlannerWeek> = []
+    var events: [CalendarEvent] = []
+    var eventClock: EventClock = .standard
 }
 
 /// What one planner page shows: its printed template, and the parts VoiceOver and the
@@ -35,7 +37,11 @@ struct PlannerPageContent: Equatable {
         layout = PageLayoutStamp.current(for: page)
         switch page {
         case .year(let year):
-            template = YearPageTemplate.make(year: year, locale: locale, today: today)
+            let eventDays = EventLayout.days(
+                with: data.events, from: PlannerDate(year: year, month: 1, day: 1),
+                through: PlannerDate(year: year, month: 12, day: 31), calendar: data.eventClock.calendar
+            )
+            template = YearPageTemplate.make(year: year, locale: locale, today: today, eventDays: eventDays)
             identifier = "page.year"
             let name = String(year)
             accessibilityLabel = String(localized: "Year page for \(name)", comment: "VoiceOver: the year page, e.g. 'Year page for 2026'.")
@@ -50,14 +56,16 @@ struct PlannerPageContent: Equatable {
             template = MonthPageTemplate.make(
                 month: month, locale: locale, labels: Self.labels, today: today, birthdays: notes,
                 journalDays: data.journal.datedDays, sketchDays: Set(pinned.keys),
-                todos: todos.items, todoOverflow: todos.overflow, inkedWeeks: inkedWeeks
+                todos: todos.items, todoOverflow: todos.overflow, inkedWeeks: inkedWeeks,
+                events: data.events, eventClock: data.eventClock
             )
             identifier = "page.month"
             let name = "\(MonthTitle.text(for: month, locale: locale)) \(month.year)"
             accessibilityLabel = String(localized: "Month page for \(name)", comment: "VoiceOver: the month page, e.g. 'Month page for NOVEMBER 2026'.")
             accessibilityItems = Self.monthItems(
                 month: month, template: template, locale: locale, birthdays: notes,
-                journalDays: data.journal.datedDays, pinned: pinned, todos: todos.items, inkedWeeks: inkedWeeks
+                journalDays: data.journal.datedDays, pinned: pinned, todos: todos.items, inkedWeeks: inkedWeeks,
+                events: data.events, clock: data.eventClock
             )
         case .week(let week):
             let notes = week.months
@@ -65,13 +73,15 @@ struct PlannerPageContent: Equatable {
                 .filter { week.contains($0.date) }
             template = WeekPageTemplate.make(
                 week: week, locale: locale, labels: Self.weekLabels, month: month ?? week.month, today: today,
-                journalDays: data.journal.datedDays, birthdayDays: Set(notes.map(\.date))
+                journalDays: data.journal.datedDays, birthdayDays: Set(notes.map(\.date)),
+                events: data.events, eventClock: data.eventClock
             )
             identifier = "page.week"
             let name = "\(WeekTitle.days(of: week, locale: locale)) \(WeekTitle.years(of: week))"
             accessibilityLabel = String(localized: "Week page for \(name)", comment: "VoiceOver: the week page, e.g. 'Week page for 9 – 15 November 2026'.")
             accessibilityItems = Self.weekItems(
-                week: week, template: template, locale: locale, birthdays: notes, journalDays: data.journal.datedDays
+                week: week, template: template, locale: locale, birthdays: notes, journalDays: data.journal.datedDays,
+                events: data.events, clock: data.eventClock
             )
         case .toBuy:
             let items = TypedLists.printed(data.toBuy, lineCount: TypedListKind.toBuy.lineCount)
@@ -140,7 +150,8 @@ struct PlannerPageContent: Equatable {
 
     private static func monthItems(
         month: YearMonth, template: PageTemplate, locale: Locale, birthdays: [BirthdayNote],
-        journalDays: Set<PlannerDate>, pinned: [PlannerDate: [Sketch]], todos: [PrintedItem], inkedWeeks: Set<Int>
+        journalDays: Set<PlannerDate>, pinned: [PlannerDate: [Sketch]], todos: [PrintedItem], inkedWeeks: Set<Int>,
+        events: [CalendarEvent], clock: EventClock
     ) -> [PageAccessibilityItem] {
         let title = MonthTitle.text(for: month, locale: locale)
         var items: [PageAccessibilityItem] = []
@@ -181,11 +192,12 @@ struct PlannerPageContent: Equatable {
         let days = DayNames(locale: locale)
         for region in template.regions {
             guard case .day(let date) = region.id else { continue }
-            // A day of this month says whose birthdays, and whether it has a journal page
-            // or pinned sketches.
+            // A day of this month says whose birthdays, whether it has a journal page or
+            // pinned sketches, and its events.
             var parts: [String] = []
             if date.yearMonth == month {
                 parts += birthdays.filter { $0.date == date }.map(\.text)
+                parts += spokenEvents(events, on: date, clock: clock)
                 if journalDays.contains(date) {
                     parts.append(String(localized: "Journal page", comment: "VoiceOver: this day has a journal page (it shows a dot)."))
                 }
@@ -242,13 +254,24 @@ struct PlannerPageContent: Equatable {
         return items
     }
 
+    /// A day's events as VoiceOver says them: "9:30 Dentist" (or "9:30 – 10:30 Dentist"),
+    /// or only the title of an all-day one.
+    static func spokenEvents(_ events: [CalendarEvent], on date: PlannerDate, clock: EventClock, withEnd: Bool = false) -> [String] {
+        EventLayout.list(events, on: date, calendar: clock.calendar).map { event in
+            guard !event.isLong else { return event.trimmedTitle }
+            let time = withEnd ? clock.range(event.start, event.end) : clock.time(event.start)
+            return "\(time) \(event.trimmedTitle)"
+        }
+    }
+
     /// VoiceOver: a WEEKLY button whose week page has ink (it shows a dot).
     static var hasInkText: String {
         String(localized: "Has handwriting", comment: "VoiceOver: the week page of this WEEKLY button has handwriting (the button shows a dot).")
     }
 
     private static func weekItems(
-        week: PlannerWeek, template: PageTemplate, locale: Locale, birthdays: [BirthdayNote], journalDays: Set<PlannerDate>
+        week: PlannerWeek, template: PageTemplate, locale: Locale, birthdays: [BirthdayNote], journalDays: Set<PlannerDate>,
+        events: [CalendarEvent], clock: EventClock
     ) -> [PageAccessibilityItem] {
         var items: [PageAccessibilityItem] = []
         if let region = template.region(.title) {
@@ -268,6 +291,7 @@ struct PlannerPageContent: Equatable {
                 if journalDays.contains(date) {
                     parts.append(String(localized: "Journal page", comment: "VoiceOver: this day has a journal page (it shows a dot)."))
                 }
+                parts += spokenEvents(events, on: date, clock: clock, withEnd: true)
                 items.append(PageAccessibilityItem(
                     identifier: "week.day.\(date)",
                     label: days.name(of: date),
@@ -459,6 +483,14 @@ enum LaunchOptions {
     /// `-DCSampleWishlist YES`: five made-up wishlist photos (drawn by the code), if there are none.
     static var sampleWishlist: Bool { ProcessInfo.processInfo.arguments.contains("-DCSampleWishlist") }
 
+    /// `-DCSampleEvents YES`: made-up calendars and events (March 2029) instead of the device's,
+    /// with access; `-DCSampleEvents ask`: the same, after "Connect Apple Calendar" (no system dialog).
+    static var sampleEvents: String? {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let index = arguments.firstIndex(of: "-DCSampleEvents") else { return nil }
+        return index + 1 < arguments.count ? arguments[index + 1] : "YES"
+    }
+
     /// Called at launch, before the ink is loaded.
     @MainActor
     static func prepareTestData() {
@@ -468,7 +500,7 @@ enum LaunchOptions {
         try? FileManager.default.removeItem(at: ListsFolder.url)
         try? FileManager.default.removeItem(at: WishlistBook.defaultFolder)
         try? FileManager.default.removeItem(at: WishlistBook.thumbnailFolder)
-        for key in InkDefaults.all {
+        for key in InkDefaults.all + CalendarDefaults.all {
             UserDefaults.standard.removeObject(forKey: key)
         }
         AppLog.info("Test data reset")

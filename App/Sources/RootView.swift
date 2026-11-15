@@ -13,6 +13,8 @@ enum PlannerSheet: Identifiable {
     case pin(UUID)
     /// The photos of things to buy (from the To Buy page).
     case wishlist
+    /// A day's events of the Apple Calendar (a finger on a day).
+    case day(PlannerDate)
     /// Typed items of a list; `inkedLines` are the page's lines with handwriting.
     case list(TypedListKind, inkedLines: Set<Int>, focusNew: Bool)
 
@@ -25,6 +27,7 @@ enum PlannerSheet: Identifiable {
         case .sketches(let day): "sketches:\(day?.description ?? "all")"
         case .pin(let id): "pin:\(id)"
         case .wishlist: "wishlist"
+        case .day(let date): "day:\(date)"
         case .list(let kind, _, _): "list:\(kind.id)"
         }
     }
@@ -40,6 +43,8 @@ struct RootView: View {
     let sketches: SketchBook
     let lists: ListBook
     let wishlist: WishlistBook
+    /// The events of the Apple Calendar, printed on the pages.
+    let appleCalendar: CalendarBook
     @AppStorage(InkDefaults.drawWithFinger) private var drawWithFinger = false
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -61,9 +66,13 @@ struct RootView: View {
     @State private var lastExport = ""
     #endif
 
-    init(ink: InkController, birthdays: BirthdayBook, journal: JournalBook, sketches: SketchBook, lists: ListBook, wishlist: WishlistBook) {
+    init(
+        ink: InkController, birthdays: BirthdayBook, journal: JournalBook, sketches: SketchBook,
+        lists: ListBook, wishlist: WishlistBook, appleCalendar: CalendarBook
+    ) {
         self.ink = ink
         self.wishlist = wishlist
+        self.appleCalendar = appleCalendar
         self.birthdays = birthdays
         self.journal = journal
         self.sketches = sketches
@@ -141,6 +150,7 @@ struct RootView: View {
             switch phase {
             case .active:
                 now = Date()
+                appleCalendar.refreshAccess()
                 AppLog.info("App active")
             case .inactive:
                 ink.saveSoon()
@@ -171,8 +181,25 @@ struct RootView: View {
             sketches: sketches.sketches,
             todos: lists.todos,
             toBuy: lists.toBuy,
-            inkedWeeks: ink.inkedWeeks
+            inkedWeeks: ink.inkedWeeks,
+            events: pageEvents,
+            eventClock: EventClock.current
         )
+    }
+
+    /// The events printed on the open page: of its days (a week's, a month's, a year's).
+    private var pageEvents: [CalendarEvent] {
+        guard appleCalendar.showInCells else { return [] }
+        switch page {
+        case .year(let year):
+            return appleCalendar.events(from: PlannerDate(year: year, month: 1, day: 1), through: PlannerDate(year: year, month: 12, day: 31))
+        case .month(let month):
+            return appleCalendar.events(from: month.firstDay, through: month.lastDay)
+        case .week(let week):
+            return appleCalendar.events(from: week.start, through: week.end)
+        default:
+            return []
+        }
     }
 
     /// The month of `calendarPage`, when it is a month.
@@ -354,8 +381,9 @@ struct RootView: View {
     // MARK: - Touches on the page
 
     /// A finger tap: the printed + of a list, the circle or box of a typed item, the sketch
-    /// mark of a day, a day's header on the week page, a WEEKLY button, or a small month
-    /// on the year page.
+    /// mark of a day, a day's header on the week page, a WEEKLY button, a small month on
+    /// the year page, or a day (its events). With "Draw with finger too" a tap in a day
+    /// writes (a dot): only the day's number opens its events, on the month page.
     private func handleTap(at point: CGPoint, in template: PageTemplate) {
         if let control = template.control(at: point) {
             switch control.id {
@@ -382,6 +410,18 @@ struct RootView: View {
             return
         }
         for region in template.regions(at: point) {
+            if case .day(let date) = region.id, case .month = page {
+                if !drawWithFinger || MonthPageLayout.isOnDayNumber(point, cell: region.rect) {
+                    sheet = .day(date)
+                }
+                return
+            }
+            if case .weekDay(let date) = region.id, page.week != nil {
+                if !drawWithFinger {
+                    sheet = .day(date)
+                }
+                return
+            }
             if case .month(let month) = region.id {
                 open(.month(month))
                 return
@@ -517,7 +557,7 @@ struct RootView: View {
     private func sheetView(_ sheet: PlannerSheet) -> some View {
         switch sheet {
         case .settings:
-            SettingsView()
+            SettingsView(calendar: appleCalendar)
         case .birthdays:
             BirthdaysView(book: birthdays)
         case .journalPages:
@@ -557,6 +597,8 @@ struct RootView: View {
             SketchPinView(book: sketches, id: id, today: today)
         case .wishlist:
             WishlistView(book: wishlist)
+        case .day(let date):
+            DayEventsView(book: appleCalendar, day: date, now: now)
         case .list(let kind, let inkedLines, let focusNew):
             TypedListView(lists: lists, kind: kind, inkedLines: inkedLines, focusNew: focusNew, title: listTitle(kind))
         }

@@ -1,0 +1,24 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSCalendarsFullAccessUsageDescription" : {
+      "comment" : "Shown by iOS when the app asks for full access to the calendars (only after 'Connect Apple Calendar').",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το Danai's Calendar τυπώνει τα συμβάντα των ημερολογίων σου στα κελιά των ημερών, κάτω από το χειρόγραφό σου, και σου επιτρέπει να τα προσθέτεις, να τα αλλάζεις και να τα σβήνεις. Τα συμβάντα σου μένουν στο Ημερολόγιο της Apple."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Danai's Calendar prints the events of your calendars in the day cells, under your handwriting, and lets you add, change and delete them. Your events stay in Apple Calendar."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

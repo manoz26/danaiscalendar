@@ -74,6 +74,8 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         ITSAppUsesNonExemptEncryption: false
+        # Asked only when she taps "Connect Apple Calendar"; translated in App/Resources/InfoPlist.xcstrings.
+        NSCalendarsFullAccessUsageDescription: "Danai's Calendar prints the events of your calendars in the day cells, under your handwriting, and lets you add, change and delete them. Your events stay in Apple Calendar."
         LSRequiresIPhoneOS: true
         UIAppFonts:
           - Inter-Regular.ttf

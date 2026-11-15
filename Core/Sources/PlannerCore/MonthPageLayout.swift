@@ -171,3 +171,11 @@ public struct MonthPageLayout: Sendable {
         return regions
     }
 }
+
+extension MonthPageLayout {
+    /// The day's number in the top-left corner of its cell: with "Draw with finger too" a
+    /// finger there still opens the day's events (anywhere else in the cell it writes).
+    public static func isOnDayNumber(_ point: CGPoint, cell: CGRect) -> Bool {
+        cell.contains(point) && point.x < cell.minX + 2 * dayNumberOffset.x && point.y < cell.minY + 2 * dayNumberOffset.y
+    }
+}

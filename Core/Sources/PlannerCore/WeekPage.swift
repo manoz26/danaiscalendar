@@ -137,7 +137,8 @@ public enum WeekPageTemplate {
     /// on the month page; `today` gets the black mark of the month page. Days in
     /// `journalDays` get a small dot after their name, days in `birthdayDays` a small gift
     /// at the right end of their header. A finger on a day's header opens its journal page
-    /// (control `day-page:<day>`).
+    /// (control `day-page:<day>`). `events` (of the Apple Calendar) are printed on the top
+    /// lines of their days, with their start and end in `eventClock`'s times.
     public static func make(
         week: PlannerWeek,
         locale: Locale,
@@ -145,7 +146,9 @@ public enum WeekPageTemplate {
         month: YearMonth? = nil,
         today: PlannerDate? = nil,
         journalDays: Set<PlannerDate> = [],
-        birthdayDays: Set<PlannerDate> = []
+        birthdayDays: Set<PlannerDate> = [],
+        events: [CalendarEvent] = [],
+        eventClock: EventClock = .standard
     ) -> PageTemplate {
         let layout = WeekPageLayout(week: week)
         let caps = { (text: String) in PlannerText.uppercased(text, locale: locale) }
@@ -169,7 +172,8 @@ public enum WeekPageTemplate {
         let room = layout.title.width - TemplateRenderer.width(of: number) - 24
         shapes.append(.text(shrunk(title, toFit: room)))
 
-        // The boxes: header, strong rule, faint lines.
+        // The boxes: header, strong rule, faint lines, and the day's events on the top lines.
+        let dayEvents = events.isEmpty ? [:] : EventLayout.row(week.days, events: events, calendar: eventClock.calendar)
         let names = CalendarNames.weekdays(week.days.map(\.weekday), locale: locale)
         for (box, name) in zip(layout.days, names) {
             guard let date = box.date else { continue }
@@ -181,6 +185,9 @@ public enum WeekPageTemplate {
                 hasBirthday: birthdayDays.contains(date)
             )
             shapes += lines(of: box)
+            if let day = dayEvents[date] {
+                shapes += EventPrinter.weekBox(day, box: box, clock: eventClock)
+            }
             controls.append(PageRegion(.dayPage(date), box.header))
         }
         shapes.append(.text(TemplateText(

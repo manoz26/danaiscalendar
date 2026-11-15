@@ -1,19 +1,21 @@
 import Foundation
 import Testing
 
-/// Checks the app's String Catalog (App/Resources/Localizable.xcstrings) from the source
-/// tree, so a missing Greek or English text fails in the first seconds of CI.
+/// Checks the app's String Catalogs (App/Resources/Localizable.xcstrings, and
+/// InfoPlist.xcstrings for the texts iOS shows, like the calendar permission) from the
+/// source tree, so a missing Greek or English text fails in the first seconds of CI.
 @Suite("String catalog")
 struct StringCatalogTests {
-    private static let catalogURL = URL(fileURLWithPath: #filePath)
+    private static let resources = URL(fileURLWithPath: #filePath)
         .deletingLastPathComponent() // PlannerCoreTests
         .deletingLastPathComponent() // Tests
         .deletingLastPathComponent() // Core
         .deletingLastPathComponent() // repo root
-        .appending(path: "App/Resources/Localizable.xcstrings")
+        .appending(path: "App/Resources")
 
-    @Test func everyStringIsTranslatedIntoEnglishAndGreek() throws {
-        let data = try Data(contentsOf: Self.catalogURL)
+    @Test(arguments: ["Localizable.xcstrings", "InfoPlist.xcstrings"])
+    func everyStringIsTranslatedIntoEnglishAndGreek(catalogName: String) throws {
+        let data = try Data(contentsOf: Self.resources.appending(path: catalogName))
         let catalog = try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
         #expect(catalog["sourceLanguage"] as? String == "en")
         let strings = try #require(catalog["strings"] as? [String: Any])

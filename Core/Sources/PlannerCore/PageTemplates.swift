@@ -44,7 +44,9 @@ public enum MonthPageTemplate {
     /// `sketchDays` (pinned sketches) a small sketch mark in their corner that opens them.
     /// `todos` are the typed to-dos (see `TypedLists.printed`), on the lines of the to-do
     /// list, with a + to add more. The WEEKLY buttons in `inkedWeeks` (numbered from 1:
-    /// their week page has ink) get a small dot under their number.
+    /// their week page has ink) get a small dot under their number. `events` (of the Apple
+    /// Calendar) are printed in the cells of this month's days, under their numbers (see
+    /// `EventPrinter`), with the times of `eventClock`.
     public static func make(
         month: YearMonth,
         firstWeekday: Weekday = .defaultFirst,
@@ -56,7 +58,9 @@ public enum MonthPageTemplate {
         sketchDays: Set<PlannerDate> = [],
         todos: [PrintedItem] = [],
         todoOverflow: Int = 0,
-        inkedWeeks: Set<Int> = []
+        inkedWeeks: Set<Int> = [],
+        events: [CalendarEvent] = [],
+        eventClock: EventClock = .standard
     ) -> PageTemplate {
         let layout = MonthPageLayout(month: month, firstWeekday: firstWeekday)
         let caps = { (text: String) in PlannerText.uppercased(text, locale: locale) }
@@ -163,6 +167,15 @@ public enum MonthPageTemplate {
                     .sketchMark(day.date),
                     CGRect(x: mark.x - 17, y: mark.y - 17, width: 34, height: 34).intersection(cell.frame)
                 ))
+            }
+        }
+
+        // Events of the Apple Calendar, week row by week row (bars join up within a row).
+        if !events.isEmpty {
+            for week in layout.weeks {
+                let cells = week.filter(\.day.isInMonth).map { (date: $0.day.date, frame: $0.frame) }
+                let days = EventLayout.row(cells.map { $0.date }, events: events, calendar: eventClock.calendar)
+                shapes += EventPrinter.monthRow(cells, events: days, clock: eventClock, sketchDays: sketchDays)
             }
         }
 
@@ -279,12 +292,14 @@ public enum MonthPageTemplate {
 }
 
 public enum YearPageTemplate {
-    /// The printed year page. `today` gets a discreet black mark when it falls in this year.
+    /// The printed year page. `today` gets a discreet black mark when it falls in this year;
+    /// days in `eventDays` (with an event of the Apple Calendar) a small dot under their number.
     public static func make(
         year: Int,
         firstWeekday: Weekday = .defaultFirst,
         locale: Locale,
-        today: PlannerDate? = nil
+        today: PlannerDate? = nil,
+        eventDays: Set<PlannerDate> = []
     ) -> PageTemplate {
         let layout = YearPageLayout(year: year, firstWeekday: firstWeekday)
         var shapes: [TemplateShape] = []
@@ -337,6 +352,12 @@ public enum YearPageTemplate {
                     anchor: CGPoint(x: center.x, y: TemplateText.baseline(centeredOn: center.y, size: size)),
                     alignment: .center
                 )))
+                if eventDays.contains(date) {
+                    shapes.append(.circle(
+                        center: CGPoint(x: center.x, y: center.y + YearPageLayout.eventDotOffset),
+                        radius: 1.3, fill: isToday ? .paper : .text, stroke: nil, lineWidth: 0
+                    ))
+                }
             }
             shapes.append(.rect(mini.notes, fill: .fill, stroke: nil, lineWidth: 0, cornerRadius: 0))
         }

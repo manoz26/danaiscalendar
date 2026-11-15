@@ -12,6 +12,8 @@ struct DanaisCalendarApp: App {
     @State private var lists: ListBook
     /// The photos of things she would like to buy.
     @State private var wishlist: WishlistBook
+    /// The events of the Apple Calendar (read, never copied).
+    @State private var appleCalendar: CalendarBook
 
     init() {
         Chrome.apply()
@@ -39,11 +41,12 @@ struct DanaisCalendarApp: App {
         _sketches = State(initialValue: sketches)
         _lists = State(initialValue: lists)
         _wishlist = State(initialValue: wishlist)
+        _appleCalendar = State(initialValue: CalendarBook())
     }
 
     var body: some Scene {
         WindowGroup {
-            RootView(ink: ink, birthdays: birthdays, journal: journal, sketches: sketches, lists: lists, wishlist: wishlist)
+            RootView(ink: ink, birthdays: birthdays, journal: journal, sketches: sketches, lists: lists, wishlist: wishlist, appleCalendar: appleCalendar)
         }
     }
 }
