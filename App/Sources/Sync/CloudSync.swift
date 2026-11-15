@@ -4,13 +4,19 @@ import PlannerCore
 import UIKit
 
 /// "A file of the app was saved here": the sync sends it to iCloud a moment later.
-/// Posted from any thread (the savers' queues).
+///
+/// Called from any thread (the savers' queues), and never waits: the notification is
+/// posted later on the main thread. (Posting from a saver's queue to an observer on the
+/// main queue waits for the main thread, which may itself be waiting for that saver:
+/// the app froze in the unit tests.)
 enum LocalChanges {
     static let notification = Notification.Name("DCLocalFileChanged")
 
     /// `path`: the synced file's path, e.g. `Pages/month-2026-11.dcpage` (see `SyncPath`).
     static func post(_ path: String) {
-        NotificationCenter.default.post(name: notification, object: nil, userInfo: ["path": path])
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: notification, object: nil, userInfo: ["path": path])
+        }
     }
 }
 
@@ -68,7 +74,8 @@ final class CloudSync {
     init(owner: AppSyncOwner) {
         self.owner = owner
         let center = NotificationCenter.default
-        _ = center.addObserver(forName: LocalChanges.notification, object: nil, queue: .main) { [weak self] note in
+        // Posted on the main thread only (`LocalChanges.post`): handled right there.
+        _ = center.addObserver(forName: LocalChanges.notification, object: nil, queue: nil) { [weak self] note in
             let path = note.userInfo?["path"] as? String
             MainActor.assumeIsolated {
                 if let path { self?.localChanged(path) }
@@ -294,11 +301,13 @@ final class CloudSync {
     private func finished(_ report: SyncReport) {
         running -= 1
         let pending = downloading.subtracting(report.inSync).union(report.downloading)
-        if pending != downloading {
+        let downloadsChanged = pending != downloading
+        if downloadsChanged {
             downloading = pending
         }
         lastSync = Date()
-        if report.changes > 0 || report.failed > 0 || !report.downloading.isEmpty {
+        // iCloud reports a download's progress again and again: logged only when something changed.
+        if report.changes > 0 || report.failed > 0 || downloadsChanged {
             AppLog.info("iCloud: \(report.summary)")
         }
         let next: Status = running > 0 ? .syncing : (report.failed > 0 ? .problem : .upToDate)
