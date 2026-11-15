@@ -14,6 +14,8 @@ struct DanaisCalendarApp: App {
     @State private var wishlist: WishlistBook
     /// The events of the Apple Calendar (read, never copied).
     @State private var appleCalendar: CalendarBook
+    /// iCloud: the same pages, lists and photos on every device.
+    @State private var sync: CloudSync
 
     init() {
         Chrome.apply()
@@ -21,7 +23,8 @@ struct DanaisCalendarApp: App {
         #if DEBUG
         LaunchOptions.prepareTestData()
         #endif
-        _ink = State(initialValue: InkController())
+        let ink = InkController()
+        _ink = State(initialValue: ink)
         let birthdays = BirthdayBook()
         #if DEBUG
         birthdays.addSamplesIfRequested()
@@ -42,11 +45,19 @@ struct DanaisCalendarApp: App {
         _lists = State(initialValue: lists)
         _wishlist = State(initialValue: wishlist)
         _appleCalendar = State(initialValue: CalendarBook())
+        let sync = CloudSync(owner: AppSyncOwner(
+            ink: ink, birthdays: birthdays, journal: journal, sketches: sketches, lists: lists, wishlist: wishlist
+        ))
+        sync.start()
+        _sync = State(initialValue: sync)
     }
 
     var body: some Scene {
         WindowGroup {
-            RootView(ink: ink, birthdays: birthdays, journal: journal, sketches: sketches, lists: lists, wishlist: wishlist, appleCalendar: appleCalendar)
+            RootView(
+                ink: ink, birthdays: birthdays, journal: journal, sketches: sketches, lists: lists,
+                wishlist: wishlist, appleCalendar: appleCalendar, sync: sync
+            )
         }
     }
 }

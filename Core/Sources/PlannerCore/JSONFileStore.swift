@@ -69,6 +69,25 @@ public final class JSONFileStore<File: VersionedFile>: Sendable {
         return target
     }
 
+    /// A file's content as `save` writes it (the same file always gives the same bytes).
+    public static func encode(_ file: File) throws -> Data {
+        try makeEncoder().encode(file)
+    }
+
+    /// Reads a file's content (e.g. a version from another device), like `load`.
+    public static func decode(_ data: Data) throws -> File {
+        let file: File
+        do {
+            file = try makeDecoder().decode(File.self, from: data)
+        } catch {
+            throw JSONFileError.unreadable(String(describing: error))
+        }
+        guard file.version <= File.currentVersion else {
+            throw JSONFileError.unsupportedVersion(file.version)
+        }
+        return file
+    }
+
     static func makeEncoder() -> JSONEncoder {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601

@@ -13,12 +13,15 @@ public struct WishlistPhoto: Codable, Sendable, Hashable, Identifiable {
     /// Size in pixels of the saved photo.
     public var width: Int
     public var height: Int
+    /// Set when it was brought back from a backup (so that other devices bring it back too).
+    public var modified: Date?
 
-    public init(id: UUID = UUID(), created: Date = Date(), width: Int, height: Int) {
+    public init(id: UUID = UUID(), created: Date = Date(), width: Int, height: Int, modified: Date? = nil) {
         self.id = id
         self.created = created
         self.width = width
         self.height = height
+        self.modified = modified
     }
 
     public var fileName: String { "\(id.uuidString).jpg" }
@@ -31,18 +34,23 @@ public struct WishlistPhoto: Codable, Sendable, Hashable, Identifiable {
     }
 }
 
-/// `Lists/wishlist.json`: `{"version": 1, "photos": [{"id", "created", "width", "height"}]}`.
+/// `Lists/wishlist.json`: `{"version": 1, "photos": [{"id", "created", "width", "height"}],
+/// "deleted": [{"id", "deleted"}]}`.
 public struct WishlistFile: VersionedFile, Equatable {
     public static let currentVersion = 1
     public static let fileName = "wishlist.json"
 
     public var version: Int
     public var photos: [WishlistPhoto]
+    public var deleted: [Tombstone]?
 
-    public init(photos: [WishlistPhoto]) {
+    public init(photos: [WishlistPhoto], deleted: [Tombstone] = []) {
         version = Self.currentVersion
         self.photos = photos
+        self.deleted = deleted.isEmpty ? nil : deleted
     }
+
+    public var tombstones: [Tombstone] { deleted ?? [] }
 }
 
 // MARK: - Image processing
@@ -198,6 +206,18 @@ public final class WishlistStore: Sendable {
         }
     }
 
+    /// Whether the photo's file is here.
+    public func hasFile(_ photo: WishlistPhoto) -> Bool {
+        FileManager.default.fileExists(atPath: url(of: photo).path(percentEncoded: false))
+    }
+
+    /// Saves a photo file as it is (a copy from another device or a backup), unless it is here already.
+    public func saveCopy(_ data: Data, of photo: WishlistPhoto) throws {
+        guard !hasFile(photo) else { return }
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        try data.write(to: url(of: photo), options: .atomic)
+    }
+
     /// Ids of the photo files in the folder.
     func photoFileIDs() -> Set<UUID> {
         let names = (try? FileManager.default.contentsOfDirectory(atPath: folder.path(percentEncoded: false))) ?? []
@@ -212,6 +232,8 @@ public final class WishlistStore: Sendable {
         public var photos: [WishlistPhoto]
         /// Listed photos whose file is gone (left out).
         public var missing: Int
+        /// Those photos: with iCloud their files may still be on the way.
+        public var waiting: [WishlistPhoto] = []
         /// Photo files the list did not know (the app stopped between saving a photo and its
         /// list): kept, as the newest.
         public var adopted: Int
@@ -224,11 +246,13 @@ public final class WishlistStore: Sendable {
         var seen: Set<UUID> = []
         var photos: [WishlistPhoto] = []
         var missing = 0
+        var waiting: [WishlistPhoto] = []
         for photo in listed where seen.insert(photo.id).inserted {
             if files.contains(photo.id) {
                 photos.append(photo)
             } else {
                 missing += 1
+                waiting.append(photo)
             }
         }
         var adopted = 0
@@ -240,6 +264,6 @@ public final class WishlistStore: Sendable {
             photos.append(photo)
             adopted += 1
         }
-        return Reconciled(photos: WishlistPhoto.newestFirst(photos), missing: missing, adopted: adopted)
+        return Reconciled(photos: WishlistPhoto.newestFirst(photos), missing: missing, waiting: waiting, adopted: adopted)
     }
 }

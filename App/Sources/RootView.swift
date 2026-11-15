@@ -45,6 +45,8 @@ struct RootView: View {
     let wishlist: WishlistBook
     /// The events of the Apple Calendar, printed on the pages.
     let appleCalendar: CalendarBook
+    /// iCloud sync: its discreet mark on the page, and Settings.
+    let sync: CloudSync
     @AppStorage(InkDefaults.drawWithFinger) private var drawWithFinger = false
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -68,9 +70,10 @@ struct RootView: View {
 
     init(
         ink: InkController, birthdays: BirthdayBook, journal: JournalBook, sketches: SketchBook,
-        lists: ListBook, wishlist: WishlistBook, appleCalendar: CalendarBook
+        lists: ListBook, wishlist: WishlistBook, appleCalendar: CalendarBook, sync: CloudSync
     ) {
         self.ink = ink
+        self.sync = sync
         self.wishlist = wishlist
         self.appleCalendar = appleCalendar
         self.birthdays = birthdays
@@ -113,6 +116,10 @@ struct RootView: View {
                     onLongPress: { point in handleLongPress(at: point, in: content.template) },
                     onSwipe: { offset in handleSwipe(offset) }
                 )
+                .overlay(alignment: .bottomTrailing) {
+                    SyncBadge(sync: sync, page: page)
+                        .padding(12)
+                }
                 .overlay {
                     if ink.canDraw {
                         InkToolbarOverlay(ink: ink)
@@ -139,6 +146,14 @@ struct RootView: View {
                 .allowsHitTesting(false)
                 .accessibilityIdentifier("debug.lastExport")
         }
+        .overlay(alignment: .topTrailing) {
+            // What the sync did since launch, for the UI tests.
+            Text(verbatim: sync.debugSummary)
+                .font(.system(size: 2))
+                .foregroundStyle(.clear)
+                .allowsHitTesting(false)
+                .accessibilityIdentifier("debug.sync")
+        }
         #endif
         .sheet(item: $sheet) { sheet in
             sheetView(sheet)
@@ -146,11 +161,25 @@ struct RootView: View {
         .onChange(of: page) { _, newPage in
             preloadNeighbors(of: newPage)
         }
+        .onChange(of: journal.pages.map(\.id)) { _, ids in
+            // The open journal page was deleted on another device: leave it.
+            if case .journal(let id) = page, !ids.contains(id) {
+                AppLog.info("The open journal page was deleted on another device")
+                open(backPage)
+            }
+        }
+        .onChange(of: sketches.sketches.map(\.id)) { _, ids in
+            if case .sketch(let id) = page, !ids.contains(id) {
+                AppLog.info("The open sketch was deleted on another device")
+                open(backPage)
+            }
+        }
         .onChange(of: scenePhase) { _, phase in
             switch phase {
             case .active:
                 now = Date()
                 appleCalendar.refreshAccess()
+                sync.becameActive()
                 AppLog.info("App active")
             case .inactive:
                 ink.saveSoon()
@@ -557,7 +586,7 @@ struct RootView: View {
     private func sheetView(_ sheet: PlannerSheet) -> some View {
         switch sheet {
         case .settings:
-            SettingsView(calendar: appleCalendar)
+            SettingsView(calendar: appleCalendar, sync: sync)
         case .birthdays:
             BirthdaysView(book: birthdays)
         case .journalPages:

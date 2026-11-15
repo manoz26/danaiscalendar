@@ -9,12 +9,15 @@ public struct Birthday: Codable, Sendable, Hashable, Identifiable {
     public var month: Int
     /// 1...31; 29 February is allowed.
     public var day: Int
+    /// When it was last added or changed (for iCloud: the newer change wins). Older files have none.
+    public var modified: Date?
 
-    public init(id: UUID = UUID(), name: String, month: Int, day: Int) {
+    public init(id: UUID = UUID(), name: String, month: Int, day: Int, modified: Date? = nil) {
         self.id = id
         self.name = name
         self.month = month
         self.day = day
+        self.modified = modified
     }
 
     /// Days a month can have in any year (29 for February).

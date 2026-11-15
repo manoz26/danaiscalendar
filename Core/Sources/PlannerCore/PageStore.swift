@@ -64,10 +64,25 @@ public final class LocalPageStore: PageStore {
     }
 
     public func save(_ file: PageFile, for page: PlannerPage) throws {
-        let data = try file.encoded()
+        try save(data: file.encoded(), for: page)
+    }
+
+    /// Saves a page file's bytes as they are (a version from another device), after
+    /// checking that they are a page file.
+    public func save(data: Data, for page: PlannerPage) throws {
+        _ = try PageFile(decoding: data)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         // Written to a temporary file next to it, then renamed over the old one.
         try data.write(to: url(for: page), options: .atomic)
+    }
+
+    /// The page file's bytes, or `nil` if it was never saved.
+    public func data(of page: PlannerPage) throws -> Data? {
+        do {
+            return try Data(contentsOf: url(for: page))
+        } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+            return nil
+        }
     }
 
     public func savedPages() throws -> [PlannerPage] {

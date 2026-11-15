@@ -35,7 +35,8 @@ public struct ListItem: Codable, Sendable, Hashable, Identifiable {
 }
 
 /// A list file: `Lists/tobuy.json` (things to buy) or `Lists/todo.json` (the to-dos of
-/// every month), `{"version": 1, "items": [{"id", "text", "done", "line", "month", "created", "modified"}]}`.
+/// every month), `{"version": 1, "items": [{"id", "text", "done", "line", "month", "created", "modified"}],
+/// "deleted": [{"id", "deleted"}]}` (the deleted items, for iCloud; left out when there are none).
 public struct ListFile: VersionedFile, Equatable {
     public static let currentVersion = 1
     public static let toBuyFileName = "tobuy.json"
@@ -43,11 +44,15 @@ public struct ListFile: VersionedFile, Equatable {
 
     public var version: Int
     public var items: [ListItem]
+    public var deleted: [Tombstone]?
 
-    public init(items: [ListItem]) {
+    public init(items: [ListItem], deleted: [Tombstone] = []) {
         version = Self.currentVersion
         self.items = items
+        self.deleted = deleted.isEmpty ? nil : deleted
     }
+
+    public var tombstones: [Tombstone] { deleted ?? [] }
 }
 
 /// A typed item as printed on a page.

@@ -37,9 +37,20 @@ final class JSONSaver<File: VersionedFile>: Sendable {
         queue.async {
             do {
                 try store.save(file)
+                LocalChanges.post("\(SyncPath.listsFolder)/\(store.fileName)")
             } catch {
                 AppLog.error("Could not save \(store.fileName)", error)
             }
+        }
+    }
+
+    /// Saves now (after any save still in flight) and returns the file's bytes: a version
+    /// from another device was merged in, and the sync sends the result on.
+    func saveNow(_ file: File) throws -> Data {
+        let store = store
+        return try queue.sync {
+            try store.save(file)
+            return try JSONFileStore<File>.encode(file)
         }
     }
 
@@ -68,11 +79,49 @@ enum ListsFolder {
 final class JournalBook {
     private(set) var journal: Journal
     @ObservationIgnored private let saver: JSONSaver<JournalFile>
+    /// Deleted pages (for iCloud: they go on the other devices too).
+    @ObservationIgnored private var tombstones: [Tombstone]
 
     init(folder: URL = ListsFolder.url) {
         saver = JSONSaver(folder: folder, fileName: JournalFile.fileName)
-        journal = Journal(pages: saver.read()?.pages ?? [])
+        let file = saver.read()
+        journal = Journal(pages: file?.pages ?? [])
+        tombstones = file?.tombstones ?? []
         AppLog.info("Journal pages: \(journal.pages.count)")
+    }
+
+    private var file: JournalFile {
+        JournalFile(pages: journal.pages, deleted: tombstones)
+    }
+
+    /// The journal of another device (or a backup) merged in. Returns the file's bytes.
+    func receive(_ data: Data) throws -> Data {
+        let merged = JournalFile.merged(file, try JSONFileStore<JournalFile>.decode(data))
+        apply(merged)
+        return try saver.saveNow(merged)
+    }
+
+    /// A backup's journal: its pages missing here come back (after the last page).
+    func restore(_ data: Data) throws {
+        apply(JournalFile.restored(file, from: try JSONFileStore<JournalFile>.decode(data)))
+        persist()
+    }
+
+    private func apply(_ merged: JournalFile) {
+        let before = journal.pages.count
+        let next = Journal(pages: merged.pages)
+        if next != journal {
+            journal = next
+        }
+        tombstones = merged.tombstones
+        if journal.pages.count != before {
+            AppLog.info("Journal pages from another device: \(before) → \(journal.pages.count)")
+        }
+    }
+
+    /// Pages deleted here or on another device, whose ink must go.
+    var deletedPageIDs: Set<UUID> {
+        Set(tombstones.map(\.id)).subtracting(journal.pages.map(\.id))
     }
 
     var pages: [JournalPage] { journal.pages }
@@ -122,6 +171,7 @@ final class JournalBook {
     func delete(_ id: UUID) {
         guard journal.page(id) != nil else { return }
         journal.remove(id)
+        tombstones = Tombstone.recording(deletionsFrom: [id], to: [], in: tombstones)
         persist()
         AppLog.info("Journal page deleted (\(journal.pages.count) left)")
     }
@@ -131,7 +181,7 @@ final class JournalBook {
     }
 
     private func persist() {
-        saver.save(JournalFile(pages: journal.pages))
+        saver.save(file)
     }
 
     #if DEBUG
@@ -162,11 +212,43 @@ final class JournalBook {
 final class SketchBook {
     private(set) var sketches: [Sketch]
     @ObservationIgnored private let saver: JSONSaver<SketchFile>
+    /// Deleted sketches (for iCloud).
+    @ObservationIgnored private var tombstones: [Tombstone]
 
     init(folder: URL = ListsFolder.url) {
         saver = JSONSaver(folder: folder, fileName: SketchFile.fileName)
-        sketches = saver.read()?.sketches ?? []
+        let file = saver.read()
+        sketches = file?.sketches ?? []
+        tombstones = file?.tombstones ?? []
         AppLog.info("Sketches: \(sketches.count)")
+    }
+
+    private var file: SketchFile {
+        SketchFile(sketches: Sketch.canonical(sketches), deleted: tombstones)
+    }
+
+    /// The sketches of another device (or a backup) merged in. Returns the file's bytes.
+    func receive(_ data: Data) throws -> Data {
+        let merged = SketchFile.merged(file, try JSONFileStore<SketchFile>.decode(data))
+        apply(merged)
+        return try saver.saveNow(merged)
+    }
+
+    func restore(_ data: Data) throws {
+        apply(SketchFile.restored(file, from: try JSONFileStore<SketchFile>.decode(data)))
+        persist()
+    }
+
+    private func apply(_ merged: SketchFile) {
+        if Sketch.canonical(sketches) != merged.sketches {
+            sketches = merged.sketches
+        }
+        tombstones = merged.tombstones
+    }
+
+    /// Sketches deleted here or on another device, whose ink must go.
+    var deletedSketchIDs: Set<UUID> {
+        Set(tombstones.map(\.id)).subtracting(sketches.map(\.id))
     }
 
     /// Newest first.
@@ -199,6 +281,7 @@ final class SketchBook {
     func delete(_ id: UUID) {
         guard sketches.contains(where: { $0.id == id }) else { return }
         sketches.removeAll { $0.id == id }
+        tombstones = Tombstone.recording(deletionsFrom: [id], to: [], in: tombstones)
         persist()
         AppLog.info("Sketch deleted (\(sketches.count) left)")
     }
@@ -208,7 +291,7 @@ final class SketchBook {
     }
 
     private func persist() {
-        saver.save(SketchFile(sketches: sketches))
+        saver.save(file)
     }
 
     #if DEBUG
@@ -276,13 +359,69 @@ final class ListBook {
     private(set) var toBuy: [ListItem]
     @ObservationIgnored private let todoSaver: JSONSaver<ListFile>
     @ObservationIgnored private let toBuySaver: JSONSaver<ListFile>
+    /// Deleted items of each list (for iCloud).
+    @ObservationIgnored private var todoTombstones: [Tombstone]
+    @ObservationIgnored private var toBuyTombstones: [Tombstone]
 
     init(folder: URL = ListsFolder.url) {
         todoSaver = JSONSaver(folder: folder, fileName: ListFile.todoFileName)
         toBuySaver = JSONSaver(folder: folder, fileName: ListFile.toBuyFileName)
-        todos = todoSaver.read()?.items ?? []
-        toBuy = toBuySaver.read()?.items ?? []
+        let todoFile = todoSaver.read()
+        let toBuyFile = toBuySaver.read()
+        todos = todoFile?.items ?? []
+        toBuy = toBuyFile?.items ?? []
+        todoTombstones = todoFile?.tombstones ?? []
+        toBuyTombstones = toBuyFile?.tombstones ?? []
         AppLog.info("Typed items: \(todos.count) to-do, \(toBuy.count) to buy")
+    }
+
+    private var todoFile: ListFile {
+        ListFile(items: ListItem.canonical(todos), deleted: todoTombstones)
+    }
+
+    private var toBuyFile: ListFile {
+        ListFile(items: ListItem.canonical(toBuy), deleted: toBuyTombstones)
+    }
+
+    /// A typed list of another device (or a backup) merged in (`todo.json` or `tobuy.json`).
+    /// Returns the file's bytes.
+    func receive(_ data: Data, fileName: String) throws -> Data {
+        let theirs = try JSONFileStore<ListFile>.decode(data)
+        if fileName == ListFile.todoFileName {
+            let merged = ListFile.merged(todoFile, theirs)
+            applyTodos(merged)
+            return try todoSaver.saveNow(merged)
+        } else {
+            let merged = ListFile.merged(toBuyFile, theirs)
+            applyToBuy(merged)
+            return try toBuySaver.saveNow(merged)
+        }
+    }
+
+    /// A backup's list: its items missing here come back.
+    func restore(_ data: Data, fileName: String) throws {
+        let backup = try JSONFileStore<ListFile>.decode(data)
+        if fileName == ListFile.todoFileName {
+            applyTodos(ListFile.restored(todoFile, from: backup))
+            todoSaver.save(todoFile)
+        } else {
+            applyToBuy(ListFile.restored(toBuyFile, from: backup))
+            toBuySaver.save(toBuyFile)
+        }
+    }
+
+    private func applyTodos(_ file: ListFile) {
+        if ListItem.canonical(todos) != file.items {
+            todos = file.items
+        }
+        todoTombstones = file.tombstones
+    }
+
+    private func applyToBuy(_ file: ListFile) {
+        if ListItem.canonical(toBuy) != file.items {
+            toBuy = file.items
+        }
+        toBuyTombstones = file.tombstones
     }
 
     /// A list's items, by printed line (items without a line last).
@@ -362,16 +501,21 @@ final class ListBook {
         toBuySaver.waitUntilSaved()
     }
 
+    /// An edit of a list, saved if it changed anything; items it removed are remembered as deleted.
     private func change(_ list: TypedListKind, _ edit: (inout [ListItem]) -> Void) {
         switch list {
         case .todo:
             let before = todos
             edit(&todos)
-            if todos != before { todoSaver.save(ListFile(items: todos)) }
+            guard todos != before else { return }
+            todoTombstones = Tombstone.recording(deletionsFrom: before.map(\.id), to: todos.map(\.id), in: todoTombstones)
+            todoSaver.save(todoFile)
         case .toBuy:
             let before = toBuy
             edit(&toBuy)
-            if toBuy != before { toBuySaver.save(ListFile(items: toBuy)) }
+            guard toBuy != before else { return }
+            toBuyTombstones = Tombstone.recording(deletionsFrom: before.map(\.id), to: toBuy.map(\.id), in: toBuyTombstones)
+            toBuySaver.save(toBuyFile)
         }
     }
 
@@ -396,8 +540,8 @@ final class ListBook {
             item("Batteries", "Μπαταρίες", line: 3, order: 3),
             item("A gift for Maria", "Δώρο για τη Μαρία", line: 37, order: 4),
         ]
-        todoSaver.save(ListFile(items: todos))
-        toBuySaver.save(ListFile(items: toBuy))
+        todoSaver.save(todoFile)
+        toBuySaver.save(toBuyFile)
         AppLog.info("Sample typed items added")
     }
     #endif

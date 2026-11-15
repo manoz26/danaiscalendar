@@ -12,17 +12,22 @@ public protocol BirthdayStore: Sendable {
     func setAside() throws -> URL?
 }
 
-/// The birthdays file: `{"version": 1, "birthdays": [{"id", "name", "month", "day"}]}`.
+/// The birthdays file: `{"version": 1, "birthdays": [{"id", "name", "month", "day", "modified"}],
+/// "deleted": [{"id", "deleted"}]}`.
 public struct BirthdayFile: Codable, Sendable, Equatable {
     public static let currentVersion = 1
 
     public var version: Int
     public var birthdays: [Birthday]
+    public var deleted: [Tombstone]?
 
-    public init(birthdays: [Birthday]) {
+    public init(birthdays: [Birthday], deleted: [Tombstone] = []) {
         version = Self.currentVersion
         self.birthdays = birthdays
+        self.deleted = deleted.isEmpty ? nil : deleted
     }
+
+    public var tombstones: [Tombstone] { deleted ?? [] }
 
     public func encoded() throws -> Data {
         let encoder = JSONEncoder()
@@ -65,17 +70,26 @@ public final class LocalBirthdayStore: BirthdayStore {
     }
 
     public func load() throws -> [Birthday] {
+        try loadFile()?.birthdays ?? []
+    }
+
+    /// The whole file (with its deleted birthdays), or `nil` if it was never saved.
+    public func loadFile() throws -> BirthdayFile? {
         let data: Data
         do {
             data = try Data(contentsOf: url)
         } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
-            return []
+            return nil
         }
-        return try BirthdayFile(decoding: data).birthdays
+        return try BirthdayFile(decoding: data)
     }
 
     public func save(_ birthdays: [Birthday]) throws {
-        let data = try BirthdayFile(birthdays: birthdays).encoded()
+        try save(file: BirthdayFile(birthdays: birthdays))
+    }
+
+    public func save(file: BirthdayFile) throws {
+        let data = try file.encoded()
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         // Written to a temporary file next to it, then renamed over the old one.
         try data.write(to: url, options: .atomic)

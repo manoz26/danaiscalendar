@@ -491,6 +491,21 @@ enum LaunchOptions {
         return index + 1 < arguments.count ? arguments[index + 1] : "YES"
     }
 
+    /// `-DCFakeCloud YES`: a plain folder plays iCloud (`fakeCloudFolder`), so the UI tests
+    /// can sync without an iCloud account.
+    static var fakeCloud: Bool { ProcessInfo.processInfo.arguments.contains("-DCFakeCloud") }
+
+    /// `-DCSampleCloud YES`: with the fake iCloud, another device's files are there first
+    /// (typed things to buy, a birthday, ink on March 2029; see `SampleCloud`).
+    static var sampleCloud: Bool { ProcessInfo.processInfo.arguments.contains("-DCSampleCloud") }
+
+    /// `-DCKeepCloud YES`: `-DCResetData` keeps the fake iCloud (a new device with the same iCloud).
+    static var keepCloud: Bool { ProcessInfo.processInfo.arguments.contains("-DCKeepCloud") }
+
+    static var fakeCloudFolder: URL {
+        FileManager.default.temporaryDirectory.appending(path: "FakeCloud", directoryHint: .isDirectory)
+    }
+
     /// Called at launch, before the ink is loaded.
     @MainActor
     static func prepareTestData() {
@@ -500,6 +515,10 @@ enum LaunchOptions {
         try? FileManager.default.removeItem(at: ListsFolder.url)
         try? FileManager.default.removeItem(at: WishlistBook.defaultFolder)
         try? FileManager.default.removeItem(at: WishlistBook.thumbnailFolder)
+        try? FileManager.default.removeItem(at: CloudSync.stateFolder)
+        if !keepCloud {
+            try? FileManager.default.removeItem(at: fakeCloudFolder)
+        }
         for key in InkDefaults.all + CalendarDefaults.all {
             UserDefaults.standard.removeObject(forKey: key)
         }

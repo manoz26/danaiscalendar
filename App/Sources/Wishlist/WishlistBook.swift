@@ -23,6 +23,10 @@ final class WishlistBook {
     @ObservationIgnored let store: WishlistStore
     @ObservationIgnored private let saver: JSONSaver<WishlistFile>
     @ObservationIgnored private let thumbnails = NSCache<NSUUID, UIImage>()
+    /// Listed photos whose file is not here yet (on its way from iCloud): shown once it is.
+    @ObservationIgnored private var waiting: [WishlistPhoto] = []
+    /// Deleted photos (for iCloud: they go on the other devices too).
+    @ObservationIgnored private var tombstones: [Tombstone] = []
 
     nonisolated static var defaultFolder: URL {
         URL.applicationSupportDirectory.appending(path: "Wishlist", directoryHint: .isDirectory)
@@ -35,11 +39,13 @@ final class WishlistBook {
     init(listsFolder: URL = ListsFolder.url, folder: URL = WishlistBook.defaultFolder, thumbnailFolder: URL = WishlistBook.thumbnailFolder) {
         store = WishlistStore(folder: folder, thumbnailFolder: thumbnailFolder)
         saver = JSONSaver(folder: listsFolder, fileName: WishlistFile.fileName)
-        let listed = saver.read()?.photos ?? []
-        let checked = store.reconcile(listed)
+        let file = saver.read()
+        let checked = store.reconcile(file?.photos ?? [])
         photos = checked.photos
+        waiting = checked.waiting
+        tombstones = file?.tombstones ?? []
         if checked.missing > 0 {
-            AppLog.warning("Wishlist: \(checked.missing) listed photos have no file; left out")
+            AppLog.warning("Wishlist: \(checked.missing) listed photos have no file here (yet); not shown")
         }
         if checked.adopted > 0 {
             AppLog.warning("Wishlist: \(checked.adopted) photo files were not in the list; kept")
@@ -52,6 +58,64 @@ final class WishlistBook {
 
     func photo(_ id: UUID) -> WishlistPhoto? {
         photos.first { $0.id == id }
+    }
+
+    private var file: WishlistFile {
+        WishlistFile(photos: WishlistPhoto.newestFirst(photos + waiting), deleted: tombstones)
+    }
+
+    /// The wishlist of another device (or a backup) merged in. Returns the file's bytes.
+    func receive(_ data: Data) throws -> Data {
+        let merged = WishlistFile.merged(file, try JSONFileStore<WishlistFile>.decode(data))
+        apply(merged)
+        return try saver.saveNow(merged)
+    }
+
+    /// A backup's wishlist: its photos missing here come back (their files come with it).
+    func restore(_ data: Data) throws {
+        apply(WishlistFile.restored(file, from: try JSONFileStore<WishlistFile>.decode(data)))
+        persist()
+    }
+
+    /// A photo's file from another device (or a backup), saved unless it is here already.
+    /// Returns the file's bytes.
+    func receivePhoto(_ data: Data, id: UUID) throws -> Data {
+        let photo = WishlistPhoto(id: id, width: 0, height: 0)
+        try store.saveCopy(data, of: photo)
+        if let index = waiting.firstIndex(where: { $0.id == id }) {
+            let arrived = waiting.remove(at: index)
+            photos = WishlistPhoto.newestFirst(photos + [arrived])
+        }
+        return try Data(contentsOf: store.url(of: photo))
+    }
+
+    /// Deletes this device's copy of a photo deleted on another device.
+    func removeLocalPhoto(_ id: UUID) {
+        let photo = WishlistPhoto(id: id, width: 0, height: 0)
+        thumbnails.removeObject(forKey: id as NSUUID)
+        do {
+            try store.delete(photo)
+        } catch {
+            AppLog.error("Could not delete a wishlist photo's file", error)
+        }
+    }
+
+    /// Photos deleted here or on another device, whose files must go.
+    var deletedPhotoIDs: Set<UUID> {
+        Set(tombstones.map(\.id)).subtracting((photos + waiting).map(\.id))
+    }
+
+    private func apply(_ merged: WishlistFile) {
+        let here = merged.photos.filter { store.hasFile($0) }
+        let gone = Set(photos.map(\.id)).subtracting(here.map(\.id))
+        for id in gone {
+            thumbnails.removeObject(forKey: id as NSUUID)
+        }
+        if here != photos {
+            photos = here
+        }
+        waiting = merged.photos.filter { !store.hasFile($0) }
+        tombstones = merged.tombstones
     }
 
     func url(of photo: WishlistPhoto) -> URL {
@@ -77,6 +141,7 @@ final class WishlistBook {
                 }.value
                 photos.insert(photo, at: 0)
                 persist()
+                LocalChanges.post(SyncPath(photo: photo.id).path)
                 added += 1
             } catch {
                 failedToAdd += 1
@@ -90,6 +155,7 @@ final class WishlistBook {
     func delete(_ id: UUID) {
         guard let photo = photo(id) else { return }
         photos.removeAll { $0.id == id }
+        tombstones = Tombstone.recording(deletionsFrom: [id], to: [], in: tombstones)
         thumbnails.removeObject(forKey: id as NSUUID)
         persist()
         let store = store
@@ -134,7 +200,7 @@ final class WishlistBook {
     }
 
     private func persist() {
-        saver.save(WishlistFile(photos: photos))
+        saver.save(file)
     }
 
     #if DEBUG

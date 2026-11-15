@@ -78,6 +78,11 @@ final class InkController {
     @ObservationIgnored private var strokeLooks: [PKInk.InkType: StrokeLook] = [:]
     @ObservationIgnored private var lookedAtStroke: Date?
 
+    /// Ink from another device changed the open page while the canvas still shows the ink
+    /// before it (`remoteBase`, canvas units): shown as soon as no stroke is being drawn.
+    @ObservationIgnored private var remoteBase: PKDrawing?
+    @ObservationIgnored private var remoteTimer: Timer?
+
     init(library: InkLibrary? = nil, canDraw: Bool? = nil) {
         self.canDraw = canDraw ?? (UIDevice.current.userInterfaceIdiom == .pad)
         self.library = library ?? InkLibrary()
@@ -90,6 +95,9 @@ final class InkController {
         inkedWeeks = self.library.files.weeksWithInk()
         self.library.onInkChange = { [weak self] page, hasInk in
             self?.inkChanged(page, hasInk: hasInk)
+        }
+        self.library.onRemoteInk = { [weak self] page, before, _ in
+            self?.remoteInkArrived(page, before: before)
         }
 
         helper.controller = self
@@ -157,6 +165,7 @@ final class InkController {
         if let page {
             library.save(page)
         }
+        remoteBase = nil
         page = content.page
         layout = content.layout
         setTemplate(content)
@@ -209,6 +218,90 @@ final class InkController {
     /// Writes unsaved ink to disk before returning (the app is going to the background).
     func saveEverything() {
         library.saveAll(wait: true)
+    }
+
+    // MARK: - Ink from other devices (iCloud, prompt 7)
+
+    /// Another version of a page (another device, an iCloud conflict, a backup): see
+    /// `InkLibrary.receive`. Returns the page file's bytes afterwards.
+    func receivePage(_ data: Data, for page: PlannerPage, replacing expected: String?) async throws -> Data {
+        try await library.receive(data, for: page, replacing: expected)
+    }
+
+    /// Whether the page is open now.
+    func isOpen(_ page: PlannerPage) -> Bool {
+        self.page == page
+    }
+
+    /// Deletes a page's ink (deleted on another device), unless it is open: then `false`.
+    func forgetIfNotOpen(_ page: PlannerPage) -> Bool {
+        guard page != self.page else { return false }
+        library.forget(page)
+        return true
+    }
+
+    /// The open page's ink changed in memory (from another device): the canvas shows it as
+    /// soon as no stroke is being drawn. A stroke finished meanwhile is kept (`commit`).
+    private func remoteInkArrived(_ page: PlannerPage, before: PKDrawing) {
+        guard page == self.page else { return }
+        if remoteBase == nil {
+            remoteBase = before
+        }
+        showRemoteInk()
+    }
+
+    private func showRemoteInk() {
+        guard remoteBase != nil, page != nil else { return }
+        if isTouchingCanvas {
+            remoteTimer?.invalidate()
+            let timer = Timer(timeInterval: 0.3, repeats: false) { [weak self] _ in
+                MainActor.assumeIsolated { self?.showRemoteInk() }
+            }
+            RunLoop.main.add(timer, forMode: .common)
+            remoteTimer = timer
+            return
+        }
+        remoteBase = nil
+        showLibraryInk()
+        #if DEBUG
+        canvas.noteDebugEvent("remote(\(canvas.drawing.strokes.count))")
+        #endif
+    }
+
+    /// Something is drawing on the canvas right now (a stroke, a straight line).
+    private var isTouchingCanvas: Bool {
+        let active: [UIGestureRecognizer.State] = [.began, .changed]
+        return activeLine != nil || active.contains(canvas.drawingGestureRecognizer.state) || active.contains(strokeTracker.state)
+    }
+
+    /// The open page's ink as the library has it, on the canvas (same zoom). The undo
+    /// history starts again: it referred to the ink before.
+    private func showLibraryInk() {
+        guard let page else { return }
+        replaceDrawing(Self.asNewStrokes(library.drawing(for: page, scale: canvas.drawingScale, layout: layout)))
+        canvas.undoManager?.removeAllActions()
+        refreshUndoState()
+    }
+
+    /// An edit of the canvas (at `scale` PencilKit units per canvas unit) goes to the
+    /// library. If ink from another device is waiting to be shown, both are kept: the
+    /// canvas showed `remoteBase`, the library has the other device's version.
+    private func commit(_ drawing: PKDrawing, scale: CGFloat) {
+        guard let page else { return }
+        guard let base = remoteBase else {
+            library.update(drawing, scale: scale, for: page, layout: layout)
+            return
+        }
+        remoteBase = nil
+        let mine = InkLibrary.rescaled(drawing, from: scale, to: 1)
+        let merged = InkMerge.threeWay(base: base, mine: mine, theirs: library.peekDrawing(for: page))
+        library.update(merged, scale: 1, for: page, layout: layout)
+        if !isTouchingCanvas {
+            showLibraryInk()
+        } else {
+            remoteBase = InkLibrary.rescaled(drawing, from: scale, to: 1)
+            showRemoteInk()
+        }
     }
 
     /// Starts writing unsaved ink to disk.
@@ -282,7 +375,7 @@ final class InkController {
 
     fileprivate func drawingDidChange() {
         Task { [weak self] in self?.refreshUndoState() }
-        guard !isReplacingDrawing, let page else { return }
+        guard !isReplacingDrawing, page != nil else { return }
         if let line = activeLine {
             // While a straight line is drawn, the canvas shows exactly that. A stroke more is
             // the one PencilKit was drawing when it was told to drop it.
@@ -307,7 +400,7 @@ final class InkController {
         canvas.noteDebugEvent("edit(\(drawing.strokes.count), w=\(Int(drawing.bounds.width)), s=\(canvas.drawingScale))")
         #endif
         replacedDrawing = nil
-        library.update(drawing, scale: canvas.drawingScale, for: page, layout: layout)
+        commit(drawing, scale: canvas.drawingScale)
         learnLook(from: drawing)
     }
 
@@ -505,9 +598,7 @@ final class InkController {
         canvas.undoManager?.enableUndoRegistration()
         let after = canvas.drawing
         registerLineUndo(restoring: line.before, redoing: after)
-        if let page {
-            library.update(after, scale: drawingScale ?? canvas.drawingScale, for: page, layout: layout)
-        }
+        commit(after, scale: drawingScale ?? canvas.drawingScale)
         refreshUndoState()
         #if DEBUG
         canvas.noteDebugEvent("line(\(after.strokes.count))")
@@ -527,9 +618,7 @@ final class InkController {
 
     private func undoLine(restore: DrawingBox, redo: DrawingBox) {
         setCanvasDrawing(restore.drawing)
-        if let page {
-            library.update(restore.drawing, scale: canvas.drawingScale, for: page, layout: layout)
-        }
+        commit(restore.drawing, scale: canvas.drawingScale)
         registerLineUndo(restoring: redo.drawing, redoing: restore.drawing)
         Task { [weak self] in self?.refreshUndoState() }
     }
@@ -600,6 +689,8 @@ final class InkController {
     /// starts again.
     private func putInkOnCanvas(resetZoom: Bool) {
         guard let page else { return }
+        // The library has any ink from other devices too.
+        remoteBase = nil
         let ink = Self.asNewStrokes(library.drawing(for: page, scale: canvas.drawingScale, layout: layout))
         canvas.hideInk(forAtMost: 0.8)
         awaitingRender = false

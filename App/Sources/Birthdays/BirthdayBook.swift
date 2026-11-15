@@ -15,6 +15,8 @@ final class BirthdayBook {
 
     @ObservationIgnored private let store: LocalBirthdayStore
     @ObservationIgnored private let queue = DispatchQueue(label: "DanaisCalendar.Birthdays", qos: .userInitiated)
+    /// Deleted birthdays (for iCloud).
+    @ObservationIgnored private var tombstones: [Tombstone]
 
     nonisolated static var defaultFolder: URL {
         URL.applicationSupportDirectory.appending(path: "Lists", directoryHint: .isDirectory)
@@ -23,7 +25,35 @@ final class BirthdayBook {
     init(folder: URL = BirthdayBook.defaultFolder) {
         let store = LocalBirthdayStore(folder: folder)
         self.store = store
-        birthdays = Self.read(from: store)
+        let file = Self.read(from: store)
+        birthdays = file?.birthdays ?? []
+        tombstones = file?.tombstones ?? []
+    }
+
+    private var file: BirthdayFile {
+        BirthdayFile(birthdays: Birthday.canonical(birthdays), deleted: tombstones)
+    }
+
+    /// The birthdays of another device (or a backup) merged in. Returns the file's bytes.
+    func receive(_ data: Data) throws -> Data {
+        let merged = BirthdayFile.merged(file, try BirthdayFile(decoding: data))
+        apply(merged)
+        let store = store
+        try queue.sync { try store.save(file: merged) }
+        return try merged.encoded()
+    }
+
+    /// A backup's birthdays: the ones missing here come back.
+    func restore(_ data: Data) throws {
+        apply(BirthdayFile.restored(file, from: try BirthdayFile(decoding: data)))
+        persist()
+    }
+
+    private func apply(_ merged: BirthdayFile) {
+        if Birthday.canonical(birthdays) != merged.birthdays {
+            birthdays = merged.birthdays
+        }
+        tombstones = merged.tombstones
     }
 
     /// Adds a birthday, or replaces the one with the same id. Names are trimmed; a
@@ -31,6 +61,7 @@ final class BirthdayBook {
     func save(_ birthday: Birthday) {
         var birthday = birthday
         birthday.name = birthday.trimmedName
+        birthday.modified = Date()
         guard birthday.isValid else {
             AppLog.warning("Ignored an incomplete birthday")
             return
@@ -46,6 +77,7 @@ final class BirthdayBook {
     func delete(_ id: UUID) {
         guard birthdays.contains(where: { $0.id == id }) else { return }
         birthdays.removeAll { $0.id == id }
+        tombstones = Tombstone.recording(deletionsFrom: [id], to: [], in: tombstones)
         persist()
     }
 
@@ -55,11 +87,12 @@ final class BirthdayBook {
     }
 
     private func persist() {
-        let snapshot = birthdays
+        let snapshot = file
         let store = store
         queue.async {
             do {
-                try store.save(snapshot)
+                try store.save(file: snapshot)
+                LocalChanges.post("\(SyncPath.listsFolder)/\(LocalBirthdayStore.fileName)")
             } catch {
                 AppLog.error("Could not save the birthdays", error)
             }
@@ -68,11 +101,11 @@ final class BirthdayBook {
 
     /// Never fails: an unreadable file is logged and set aside (kept, not deleted), and
     /// the list starts empty.
-    private static func read(from store: LocalBirthdayStore) -> [Birthday] {
+    private static func read(from store: LocalBirthdayStore) -> BirthdayFile? {
         do {
-            let birthdays = try store.load()
-            AppLog.info("Birthdays: \(birthdays.count)")
-            return birthdays
+            let file = try store.loadFile()
+            AppLog.info("Birthdays: \(file?.birthdays.count ?? 0)")
+            return file
         } catch {
             AppLog.error("Could not read the birthdays", error)
             do {
@@ -82,7 +115,7 @@ final class BirthdayBook {
             } catch {
                 AppLog.error("Could not set aside the birthdays file", error)
             }
-            return []
+            return nil
         }
     }
 
@@ -99,7 +132,7 @@ final class BirthdayBook {
             ("Άννα", "Anna", 2, 29),
         ]
         for (greekName, englishName, month, day) in samples {
-            birthdays.append(Birthday(name: greek ? greekName : englishName, month: month, day: day))
+            birthdays.append(Birthday(name: greek ? greekName : englishName, month: month, day: day, modified: Date()))
         }
         persist()
         AppLog.info("Sample birthdays added")

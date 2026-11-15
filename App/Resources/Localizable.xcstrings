@@ -487,6 +487,42 @@
         }
       }
     },
+    "Backup" : {
+      "comment" : "Settings section title, printed in capitals.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αντίγραφο ασφαλείας"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup"
+          }
+        }
+      }
+    },
+    "Backup restored" : {
+      "comment" : "Alert after restoring a backup.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Έγινε επαναφορά"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup restored"
+          }
+        }
+      }
+    },
     "Birthdays" : {
       "comment" : "Title of the birthdays list, and VoiceOver label of the gift button in the top bar.",
       "extractionState" : "manual",
@@ -1045,6 +1081,24 @@
         }
       }
     },
+    "Downloading from iCloud…" : {
+      "comment" : "Shown on a page that is in iCloud but not on this device yet.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Λήψη από το iCloud…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloading from iCloud…"
+          }
+        }
+      }
+    },
     "Draw with finger too" : {
       "comment" : "Settings switch: a finger writes on the page like the Apple Pencil.",
       "extractionState" : "manual",
@@ -1315,6 +1369,24 @@
         }
       }
     },
+    "Export all data" : {
+      "comment" : "Settings → Backup: makes one file with all the data and opens the share sheet.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εξαγωγή όλων των δεδομένων"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export all data"
+          }
+        }
+      }
+    },
     "Faint highlighter" : {
       "comment" : "Toolbar: the most see-through of the highlighter's three opacity levels (VoiceOver).",
       "extractionState" : "manual",
@@ -1441,6 +1513,24 @@
         }
       }
     },
+    "iCloud" : {
+      "comment" : "Settings section title, printed in capitals.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud"
+          }
+        }
+      }
+    },
     "iCloud account" : {
       "comment" : "Diagnostics check: an iCloud account is signed in on the device.",
       "extractionState" : "manual",
@@ -1455,6 +1545,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "iCloud account"
+          }
+        }
+      }
+    },
+    "iCloud Drive is off for this app, or iCloud cannot be reached. Everything stays on this device." : {
+      "comment" : "Settings → iCloud footer when the app's iCloud folder is unavailable.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το iCloud Drive είναι κλειστό για την εφαρμογή ή το iCloud δεν είναι διαθέσιμο. Όλα μένουν σε αυτή τη συσκευή."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud Drive is off for this app, or iCloud cannot be reached. Everything stays on this device."
           }
         }
       }
@@ -1653,6 +1761,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lasso"
+          }
+        }
+      }
+    },
+    "Last sync" : {
+      "comment" : "Settings → iCloud: when the last sync happened.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τελευταίος συγχρονισμός"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last sync"
           }
         }
       }
@@ -2107,6 +2233,24 @@
         }
       }
     },
+    "No backup" : {
+      "comment" : "Alert when the backup could not be made.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δεν έγινε αντίγραφο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No backup"
+          }
+        }
+      }
+    },
     "No birthdays yet" : {
       "comment" : "Birthdays list when it is empty.",
       "extractionState" : "manual",
@@ -2233,6 +2377,42 @@
         }
       }
     },
+    "Not a backup" : {
+      "comment" : "Alert when the picked file is not a backup.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δεν είναι αντίγραφο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not a backup"
+          }
+        }
+      }
+    },
+    "Not available" : {
+      "comment" : "Settings → iCloud: sync status when iCloud Drive is off for the app.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μη διαθέσιμος"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not available"
+          }
+        }
+      }
+    },
     "Not signed in" : {
       "comment" : "Diagnostics check result: no iCloud account on the device.",
       "extractionState" : "manual",
@@ -2305,6 +2485,24 @@
         }
       }
     },
+    "Off" : {
+      "comment" : "Settings → iCloud: sync status when not signed in to iCloud.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ανενεργός"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off"
+          }
+        }
+      }
+    },
     "OK" : {
       "comment" : "Diagnostics check result: works.",
       "extractionState" : "manual",
@@ -2337,6 +2535,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "On the day at %@"
+          }
+        }
+      }
+    },
+    "One file with all your pages, lists, birthdays and photos. Restoring adds back what the backup has; nothing you have now is deleted." : {
+      "comment" : "Settings → Backup footer.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ένα αρχείο με όλες τις σελίδες, τις λίστες, τα γενέθλια και τις φωτογραφίες σου. Η επαναφορά προσθέτει ό,τι έχει το αντίγραφο· δεν σβήνεται τίποτα από όσα έχεις τώρα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One file with all your pages, lists, birthdays and photos. Restoring adds back what the backup has; nothing you have now is deleted."
           }
         }
       }
@@ -2845,6 +3061,60 @@
         }
       }
     },
+    "Restore" : {
+      "comment" : "Alert button: restores the backup.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επαναφορά"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore"
+          }
+        }
+      }
+    },
+    "Restore from a backup…" : {
+      "comment" : "Settings → Backup: picks a backup file.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επαναφορά από αντίγραφο…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore from a backup…"
+          }
+        }
+      }
+    },
+    "Restore this backup?" : {
+      "comment" : "Alert before restoring a backup.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επαναφορά αυτού του αντιγράφου;"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore this backup?"
+          }
+        }
+      }
+    },
     "Save" : {
       "comment" : "Birthday form: saves the birthday.",
       "extractionState" : "manual",
@@ -3061,6 +3331,42 @@
         }
       }
     },
+    "Some files did not sync" : {
+      "comment" : "Settings → iCloud: sync status after a problem.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κάποια αρχεία δεν συγχρονίστηκαν"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Some files did not sync"
+          }
+        }
+      }
+    },
+    "Some files did not sync with iCloud" : {
+      "comment" : "VoiceOver: the small cloud mark with '!' on the page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κάποια αρχεία δεν συγχρονίστηκαν με το iCloud"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Some files did not sync with iCloud"
+          }
+        }
+      }
+    },
     "Some photos could not be added." : {
       "comment" : "Alert after picking photos for the wishlist when some of them could not be read.",
       "extractionState" : "manual",
@@ -3111,6 +3417,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Strong highlighter"
+          }
+        }
+      }
+    },
+    "Sync" : {
+      "comment" : "Settings → iCloud: the row with the sync status.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Συγχρονισμός"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync"
+          }
+        }
+      }
+    },
+    "Sync now" : {
+      "comment" : "Settings → iCloud: button.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Συγχρονισμός τώρα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync now"
+          }
+        }
+      }
+    },
+    "Syncing with iCloud" : {
+      "comment" : "VoiceOver: the small cloud mark on the page while syncing.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Συγχρονισμός με το iCloud"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Syncing with iCloud"
+          }
+        }
+      }
+    },
+    "Syncing…" : {
+      "comment" : "Settings → iCloud: sync status.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Συγχρονισμός…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Syncing…"
           }
         }
       }
@@ -3201,6 +3579,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "The app keeps no copy of your events. Without access it works as before, as a handwritten planner."
+          }
+        }
+      }
+    },
+    "The backup could not be made." : {
+      "comment" : "Alert when the backup could not be made.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το αντίγραφο δεν μπόρεσε να γίνει."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The backup could not be made."
+          }
+        }
+      }
+    },
+    "The backup's pages, lists and photos are back." : {
+      "comment" : "Alert after restoring a backup.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι σελίδες, οι λίστες και οι φωτογραφίες του αντιγράφου επέστρεψαν."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The backup's pages, lists and photos are back."
           }
         }
       }
@@ -3349,6 +3763,42 @@
         }
       }
     },
+    "The pages, lists, birthdays and photos of the backup come back. Nothing you have now is deleted." : {
+      "comment" : "Alert before restoring a backup.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι σελίδες, οι λίστες, τα γενέθλια και οι φωτογραφίες του αντιγράφου επιστρέφουν. Δεν σβήνεται τίποτα από όσα έχεις τώρα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The pages, lists, birthdays and photos of the backup come back. Nothing you have now is deleted."
+          }
+        }
+      }
+    },
+    "They are tried again in a while. Nothing is lost: everything is also kept on this device." : {
+      "comment" : "Settings → iCloud footer after 'Some files did not sync'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Θα ξαναδοκιμαστούν σε λίγο. Δεν χάνεται τίποτα: όλα μένουν και σε αυτή τη συσκευή."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "They are tried again in a while. Nothing is lost: everything is also kept on this device."
+          }
+        }
+      }
+    },
     "Thick" : {
       "comment" : "Toolbar: thickest line width (VoiceOver).",
       "extractionState" : "manual",
@@ -3417,6 +3867,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "This device"
+          }
+        }
+      }
+    },
+    "This file is not a backup of Danai's Calendar." : {
+      "comment" : "Alert when the picked file is not a backup.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αυτό το αρχείο δεν είναι αντίγραφο του Danai's Calendar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This file is not a backup of Danai's Calendar."
           }
         }
       }
@@ -3525,6 +3993,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "To do list"
+          }
+        }
+      }
+    },
+    "To see the same pages on your iPad and iPhone, sign in to iCloud with iCloud Drive on, in the Settings app. Until then everything stays on this device." : {
+      "comment" : "Settings → iCloud footer when not signed in.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Για να βλέπεις τις ίδιες σελίδες σε iPad και iPhone, συνδέσου στο iCloud με ανοιχτό το iCloud Drive, από τις Ρυθμίσεις της συσκευής. Μέχρι τότε όλα μένουν σε αυτή τη συσκευή."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To see the same pages on your iPad and iPhone, sign in to iCloud with iCloud Drive on, in the Settings app. Until then everything stays on this device."
           }
         }
       }
@@ -3673,6 +4159,24 @@
         }
       }
     },
+    "Up to date" : {
+      "comment" : "Settings → iCloud: sync status, everything is synced.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ενημερωμένα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to date"
+          }
+        }
+      }
+    },
     "Version" : {
       "comment" : "Settings row with the app version. Tapping it 5 times opens Diagnostics.",
       "extractionState" : "manual",
@@ -3759,6 +4263,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Weekly"
+          }
+        }
+      }
+    },
+    "What you write here shows on your other devices with the same iCloud account. Everything is also kept on this device." : {
+      "comment" : "Settings → iCloud footer while syncing.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ό,τι γράφεις εδώ εμφανίζεται και στις άλλες συσκευές σου με τον ίδιο λογαριασμό iCloud. Όλα μένουν και σε αυτή τη συσκευή."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What you write here shows on your other devices with the same iCloud account. Everything is also kept on this device."
           }
         }
       }

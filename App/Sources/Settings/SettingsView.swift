@@ -3,9 +3,11 @@ import UIKit
 import PlannerCore
 
 /// Settings sheet: drawing with a finger (iPad), the Apple Calendar (events in the cells,
-/// which calendars), and the version; tapping the version 5 times opens Diagnostics.
+/// which calendars), iCloud, the backup, and the version; tapping the version 5 times
+/// opens Diagnostics.
 struct SettingsView: View {
     let calendar: CalendarBook
+    let sync: CloudSync
 
     @Environment(\.dismiss) private var dismiss
     @AppStorage(InkDefaults.drawWithFinger) private var drawWithFinger = false
@@ -36,6 +38,10 @@ struct SettingsView: View {
                 }
 
                 calendarSection
+
+                ICloudSection(sync: sync)
+
+                BackupSection(sync: sync)
 
                 Section {
                     Button(action: versionTapped) {
