@@ -52,7 +52,7 @@ public struct BackupArchive: Sendable, Equatable {
     public static func collect(from root: URL, created: Date = Date(), writtenBy: String) throws -> BackupArchive {
         let folder = FolderStorage(root: root)
         var entries: [Entry] = []
-        for item in folder.listNow().keys.compactMap(SyncPath.init).sorted() {
+        for item in folder.listNow().keys.compactMap({ SyncPath($0) }).sorted() {
             if let data = try folder.readNow(item.path) {
                 entries.append(Entry(path: item.path, data: data))
             }

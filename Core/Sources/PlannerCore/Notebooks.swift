@@ -152,10 +152,10 @@ public struct Journal: Sendable, Equatable {
         guard index(of: page.id) == nil else { return }
         let at = id.flatMap { index(of: $0) }.map { $0 + 1 } ?? pages.count
         var placed = page
-        let slot = slot(at: at)
-        placed.position = slot ?? 0
+        let free = slot(at: at)
+        placed.position = free ?? 0
         pages.insert(placed, at: at)
-        if slot == nil {
+        if free == nil {
             renumber(now: now)
         }
     }
@@ -187,11 +187,11 @@ public struct Journal: Sendable, Equatable {
             pages.insert(page, at: index)
             return
         }
-        let slot = slot(at: at)
-        page.position = slot ?? 0
+        let free = slot(at: at)
+        page.position = free ?? 0
         page.modified = now
         pages.insert(page, at: at)
-        if slot == nil {
+        if free == nil {
             renumber(now: now)
         }
     }

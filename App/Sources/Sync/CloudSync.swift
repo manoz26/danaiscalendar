@@ -204,7 +204,7 @@ final class CloudSync {
         let keys = [NSMetadataQueryUpdateAddedItemsKey, NSMetadataQueryUpdateChangedItemsKey, NSMetadataQueryUpdateRemovedItemsKey]
         for key in keys {
             for item in note.userInfo?[key] as? [NSMetadataItem] ?? [] {
-                if let url = item.value(forAttribute: NSMetadataItemURLKey) as? URL, let path = path(of: url) {
+                if let url = item.value(forAttribute: NSMetadataItemURLKey) as? URL, let path = Self.path(of: url) {
                     paths.insert(path)
                 }
             }

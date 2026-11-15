@@ -459,7 +459,7 @@ public actor SyncEngine {
             state = current
         }
         let names = all ? Set(localItems.keys).union(remoteItems.keys).union(current.synced.keys) : paths
-        let items = names.compactMap(SyncPath.init).sorted()
+        let items = names.compactMap { SyncPath($0) }.sorted()
 
         for item in items where item.rank == 0 {
             await process(item, localItems: localItems, remoteItems: remoteItems)
