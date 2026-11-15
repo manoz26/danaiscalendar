@@ -214,7 +214,9 @@ struct CalendarEventTests {
     }
 
     @Test func remindersOfAllDayEventsAreAtNine() {
-        #expect(EventReminder.allDayChoices.map(\.offset) == [9 * 3600, -15 * 3600, -39 * 3600, -159 * 3600])
+        let hours: [TimeInterval] = [9, -15, -39, -159]
+        let offsets = EventReminder.allDayChoices.map(\.offset)
+        #expect(offsets == hours.map { $0 * 3600 })
         #expect(EventReminder.timedChoices.first?.offset == 0)
         #expect(EventReminder.timedChoices.contains(EventReminder(offset: -3600)))
     }
