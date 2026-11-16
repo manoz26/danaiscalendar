@@ -11,6 +11,7 @@ import XCTest
 final class WishlistTests: XCTestCase {
     @MainActor
     func testWishlistEnglish() throws {
+        guard isPad else { throw XCTSkip("The iPhone has its own screens (PhoneTests).") }
         continueAfterFailure = false
         XCUIDevice.shared.orientation = .portrait
         var app = launch(language: "en", region: "US", extraArguments: ["-DCOpenPage", "tobuy"])
@@ -74,6 +75,7 @@ final class WishlistTests: XCTestCase {
 
     @MainActor
     func testWishlistGreek() throws {
+        guard isPad else { throw XCTSkip("The iPhone has its own screens (PhoneTests).") }
         continueAfterFailure = false
         XCUIDevice.shared.orientation = .portrait
         let app = launch(language: "el", region: "GR", extraArguments: ["-DCOpenPage", "tobuy", "-DCSampleWishlist", "YES"])

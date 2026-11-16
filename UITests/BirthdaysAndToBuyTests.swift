@@ -10,6 +10,7 @@ import XCTest
 final class BirthdaysAndToBuyTests: XCTestCase {
     @MainActor
     func testAddABirthdayAndOpenToBuyEnglish() throws {
+        guard isPad else { throw XCTSkip("The iPhone has its own screens (PhoneTests).") }
         continueAfterFailure = false
         XCUIDevice.shared.orientation = .portrait
         var app = launch(language: "en", region: "US", extraArguments: ["-DCOpenPage", "month:2029-03"])
@@ -74,6 +75,7 @@ final class BirthdaysAndToBuyTests: XCTestCase {
 
     @MainActor
     func testBirthdaysAndToBuyGreek() throws {
+        guard isPad else { throw XCTSkip("The iPhone has its own screens (PhoneTests).") }
         continueAfterFailure = false
         XCUIDevice.shared.orientation = .portrait
         let app = launch(language: "el", region: "GR", extraArguments: ["-DCSampleBirthdays", "YES", "-DCOpenPage", "month:2029-03"])

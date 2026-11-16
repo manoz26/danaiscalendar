@@ -19,7 +19,7 @@ extension PlannerDate {
 }
 
 /// A page picture with a thin frame (black and thicker for the open page).
-private struct PageThumbnail: View {
+struct PageThumbnail: View {
     let image: UIImage
     let isCurrent: Bool
 
@@ -35,7 +35,7 @@ private struct PageThumbnail: View {
 }
 
 /// Big icon, a title and a line of text, for an empty grid.
-private struct EmptyGrid: View {
+struct EmptyGrid: View {
     let systemName: String
     let title: Text
     let message: Text
@@ -433,7 +433,7 @@ struct JournalPageSettingsView: View {
 }
 
 /// One kind of paper: a small sample and its name; the chosen one has a black frame.
-private struct PaperChoice: View {
+struct PaperChoice: View {
     let style: PaperStyle
     let isSelected: Bool
     let action: () -> Void
@@ -467,7 +467,7 @@ private struct PaperChoice: View {
 }
 
 /// A tiny sample of a paper.
-private struct PaperSwatch: View {
+struct PaperSwatch: View {
     let style: PaperStyle
 
     var body: some View {

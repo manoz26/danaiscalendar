@@ -202,6 +202,24 @@ final class InkCanvasView: PKCanvasView {
         contentOffset = .zero
     }
 
+    /// Two taps on the iPhone: zooms in on a place of the page (canvas units), or, when
+    /// zoomed in already, back out to the whole width with that place still in view.
+    func toggleZoom(centeredOn point: CGPoint, factor: CGFloat = 2.4) {
+        guard fittedWidth > 0 else { return }
+        let target = isZoomedIn ? fitZoom : min(maximumZoomScale, fitZoom * factor)
+        let scale = target * drawingScale
+        let content = CGSize(width: PageCanvas.size.width * scale, height: PageCanvas.size.height * scale)
+        let offset = CGPoint(
+            x: min(max(0, point.x * scale - bounds.width / 2), max(0, content.width - bounds.width)),
+            y: min(max(0, point.y * scale - bounds.height / 2), max(0, content.height - bounds.height))
+        )
+        UIView.animate(withDuration: 0.25) {
+            self.zoomScale = target
+            self.followZoom()
+            self.contentOffset = offset
+        }
+    }
+
     /// Keeps the template and the scrollable area in step with PencilKit's zoom.
     func followZoom() {
         let scale = zoomScale * drawingScale

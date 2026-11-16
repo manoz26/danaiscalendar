@@ -74,6 +74,28 @@ enum PageExporter {
         }
     }
 
+    /// A part of the page (e.g. a day's cell) as a picture, template and ink, `scale` pixels
+    /// per canvas unit: the iPhone shows a day's handwriting enlarged.
+    static func crop(template: PageTemplate, drawing: PKDrawing, rect: CGRect, scale: CGFloat) -> UIImage {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = scale
+        format.opaque = true
+        var ink: UIImage?
+        if !drawing.strokes.isEmpty {
+            UITraitCollection(userInterfaceStyle: .light).performAsCurrent {
+                ink = drawing.image(from: rect, scale: scale)
+            }
+        }
+        return UIGraphicsImageRenderer(size: rect.size, format: format).image { context in
+            let cgContext = context.cgContext
+            cgContext.saveGState()
+            cgContext.translateBy(x: -rect.minX, y: -rect.minY)
+            TemplateRenderer.drawPage(template, in: cgContext, scale: 1)
+            cgContext.restoreGState()
+            ink?.draw(in: CGRect(origin: .zero, size: rect.size))
+        }
+    }
+
     /// The ink of the whole page as a transparent picture, always in light colours (in dark
     /// mode PencilKit would turn black ink white).
     static func inkImage(_ drawing: PKDrawing, scale: CGFloat) -> UIImage? {

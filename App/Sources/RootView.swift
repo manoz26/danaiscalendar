@@ -50,7 +50,7 @@ struct RootView: View {
     @AppStorage(InkDefaults.drawWithFinger) private var drawWithFinger = false
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @State private var now = Date()
+    @State private var now = AppClock.now
     @State private var page: PlannerPage
     /// The last year or month page: where other pages go back to, and whose tabs the To Buy
     /// page shows. On a week page it is the week's month: the one she came from while the
@@ -80,7 +80,7 @@ struct RootView: View {
         self.journal = journal
         self.sketches = sketches
         self.lists = lists
-        let month = YearMonth(date: Date(), calendar: PlannerLocale.calendar(locale: AppLocale.current))
+        let month = YearMonth(date: AppClock.now, calendar: PlannerLocale.calendar(locale: AppLocale.current))
         var first = LaunchOptions.initialPage ?? .month(month)
         if LaunchOptions.openPageArgument == "journal", let page = journal.pages.first {
             first = page.page
@@ -177,7 +177,7 @@ struct RootView: View {
         .onChange(of: scenePhase) { _, phase in
             switch phase {
             case .active:
-                now = Date()
+                now = AppClock.now
                 appleCalendar.refreshAccess()
                 sync.becameActive()
                 AppLog.info("App active")
@@ -197,7 +197,7 @@ struct RootView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
             // Midnight, time zone or clock change: move the "today" mark.
-            now = Date()
+            now = AppClock.now
         }
     }
 
@@ -547,7 +547,7 @@ struct RootView: View {
         do {
             let url = try PageExporter.export(
                 template: content.template, drawing: ink.drawing(of: page),
-                name: exportName(locale: locale), format: format
+                name: PlannerPageContent.exportName(of: page, journal: journal, locale: locale), format: format
             )
             #if DEBUG
             lastExport = PageExporter.lastExport
@@ -555,28 +555,6 @@ struct RootView: View {
             SharePresenter.present(url)
         } catch {
             AppLog.error("Could not export the page", error)
-        }
-    }
-
-    /// The shared file's name: "November 2026", "2026", "9 – 15 November 2026", "To buy",
-    /// the journal page's title or day, or "Sketch".
-    private func exportName(locale: Locale) -> String {
-        switch page {
-        case .year(let year):
-            return String(year)
-        case .month(let month):
-            return "\(CalendarNames.monthName(month.month, locale: locale)) \(month.year)"
-        case .week(let week):
-            return "\(WeekTitle.days(of: week, locale: locale)) \(WeekTitle.years(of: week))"
-        case .toBuy:
-            return PlannerPageContent.toBuyTitle
-        case .journal(let id):
-            let record = journal.page(id)
-            if let title = record?.trimmedTitle, !title.isEmpty { return title }
-            if let date = record?.date { return JournalHeading.fullDate(date, locale: locale) }
-            return String(localized: "Journal", comment: "The journal ('Τετράδιο'): free pages to write on. Top bar button, printed in capitals.")
-        case .sketch:
-            return PlannerPageContent.sketchTitle
         }
     }
 
@@ -629,17 +607,7 @@ struct RootView: View {
         case .day(let date):
             DayEventsView(book: appleCalendar, day: date, now: now)
         case .list(let kind, let inkedLines, let focusNew):
-            TypedListView(lists: lists, kind: kind, inkedLines: inkedLines, focusNew: focusNew, title: listTitle(kind))
-        }
-    }
-
-    private func listTitle(_ kind: TypedListKind) -> String {
-        switch kind {
-        case .todo(let month):
-            let name = "\(CalendarNames.monthName(month.month, locale: AppLocale.current)) \(month.year)"
-            return String(localized: "To-dos for \(name)", comment: "Title of the typed to-dos of a month, e.g. 'To-dos for November 2026'.")
-        case .toBuy:
-            return PlannerPageContent.toBuyTitle
+            TypedListView(lists: lists, kind: kind, inkedLines: inkedLines, focusNew: focusNew, title: PlannerPageContent.listTitle(kind))
         }
     }
 }

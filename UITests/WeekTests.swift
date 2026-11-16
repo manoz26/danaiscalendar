@@ -63,7 +63,9 @@ final class WeekTests: XCTestCase {
         tapOnPage(app, "month.weekly.4")
         waitForPage(app, "week:2026-03-16")
         XCTAssertEqual(value(app, "nav.back"), march)
-        XCTAssertTrue(element(app, "tab.month.3").isSelected, "The week's month tab is not open")
+        if isPad {
+            XCTAssertTrue(element(app, "tab.month.3").isSelected, "The week's month tab is not open")
+        }
         save(app, "\(language)-portrait-week")
         checkInk(app, page: "page.week", targets: Self.targets("2026-03-16"), minimum: isPad ? 2 : 3)
 
@@ -90,7 +92,9 @@ final class WeekTests: XCTestCase {
         element(app, "page.week").swipeLeft()
         waitForPage(app, "week:2026-04-06")
         XCTAssertEqual(value(app, "nav.back"), april)
-        XCTAssertTrue(element(app, "tab.month.4").isSelected, "The April tab is not open")
+        if isPad {
+            XCTAssertTrue(element(app, "tab.month.4").isSelected, "The April tab is not open")
+        }
 
         // Back in April, the weeks she opened (and wrote on) have a dot.
         tap(app, "nav.back")

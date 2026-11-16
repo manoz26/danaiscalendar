@@ -10,6 +10,8 @@ import UIKit
 /// colours; everything around them is black and white.
 struct WishlistView: View {
     let book: WishlistBook
+    /// Inside the iPhone's Lists tab (not a sheet): no title and no Done.
+    var embedded = false
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var sizeClass
@@ -36,7 +38,7 @@ struct WishlistView: View {
                 }
             }
             .background(Paper.fill)
-            .navigationTitle(Text("Wishlist"))
+            .navigationTitle(embedded ? Text(verbatim: "") : Text("Wishlist"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -47,14 +49,16 @@ struct WishlistView: View {
                     .accessibilityLabel(Text("Add photos"))
                     .accessibilityIdentifier("wishlist.add")
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Text("Done")
-                            .font(.inter(.semibold, size: 17, relativeTo: .body))
+                if !embedded {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Text("Done")
+                                .font(.inter(.semibold, size: 17, relativeTo: .body))
+                        }
+                        .accessibilityIdentifier("wishlist.done")
                     }
-                    .accessibilityIdentifier("wishlist.done")
                 }
             }
             .confirmationDialog(

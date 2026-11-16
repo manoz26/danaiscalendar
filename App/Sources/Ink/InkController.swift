@@ -144,6 +144,16 @@ final class InkController {
             setUpStraightLines()
         } else {
             canvas.drawingGestureRecognizer.isEnabled = false
+            // iPhone: two taps zoom in on that place of the page (on a month, on that week),
+            // and two more zoom back out. A single tap waits a moment to see if a second follows.
+            let doubleTap = UITapGestureRecognizer(target: helper, action: #selector(CanvasHelper.doubleTapped(_:)))
+            doubleTap.numberOfTapsRequired = 2
+            doubleTap.delaysTouchesBegan = false
+            doubleTap.delaysTouchesEnded = false
+            doubleTap.cancelsTouchesInView = false
+            doubleTap.delegate = helper
+            canvas.addGestureRecognizer(doubleTap)
+            tap.require(toFail: doubleTap)
         }
         applyTool()
         observeNotifications()
@@ -418,6 +428,21 @@ final class InkController {
     fileprivate func tapped(_ recognizer: UITapGestureRecognizer) {
         guard recognizer.state == .ended else { return }
         onTap?(canvas.canvasLocation(of: recognizer))
+    }
+
+    /// Two taps (iPhone): zooms in around the place tapped, or back out to the whole width.
+    /// On a day of the month page the zoom centres on that day's week row.
+    fileprivate func doubleTapped(_ recognizer: UITapGestureRecognizer) {
+        guard recognizer.state == .ended else { return }
+        var center = canvas.canvasLocation(of: recognizer)
+        let day = template?.regions(at: center).first { region in
+            if case .day = region.id { return true }
+            return false
+        }
+        if let day {
+            center.y = day.rect.midY
+        }
+        canvas.toggleZoom(centeredOn: center)
     }
 
     fileprivate func longPressed(_ recognizer: UILongPressGestureRecognizer) {
@@ -853,6 +878,10 @@ private final class CanvasHelper: NSObject, PKCanvasViewDelegate, UIGestureRecog
 
     @objc func longPressed(_ recognizer: UILongPressGestureRecognizer) {
         controller?.longPressed(recognizer)
+    }
+
+    @objc func doubleTapped(_ recognizer: UITapGestureRecognizer) {
+        controller?.doubleTapped(recognizer)
     }
 
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {

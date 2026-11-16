@@ -440,6 +440,23 @@ final class ListBook {
         }
     }
 
+    /// A list's items as the iPhone shows them: in the order she arranged them (see
+    /// `TypedLists.arranged`), which is not the order of the printed lines.
+    func arranged(_ list: TypedListKind) -> [ListItem] {
+        TypedLists.arranged(items(list))
+    }
+
+    /// The iPhone's list: an item dragged to `index` among `others` (the items on screen, in
+    /// order, without it). Only the moved item changes; its printed line stays.
+    func move(_ id: UUID, to index: Int, among others: [ListItem], in list: TypedListKind) {
+        let position = TypedLists.position(at: index, among: others.filter { $0.id != id })
+        change(list) { items in
+            guard let found = items.firstIndex(where: { $0.id == id }), items[found].position != position else { return }
+            items[found].position = position
+            items[found].modified = Date()
+        }
+    }
+
     /// Adds an item on the first line with no item and no ink. Empty texts are ignored.
     @discardableResult
     func add(_ text: String, to list: TypedListKind, inkedLines: Set<Int>) -> ListItem? {

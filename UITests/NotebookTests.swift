@@ -160,6 +160,7 @@ final class NotebookTests: XCTestCase {
     /// ticked with a finger on the page.
     @MainActor
     func testTypedItemsEnglish() throws {
+        guard isPad else { throw XCTSkip("The iPhone has its own screens (PhoneTests).") }
         continueAfterFailure = false
         XCUIDevice.shared.orientation = .portrait
         let app = launch(language: "en", region: "US", extraArguments: ["-DCOpenPage", "month:2029-03"])
@@ -305,6 +306,7 @@ final class NotebookTests: XCTestCase {
     /// page, a journal page, the pages grid and the sketches (on iPhone through the … menu).
     @MainActor
     func testNotebooksGreek() throws {
+        guard isPad else { throw XCTSkip("The iPhone has its own screens (PhoneTests).") }
         continueAfterFailure = false
         XCUIDevice.shared.orientation = .portrait
         let app = launch(language: "el", region: "GR", extraArguments: [

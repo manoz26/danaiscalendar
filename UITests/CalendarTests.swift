@@ -10,6 +10,7 @@ import XCTest
 final class CalendarTests: XCTestCase {
     @MainActor
     func testEventsOnThePagesEnglish() throws {
+        guard isPad else { throw XCTSkip("The iPhone has its own screens (PhoneTests).") }
         continueAfterFailure = false
         XCUIDevice.shared.orientation = .portrait
         let app = launch(language: "en", region: "US", extraArguments: ["-DCSampleEvents", "YES", "-DCOpenPage", "month:2029-03"])
@@ -91,6 +92,7 @@ final class CalendarTests: XCTestCase {
 
     @MainActor
     func testCalendarSettingsEnglish() throws {
+        guard isPad else { throw XCTSkip("The iPhone has its own screens (PhoneTests).") }
         continueAfterFailure = false
         XCUIDevice.shared.orientation = .portrait
         let app = launch(language: "en", region: "US", extraArguments: ["-DCSampleEvents", "YES", "-DCOpenPage", "month:2029-03"])
@@ -133,6 +135,7 @@ final class CalendarTests: XCTestCase {
 
     @MainActor
     func testConnectAndEventsGreek() throws {
+        guard isPad else { throw XCTSkip("The iPhone has its own screens (PhoneTests).") }
         continueAfterFailure = false
         XCUIDevice.shared.orientation = .portrait
         let app = launch(language: "el", region: "GR", extraArguments: ["-DCSampleEvents", "ask", "-DCOpenPage", "month:2029-03"])

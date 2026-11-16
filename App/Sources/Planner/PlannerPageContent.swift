@@ -439,6 +439,43 @@ struct PlannerPageContent: Equatable {
     }
 }
 
+extension PlannerPageContent {
+    /// The name of a shared page's file: "November 2026", "2026", "9 – 15 November 2026",
+    /// "To buy", the journal page's title or day, or "Sketch".
+    @MainActor
+    static func exportName(of page: PlannerPage, journal: JournalBook, locale: Locale) -> String {
+        switch page {
+        case .year(let year):
+            return String(year)
+        case .month(let month):
+            return "\(CalendarNames.monthName(month.month, locale: locale)) \(month.year)"
+        case .week(let week):
+            return "\(WeekTitle.days(of: week, locale: locale)) \(WeekTitle.years(of: week))"
+        case .toBuy:
+            return toBuyTitle
+        case .journal(let id):
+            let record = journal.page(id)
+            if let title = record?.trimmedTitle, !title.isEmpty { return title }
+            if let date = record?.date { return JournalHeading.fullDate(date, locale: locale) }
+            return String(localized: "Journal", comment: "The journal ('Τετράδιο'): free pages to write on. Top bar button, printed in capitals.")
+        case .sketch:
+            return sketchTitle
+        }
+    }
+
+    /// The title of a typed list's sheet: "To-dos for November 2026", or "To buy".
+    @MainActor
+    static func listTitle(_ kind: TypedListKind) -> String {
+        switch kind {
+        case .todo(let month):
+            let name = "\(CalendarNames.monthName(month.month, locale: AppLocale.current)) \(month.year)"
+            return String(localized: "To-dos for \(name)", comment: "Title of the typed to-dos of a month, e.g. 'To-dos for November 2026'.")
+        case .toBuy:
+            return toBuyTitle
+        }
+    }
+}
+
 /// Spoken names of days, e.g. "Saturday 14 November 2026", in the app's language.
 struct DayNames {
     private let formatter: DateFormatter
@@ -457,6 +494,16 @@ struct DayNames {
         let components = DateComponents(year: date.year, month: date.month, day: date.day, hour: 12)
         guard let day = calendar.date(from: components) else { return date.description }
         return formatter.string(from: day)
+    }
+}
+
+/// The time the app shows as "now" (today's mark, the current month, new events).
+enum AppClock {
+    static var now: Date {
+        #if DEBUG
+        if let fixed = LaunchOptions.fixedToday { return fixed }
+        #endif
+        return Date()
     }
 }
 
@@ -519,7 +566,7 @@ enum LaunchOptions {
         if !keepCloud {
             try? FileManager.default.removeItem(at: fakeCloudFolder)
         }
-        for key in InkDefaults.all + CalendarDefaults.all {
+        for key in InkDefaults.all + CalendarDefaults.all + PhoneDefaults.all {
             UserDefaults.standard.removeObject(forKey: key)
         }
         AppLog.info("Test data reset")
@@ -531,6 +578,26 @@ enum LaunchOptions {
     static var openPageArgument: String? {
         let arguments = ProcessInfo.processInfo.arguments
         guard let index = arguments.firstIndex(of: "-DCOpenPage"), index + 1 < arguments.count else { return nil }
+        return arguments[index + 1]
+    }
+
+    #if DEBUG
+    /// `-DCToday 2029-03-21`: the app believes it is that day, at 9:41, so that screenshots
+    /// with "today" in them are the same every day.
+    static let fixedToday: Date? = {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let index = arguments.firstIndex(of: "-DCToday"), index + 1 < arguments.count,
+              let day = PlannerDate(arguments[index + 1]) else { return nil }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = .current
+        return calendar.date(from: DateComponents(year: day.year, month: day.month, day: day.day, hour: 9, minute: 41))
+    }()
+    #endif
+
+    /// `-DCPhoneTab <tab>`: the iPhone opens on that tab (`month`, `today`, `lists`, `journal`).
+    static var phoneTabArgument: String? {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let index = arguments.firstIndex(of: "-DCPhoneTab"), index + 1 < arguments.count else { return nil }
         return arguments[index + 1]
     }
 

@@ -84,8 +84,12 @@ final class ScreenshotTests: XCTestCase {
             waitForOrientation(app, landscape: false)
         }
 
-        // The January tab, then Today.
-        tap(app, "tab.month.1")
+        // The January tab (on the iPhone, January on the year page), then Today.
+        if isPad {
+            tap(app, "tab.month.1")
+        } else {
+            tapOnPage(app, String(format: "year.month.%04d-01", year))
+        }
         waitForPage(app, String(format: "%04d-01", year))
         tap(app, "nav.today")
         waitForPage(app, currentMonth)

@@ -5,6 +5,16 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "full: everything. build: Core tests and a build only (a few minutes, no simulators)."
+        type: choice
+        options: [full, build]
+        default: full
+      only:
+        description: "UI test classes to run, comma separated (e.g. PhoneTests,LockTests). Empty: all."
+        type: string
+        default: ""
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -23,6 +33,9 @@ jobs:
       PROJECT: DanaisCalendar.xcodeproj
       SCHEME: DanaisCalendar
       DERIVED_DATA: build/DerivedData
+      # Manual runs can stop after the build (`mode: build`) or run only some UI test classes (`only`).
+      MODE: ${{ inputs.mode || 'full' }}
+      ONLY: ${{ inputs.only }}
     steps:
       - uses: actions/checkout@v7
 
@@ -50,12 +63,43 @@ jobs:
           set -o pipefail
           swift test --package-path Core 2>&1 | tee build/logs/core-tests.log
 
+      # `mode: build`: only checks that everything compiles, without waiting for simulators.
+      - name: Build only (no simulators)
+        if: env.MODE == 'build'
+        run: |
+          set -o pipefail
+          xcodebuild build-for-testing \
+            -project "$PROJECT" -scheme "$SCHEME" \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$DERIVED_DATA" \
+            ARCHS=arm64 ONLY_ACTIVE_ARCH=YES \
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee build/logs/build.log | xcbeautify --quiet
+
       - name: Create simulators
         id: sims
+        if: env.MODE != 'build'
         run: bash scripts/ci/pick-simulators.sh >> "$GITHUB_OUTPUT"
+
+      # Which UI tests run: all of them, or the classes named in `only`.
+      - name: Choose UI tests
+        if: env.MODE != 'build'
+        run: |
+          flags=""
+          if [ -n "$ONLY" ]; then
+            IFS=',' read -ra classes <<< "$ONLY"
+            for class in "${classes[@]}"; do
+              class=$(echo "$class" | tr -cd 'A-Za-z0-9_')
+              [ -n "$class" ] && flags="$flags -only-testing:DanaisCalendarUITests/$class"
+            done
+          fi
+          [ -n "$flags" ] || flags="-only-testing:DanaisCalendarUITests"
+          echo "UI_TESTS=$flags" >> "$GITHUB_ENV"
+          echo "UI tests: $flags"
 
       - name: Build for testing
         id: build
+        if: env.MODE != 'build'
         run: |
           set -o pipefail
           xcodebuild build-for-testing \
@@ -66,6 +110,7 @@ jobs:
             2>&1 | tee build/logs/build.log | xcbeautify --quiet
 
       - name: Inspect app bundle
+        if: env.MODE != 'build'
         run: |
           app=$(find "$DERIVED_DATA/Build/Products" -maxdepth 2 -name "DanaisCalendar.app" -type d | head -1)
           echo "App: $app"
@@ -73,6 +118,7 @@ jobs:
           plutil -p "$app/Info.plist" | tee -a build/logs/app-bundle.txt
 
       - name: App unit tests
+        if: env.MODE != 'build'
         run: |
           set -o pipefail
           xcodebuild test-without-building \
@@ -84,6 +130,7 @@ jobs:
             2>&1 | tee build/logs/unit-tests.log | xcbeautify
 
       - name: UI tests and screenshots (iPad 13")
+        if: env.MODE != 'build'
         env:
           TEST_RUNNER_SCREENSHOT_DIR: ${{ github.workspace }}/build/screenshots
           TEST_RUNNER_DEVICE_LABEL: ipad13
@@ -93,21 +140,21 @@ jobs:
             -project "$PROJECT" -scheme "$SCHEME" \
             -destination "id=${{ steps.sims.outputs.ipad }}" \
             -derivedDataPath "$DERIVED_DATA" \
-            -only-testing:DanaisCalendarUITests \
+            $UI_TESTS \
             -retry-tests-on-failure -test-iterations 3 \
             -resultBundlePath build/results/ui-ipad.xcresult \
             2>&1 | tee build/logs/ui-ipad.log | xcbeautify
 
       # One simulator at a time: app launches are much faster on a less busy runner.
-      # The iPhone runs even if the iPad tests failed, so both sets of screenshots come out.
-      - name: Switch to the iPhone simulator
-        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+      # The iPhones run even if the iPad tests failed, so every set of screenshots comes out.
+      - name: Switch to the large iPhone simulator
+        if: ${{ !cancelled() && env.MODE != 'build' && steps.build.outcome == 'success' }}
         run: |
           xcrun simctl shutdown "${{ steps.sims.outputs.ipad }}" || true
           bash scripts/ci/boot-simulator.sh "${{ steps.sims.outputs.iphone }}"
 
-      - name: UI tests and screenshots (iPhone)
-        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+      - name: UI tests and screenshots (large iPhone)
+        if: ${{ !cancelled() && env.MODE != 'build' && steps.build.outcome == 'success' }}
         env:
           TEST_RUNNER_SCREENSHOT_DIR: ${{ github.workspace }}/build/screenshots
           TEST_RUNNER_DEVICE_LABEL: iphone
@@ -117,10 +164,33 @@ jobs:
             -project "$PROJECT" -scheme "$SCHEME" \
             -destination "id=${{ steps.sims.outputs.iphone }}" \
             -derivedDataPath "$DERIVED_DATA" \
-            -only-testing:DanaisCalendarUITests \
+            $UI_TESTS \
             -retry-tests-on-failure -test-iterations 3 \
             -resultBundlePath build/results/ui-iphone.xcresult \
             2>&1 | tee build/logs/ui-iphone.log | xcbeautify
+
+      # The smallest iPhone of the runtime: only the iPhone's own screens (PhoneTests).
+      - name: Switch to the small iPhone simulator
+        if: ${{ !cancelled() && env.MODE != 'build' && steps.build.outcome == 'success' && steps.sims.outputs.iphone_small != '' }}
+        run: |
+          xcrun simctl shutdown "${{ steps.sims.outputs.iphone }}" || true
+          bash scripts/ci/boot-simulator.sh "${{ steps.sims.outputs.iphone_small }}"
+
+      - name: UI tests and screenshots (small iPhone)
+        if: ${{ !cancelled() && env.MODE != 'build' && steps.build.outcome == 'success' && steps.sims.outputs.iphone_small != '' && (env.ONLY == '' || contains(env.ONLY, 'PhoneTests')) }}
+        env:
+          TEST_RUNNER_SCREENSHOT_DIR: ${{ github.workspace }}/build/screenshots
+          TEST_RUNNER_DEVICE_LABEL: iphone-small
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building \
+            -project "$PROJECT" -scheme "$SCHEME" \
+            -destination "id=${{ steps.sims.outputs.iphone_small }}" \
+            -derivedDataPath "$DERIVED_DATA" \
+            -only-testing:DanaisCalendarUITests/PhoneTests \
+            -retry-tests-on-failure -test-iterations 3 \
+            -resultBundlePath build/results/ui-iphone-small.xcresult \
+            2>&1 | tee build/logs/ui-iphone-small.log | xcbeautify
 
       # Crash reports of the app in the simulators (the .ips files the host keeps), in the logs artifact.
       - name: Collect app crash reports
@@ -136,7 +206,7 @@ jobs:
         run: |
           {
             echo "### Screenshots"
-            echo "Simulators: ${{ steps.sims.outputs.ipad_name }}, ${{ steps.sims.outputs.iphone_name }} (${{ steps.sims.outputs.runtime }})"
+            echo "Simulators: ${{ steps.sims.outputs.ipad_name }}, ${{ steps.sims.outputs.iphone_name }}, ${{ steps.sims.outputs.iphone_small_name }} (${{ steps.sims.outputs.runtime }})"
             echo
             ls build/screenshots 2>/dev/null | sed 's/^/- /' || echo "none"
           } >> "$GITHUB_STEP_SUMMARY"

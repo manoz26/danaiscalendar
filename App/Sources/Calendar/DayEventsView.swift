@@ -114,7 +114,7 @@ enum EventEditorTarget: Hashable, Identifiable {
 
 /// One event in a day's list: its time (or "All day") on the left, the title and the
 /// calendar's name.
-private struct EventRow: View {
+struct EventRow: View {
     let event: CalendarEvent
     let day: PlannerDate
     let clock: EventClock

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Creates fresh simulators for CI on the runtime that matches the selected Xcode's SDK:
 #   - the newest "iPad Pro 13-inch" (fallback: "iPad Air 13-inch")
-#   - the newest "iPhone NN Pro"
+#   - the newest "iPhone NN Pro Max" (the large iPhone; fallback: "iPhone NN Pro")
+#   - a small iPhone if the runtime has one ("iPhone SE", else "iPhone NNe", else "iPhone NN")
 # Boots only the iPad (one simulator at a time keeps app launches fast; the workflow boots
 # the iPhone later with boot-simulator.sh) and prints key=value lines for $GITHUB_OUTPUT.
 set -euo pipefail
@@ -37,7 +38,11 @@ pick_type() {
 
 ipad_type=$(pick_type '^iPad Pro 13-inch')
 [[ -n "$ipad_type" ]] || ipad_type=$(pick_type '^iPad Air 13-inch')
-iphone_type=$(pick_type '^iPhone [0-9]+ Pro$')
+iphone_type=$(pick_type '^iPhone [0-9]+ Pro Max$')
+[[ -n "$iphone_type" ]] || iphone_type=$(pick_type '^iPhone [0-9]+ Pro$')
+small_type=$(pick_type '^iPhone SE')
+[[ -n "$small_type" ]] || small_type=$(pick_type '^iPhone [0-9]+e$')
+[[ -n "$small_type" ]] || small_type=$(pick_type '^iPhone [0-9]+$')
 
 if [[ -z "$ipad_type" || -z "$iphone_type" ]]; then
   echo "Could not find iPad 13\" / iPhone Pro device types in $runtime" >&2
@@ -49,6 +54,10 @@ type_name() { jq -r --arg id "$1" '.supportedDeviceTypes[] | select(.identifier 
 
 ipad=$(xcrun simctl create "CI iPad 13" "$ipad_type" "$runtime")
 iphone=$(xcrun simctl create "CI iPhone" "$iphone_type" "$runtime")
+small=""
+if [[ -n "$small_type" ]]; then
+  small=$(xcrun simctl create "CI iPhone small" "$small_type" "$runtime")
+fi
 
 bash "$(dirname "$0")/boot-simulator.sh" "$ipad"
 
@@ -56,10 +65,13 @@ bash "$(dirname "$0")/boot-simulator.sh" "$ipad"
   echo "Runtime: $runtime (SDK $sdk)"
   echo "iPad: $(type_name "$ipad_type") $ipad"
   echo "iPhone: $(type_name "$iphone_type") $iphone"
+  if [[ -n "$small_type" ]]; then echo "Small iPhone: $(type_name "$small_type") $small"; fi
 } >&2
 
 echo "ipad=$ipad"
 echo "iphone=$iphone"
 echo "ipad_name=$(type_name "$ipad_type")"
 echo "iphone_name=$(type_name "$iphone_type")"
+echo "iphone_small=$small"
+if [[ -n "$small_type" ]]; then echo "iphone_small_name=$(type_name "$small_type")"; else echo "iphone_small_name="; fi
 echo "runtime=$runtime"

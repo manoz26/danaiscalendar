@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 @main
 struct DanaisCalendarApp: App {
@@ -54,10 +55,18 @@ struct DanaisCalendarApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView(
-                ink: ink, birthdays: birthdays, journal: journal, sketches: sketches, lists: lists,
-                wishlist: wishlist, appleCalendar: appleCalendar, sync: sync
-            )
+            // The iPad writes; the iPhone shows what was written and adds typed things.
+            if UIDevice.current.userInterfaceIdiom == .phone {
+                PhoneRootView(
+                    ink: ink, birthdays: birthdays, journal: journal, sketches: sketches, lists: lists,
+                    wishlist: wishlist, appleCalendar: appleCalendar, sync: sync
+                )
+            } else {
+                RootView(
+                    ink: ink, birthdays: birthdays, journal: journal, sketches: sketches, lists: lists,
+                    wishlist: wishlist, appleCalendar: appleCalendar, sync: sync
+                )
+            }
         }
     }
 }

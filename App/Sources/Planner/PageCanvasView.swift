@@ -8,6 +8,9 @@ struct PlannerCanvas: UIViewRepresentable {
     let ink: InkController
     let content: PlannerPageContent
     let drawWithFinger: Bool
+    /// The canvas is covered by something else (the iPhone's other tabs): VoiceOver and the
+    /// UI tests must not find the page under it.
+    var hidden = false
     let onTap: (CGPoint) -> Void
     let onLongPress: (CGPoint) -> Void
     let onSwipe: (Int) -> Void
@@ -21,6 +24,9 @@ struct PlannerCanvas: UIViewRepresentable {
         ink.onLongPress = onLongPress
         ink.onSwipe = onSwipe
         ink.setDrawWithFinger(drawWithFinger)
+        if view.accessibilityElementsHidden != hidden {
+            view.accessibilityElementsHidden = hidden
+        }
         ink.show(content)
     }
 }

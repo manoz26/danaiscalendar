@@ -7,6 +7,8 @@ import PlannerCore
 /// gift on its day in the month page and a line in that month's notes.
 struct BirthdaysView: View {
     let book: BirthdayBook
+    /// Inside the iPhone's Lists tab (not a sheet): no title and no Done.
+    var embedded = false
     @Environment(\.dismiss) private var dismiss
     @State private var editing: BirthdayDraft?
 
@@ -46,7 +48,7 @@ struct BirthdaysView: View {
             .textCase(nil)
             .scrollContentBackground(.hidden)
             .background(Paper.fill)
-            .navigationTitle(Text("Birthdays"))
+            .navigationTitle(embedded ? Text(verbatim: "") : Text("Birthdays"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -59,14 +61,16 @@ struct BirthdaysView: View {
                     .accessibilityLabel(Text("Add birthday"))
                     .accessibilityIdentifier("birthdays.add")
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Text("Done")
-                            .font(.inter(.semibold, size: 17, relativeTo: .body))
+                if !embedded {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Text("Done")
+                                .font(.inter(.semibold, size: 17, relativeTo: .body))
+                        }
+                        .accessibilityIdentifier("birthdays.done")
                     }
-                    .accessibilityIdentifier("birthdays.done")
                 }
             }
             .navigationDestination(item: $editing) { draft in

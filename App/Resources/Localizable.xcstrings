@@ -433,6 +433,24 @@
         }
       }
     },
+    "Arrange items" : {
+      "comment" : "iPhone: the button that shows the handles for moving the items of a list.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αλλαγή σειράς"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrange items"
+          }
+        }
+      }
+    },
     "At time of event" : {
       "comment" : "Reminder of an event: when it starts.",
       "extractionState" : "manual",
@@ -645,6 +663,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cancel"
+          }
+        }
+      }
+    },
+    "Change" : {
+      "comment" : "iPhone: swipe action that changes the text of a typed item.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αλλαγή"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change"
+          }
+        }
+      }
+    },
+    "Change item" : {
+      "comment" : "iPhone: title of the alert that changes the text of a typed item.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αλλαγή στοιχείου"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change item"
           }
         }
       }
@@ -1243,6 +1297,24 @@
         }
       }
     },
+    "Events" : {
+      "comment" : "Header of a day's events of the Apple Calendar (iPhone day sheet).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Συμβάντα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Events"
+          }
+        }
+      }
+    },
     "Events are kept in Apple Calendar: a change here shows there too, and the other way round." : {
       "comment" : "Under a day's events.",
       "extractionState" : "manual",
@@ -1369,6 +1441,24 @@
         }
       }
     },
+    "Everything is ticked." : {
+      "comment" : "iPhone: every item of a typed list is ticked.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Έγιναν όλα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everything is ticked."
+          }
+        }
+      }
+    },
     "Export all data" : {
       "comment" : "Settings → Backup: makes one file with all the data and opens the share sheet.",
       "extractionState" : "manual",
@@ -1455,6 +1545,60 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Grid"
+          }
+        }
+      }
+    },
+    "Handwriting" : {
+      "comment" : "Header over the picture of a day's box cut out of the page (iPhone day sheet).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Χειρόγραφο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Handwriting"
+          }
+        }
+      }
+    },
+    "Handwriting of this day" : {
+      "comment" : "VoiceOver: the picture of a day's box with its handwriting (iPhone day sheet).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το χειρόγραφο αυτής της μέρας"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Handwriting of this day"
+          }
+        }
+      }
+    },
+    "Handwritten page" : {
+      "comment" : "iPhone Lists tab: opens the To Buy page written by hand on the iPad.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Χειρόγραφη σελίδα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Handwritten page"
           }
         }
       }
@@ -1801,6 +1945,24 @@
         }
       }
     },
+    "Lists" : {
+      "comment" : "iPhone tab: to buy, to do, birthdays and the wishlist.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Λίστες"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lists"
+          }
+        }
+      }
+    },
     "Loading…" : {
       "comment" : "Shown while the diagnostics log loads.",
       "extractionState" : "manual",
@@ -2143,6 +2305,42 @@
         }
       }
     },
+    "New thing to buy" : {
+      "comment" : "iPhone Today tab: adds a typed thing to buy.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Νέο στο «Να αγοράσω»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New thing to buy"
+          }
+        }
+      }
+    },
+    "New to-do" : {
+      "comment" : "iPhone Today tab: adds a typed to-do to this month.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Νέο στο «Να κάνω»"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New to-do"
+          }
+        }
+      }
+    },
     "Next month" : {
       "comment" : "Arrow button on a month page.",
       "extractionState" : "manual",
@@ -2481,6 +2679,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Notes for %@"
+          }
+        }
+      }
+    },
+    "Nothing here yet. Type below to add." : {
+      "comment" : "iPhone: an empty typed list.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τίποτα ακόμα. Γράψε από κάτω για να προσθέσεις."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing here yet. Type below to add."
+          }
+        }
+      }
+    },
+    "Nothing planned for today." : {
+      "comment" : "iPhone Today tab: no events and no birthdays today.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τίποτα προγραμματισμένο για σήμερα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing planned for today."
           }
         }
       }
@@ -3835,6 +4069,24 @@
         }
       }
     },
+    "Things still to buy: %lld" : {
+      "comment" : "iPhone Today tab: how many typed things to buy are not ticked yet.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μένουν να αγοραστούν: %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Things still to buy: %lld"
+          }
+        }
+      }
+    },
     "This calendar can't be changed here." : {
       "comment" : "Event form of an event in a calendar that accepts no changes (e.g. subscribed holidays).",
       "extractionState" : "manual",
@@ -3907,6 +4159,24 @@
         }
       }
     },
+    "This month" : {
+      "comment" : "VoiceOver: the button of the iPhone's page bar that goes to the current month.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τρέχων μήνας"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This month"
+          }
+        }
+      }
+    },
     "Ticked" : {
       "comment" : "VoiceOver: a typed to-do or thing to buy is ticked (done).",
       "extractionState" : "manual",
@@ -3975,6 +4245,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "To buy page"
+          }
+        }
+      }
+    },
+    "To do" : {
+      "comment" : "iPhone, Lists tab: the typed to-dos of a month.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Να κάνω"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To do"
           }
         }
       }
@@ -4227,6 +4515,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Week %lld"
+          }
+        }
+      }
+    },
+    "Week page" : {
+      "comment" : "iPhone day sheet: opens the week page of the day.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σελίδα εβδομάδας"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Week page"
           }
         }
       }

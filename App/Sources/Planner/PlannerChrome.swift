@@ -363,7 +363,7 @@ struct PlannerTopBar: View {
 }
 
 /// Remembers where the share button (or the … menu) is on screen, for the share popover.
-private struct ShareAnchorReader: View {
+struct ShareAnchorReader: View {
     var body: some View {
         GeometryReader { proxy in
             Color.clear
@@ -421,7 +421,7 @@ private struct SectionButton: View {
 }
 
 /// A chevron and a name, e.g. back to "2026".
-private struct BackButton: View {
+struct BackButton: View {
     let label: String
     let identifier: String
     let action: () -> Void
@@ -446,7 +446,7 @@ private struct BackButton: View {
     }
 }
 
-private struct BarIconButton: View {
+struct BarIconButton: View {
     let systemName: String
     let identifier: String
     /// Narrower on iPhone, where the bar has less room.
