@@ -467,6 +467,9 @@ final class ListBook {
         if case .todo(let month) = list {
             item.month = month
         }
+        // Last in the iPhone's order (not by the clock: devices' clocks differ).
+        let arranged = self.arranged(list)
+        item.position = TypedLists.position(at: arranged.count, among: arranged)
         change(list) { $0.append(item) }
         AppLog.info("Typed item added (\(list.logName))\(line == nil ? " without a free line" : "")")
         return item

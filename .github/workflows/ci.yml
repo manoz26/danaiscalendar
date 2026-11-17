@@ -117,20 +117,32 @@ jobs:
           ls "$app" | tee build/logs/app-bundle.txt
           plutil -p "$app/Info.plist" | tee -a build/logs/app-bundle.txt
 
+      # The simulator once killed the test app before it connected ("Test crashed with signal
+      # term before establishing connection"): that, and only that, is tried once more.
       - name: App unit tests
         if: env.MODE != 'build'
         run: |
           set -o pipefail
-          xcodebuild test-without-building \
-            -project "$PROJECT" -scheme "$SCHEME" \
-            -destination "id=${{ steps.sims.outputs.ipad }}" \
-            -derivedDataPath "$DERIVED_DATA" \
-            -only-testing:DanaisCalendarTests \
-            -resultBundlePath build/results/unit.xcresult \
-            2>&1 | tee build/logs/unit-tests.log | xcbeautify
+          run_unit_tests() {
+            xcodebuild test-without-building \
+              -project "$PROJECT" -scheme "$SCHEME" \
+              -destination "id=${{ steps.sims.outputs.ipad }}" \
+              -derivedDataPath "$DERIVED_DATA" \
+              -only-testing:DanaisCalendarTests \
+              -resultBundlePath "build/results/unit$1.xcresult" \
+              2>&1 | tee "build/logs/unit-tests$1.log" | xcbeautify
+          }
+          if run_unit_tests ""; then exit 0; fi
+          if grep -q "before establishing connection" build/logs/unit-tests.log; then
+            echo "::warning::The test app never connected; trying once more"
+            run_unit_tests "-retry"
+          else
+            exit 1
+          fi
 
+      # Runs even if the unit tests failed, so the iPad's screenshots always come out.
       - name: UI tests and screenshots (iPad 13")
-        if: env.MODE != 'build'
+        if: ${{ !cancelled() && env.MODE != 'build' && steps.build.outcome == 'success' }}
         env:
           TEST_RUNNER_SCREENSHOT_DIR: ${{ github.workspace }}/build/screenshots
           TEST_RUNNER_DEVICE_LABEL: ipad13

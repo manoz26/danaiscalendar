@@ -127,6 +127,7 @@ final class InkController {
         canvas.addGestureRecognizer(longPress)
         canvas.dayLongPress = longPress
         tap.require(toFail: longPress)
+        var ownRecognizers: [UIGestureRecognizer] = [tap, longPress]
         for direction: UISwipeGestureRecognizer.Direction in [.left, .right] {
             let swipe = UISwipeGestureRecognizer(target: helper, action: #selector(CanvasHelper.swiped(_:)))
             swipe.direction = direction
@@ -135,6 +136,7 @@ final class InkController {
             swipe.cancelsTouchesInView = false
             swipe.delegate = helper
             canvas.addGestureRecognizer(swipe)
+            ownRecognizers.append(swipe)
         }
 
         if self.canDraw {
@@ -154,6 +156,9 @@ final class InkController {
             doubleTap.delegate = helper
             canvas.addGestureRecognizer(doubleTap)
             tap.require(toFail: doubleTap)
+            canvas.appRecognizers = ownRecognizers + [doubleTap]
+            canvas.isReadOnly = true
+            canvas.stopDelayingTouches()
         }
         applyTool()
         observeNotifications()
@@ -443,6 +448,7 @@ final class InkController {
             center.y = day.rect.midY
         }
         canvas.toggleZoom(centeredOn: center)
+        dismissPencilKitMenu()
     }
 
     fileprivate func longPressed(_ recognizer: UILongPressGestureRecognizer) {

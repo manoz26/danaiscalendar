@@ -27,6 +27,11 @@ final class InkCanvasView: PKCanvasView {
     /// Space" menu) wait for it to fail, so that menu never pops up over the day's page.
     /// It only begins on a day, so elsewhere PencilKit's menu works as usual.
     weak var dayLongPress: UILongPressGestureRecognizer?
+    /// iPhone: the page is only looked at. Every gesture recognizer but scrolling, zooming
+    /// and the app's own (`appRecognizers`) is switched off, so PencilKit's own taps and
+    /// presses never open its "Select All / Insert Space" menu.
+    var isReadOnly = false
+    var appRecognizers: [UIGestureRecognizer] = []
     private var waitingForDayPress: Set<ObjectIdentifier> = []
 
     /// Each open page has its own undo history (cleared when another page opens).
@@ -95,6 +100,10 @@ final class InkCanvasView: PKCanvasView {
                 if recognizer.delaysTouchesBegan { recognizer.delaysTouchesBegan = false }
                 if recognizer.delaysTouchesEnded { recognizer.delaysTouchesEnded = false }
                 waitForDayPress(recognizer)
+                if isReadOnly, recognizer.isEnabled, recognizer !== panGestureRecognizer,
+                   recognizer !== pinchGestureRecognizer, !appRecognizers.contains(where: { $0 === recognizer }) {
+                    recognizer.isEnabled = false
+                }
             }
             view.subviews.forEach(visit)
         }

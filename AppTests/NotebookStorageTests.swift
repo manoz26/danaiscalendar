@@ -87,6 +87,27 @@ struct NotebookStorageTests {
         #expect(reopened.toBuy.isEmpty)
     }
 
+    /// The iPhone's order: a new item goes last even next to items with later dates (another
+    /// device's clock); a moved item takes its new place and keeps its printed line.
+    @Test func typedItemsAreArrangedForTheIPhone() throws {
+        let folder = temporaryFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let future = ListItem(text: "Milk", line: 1, created: Date(timeIntervalSince1970: 1_850_000_000))
+        try JSONFileStore<ListFile>(folder: folder, fileName: ListFile.toBuyFileName).save(ListFile(items: [future]))
+        let book = ListBook(folder: folder)
+        let bread = try #require(book.add("Bread", to: .toBuy, inkedLines: []))
+        let eggs = try #require(book.add("Eggs", to: .toBuy, inkedLines: []))
+        #expect(book.arranged(.toBuy).map(\.text) == ["Milk", "Bread", "Eggs"])
+
+        let others = book.arranged(.toBuy).filter { $0.id != eggs.id }
+        book.move(eggs.id, to: 0, among: others, in: .toBuy)
+        #expect(book.arranged(.toBuy).map(\.text) == ["Eggs", "Milk", "Bread"])
+        #expect(book.items(.toBuy).map(\.text) == ["Milk", "Bread", "Eggs"], "The printed lines did not change")
+        #expect(book.items(.toBuy).first { $0.id == bread.id }?.line == 2)
+        book.waitUntilSaved()
+        #expect(ListBook(folder: folder).arranged(.toBuy).map(\.text) == ["Eggs", "Milk", "Bread"])
+    }
+
     @Test func pageInkIsCopiedAndDeleted() throws {
         let folder = temporaryFolder()
         defer { try? FileManager.default.removeItem(at: folder) }

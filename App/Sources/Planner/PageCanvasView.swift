@@ -24,8 +24,8 @@ struct PlannerCanvas: UIViewRepresentable {
         ink.onLongPress = onLongPress
         ink.onSwipe = onSwipe
         ink.setDrawWithFinger(drawWithFinger)
-        if view.accessibilityElementsHidden != hidden {
-            view.accessibilityElementsHidden = hidden
+        if view.isHidden != hidden {
+            view.isHidden = hidden
         }
         ink.show(content)
     }

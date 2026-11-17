@@ -35,6 +35,7 @@ final class PhoneTests: XCTestCase {
         day.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).doubleTap()
         settle(1.2)
         XCTAssertGreaterThan(day.frame.width, fitted * 1.8, "Two taps did not zoom in")
+        XCTAssertFalse(app.buttons["Select All"].exists || app.menuItems["Select All"].exists, "PencilKit's menu opened on the iPhone")
         save(app, "en-portrait-phone-month-zoom")
         element(app, "page.month").coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).doubleTap()
         settle(1.2)
@@ -182,6 +183,10 @@ final class PhoneTests: XCTestCase {
         save(app, "en-portrait-phone-tobuy-typing")
 
         // A tap ticks Milk: it falls below, next to Bread. Then both are deleted at once.
+        XCTAssertEqual(labels(items), ["Milk", "Batteries", "A gift for Maria", "Coffee", "Tea", "Bread"], "New items go last")
+        app.swipeDown()
+        let keyboardGone = XCTNSPredicateExpectation(predicate: NSPredicate(format: "count == 0"), object: app.keyboards)
+        XCTAssertEqual(XCTWaiter().wait(for: [keyboardGone], timeout: 5), .completed, "The keyboard did not go away")
         items.element(boundBy: 0).tap()
         let expected = ["Batteries", "A gift for Maria", "Coffee", "Tea", "Milk", "Bread"]
         XCTAssertTrue(wait(labels: expected, of: items), "\(labels(items))")
