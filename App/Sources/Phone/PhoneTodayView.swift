@@ -67,29 +67,33 @@ struct PhoneTodayView: View {
                 }
 
                 Section {
+                    // The whole row ticks (as in the Lists tab), not only its circle and text.
                     ForEach(todos.open + todos.ticked) { item in
-                        Button {
-                            lists.setDone(item.id, !item.done, in: .todo(month))
-                        } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: item.done ? "checkmark.circle.fill" : "circle")
-                                    .font(.system(size: 22, weight: .regular))
-                                    .frame(width: 26)
-                                Text(verbatim: item.trimmedText)
-                                    .font(.inter(.regular, size: 17, relativeTo: .body))
-                                    .strikethrough(item.done, color: Paper.secondary)
-                                    .multilineTextAlignment(.leading)
-                                Spacer(minLength: 0)
-                            }
-                            .foregroundStyle(item.done ? Paper.secondary : Paper.ink)
-                            .frame(minHeight: 36)
-                            .contentShape(Rectangle())
+                        HStack(spacing: 12) {
+                            Image(systemName: item.done ? "checkmark.circle.fill" : "circle")
+                                .font(.system(size: 22, weight: .regular))
+                                .frame(width: 26)
+                            Text(verbatim: item.trimmedText)
+                                .font(.inter(.regular, size: 17, relativeTo: .body))
+                                .strikethrough(item.done, color: Paper.secondary)
+                                .multilineTextAlignment(.leading)
+                            Spacer(minLength: 0)
                         }
-                        .buttonStyle(.plain)
+                        .foregroundStyle(item.done ? Paper.secondary : Paper.ink)
+                        .frame(maxWidth: .infinity, minHeight: 36, alignment: .leading)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            lists.setDone(item.id, !item.done, in: .todo(month))
+                        }
                         .listRowBackground(Paper.background)
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityAddTraits(.isButton)
                         .accessibilityLabel(Text(verbatim: item.trimmedText))
                         .accessibilityValue(item.done ? Text("Ticked") : Text("Not ticked"))
                         .accessibilityIdentifier("today.todo")
+                        .accessibilityAction {
+                            lists.setDone(item.id, !item.done, in: .todo(month))
+                        }
                     }
                     Button {
                         onAdd(.todo(month))

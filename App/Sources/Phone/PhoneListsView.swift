@@ -236,29 +236,34 @@ struct PhoneTypedList: View {
 
     // MARK: - Parts
 
+    /// The whole row ticks, not only its box and text: a plain button in a list row (iOS 26
+    /// and later) took no tap on its empty part, and that is most of the row.
     private func row(_ item: ListItem) -> some View {
-        Button {
-            lists.setDone(item.id, !item.done, in: kind)
-        } label: {
-            HStack(spacing: 14) {
-                Image(systemName: symbol(item))
-                    .font(.system(size: 27, weight: .regular))
-                    .frame(width: 30)
-                Text(verbatim: item.trimmedText)
-                    .font(.inter(.regular, size: 20, relativeTo: .title3))
-                    .strikethrough(item.done, color: Paper.secondary)
-                    .multilineTextAlignment(.leading)
-                Spacer(minLength: 0)
-            }
-            .foregroundStyle(item.done ? Paper.secondary : Paper.ink)
-            .frame(minHeight: 48)
-            .contentShape(Rectangle())
+        HStack(spacing: 14) {
+            Image(systemName: symbol(item))
+                .font(.system(size: 27, weight: .regular))
+                .frame(width: 30)
+            Text(verbatim: item.trimmedText)
+                .font(.inter(.regular, size: 20, relativeTo: .title3))
+                .strikethrough(item.done, color: Paper.secondary)
+                .multilineTextAlignment(.leading)
+            Spacer(minLength: 0)
         }
-        .buttonStyle(.plain)
+        .foregroundStyle(item.done ? Paper.secondary : Paper.ink)
+        .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            lists.setDone(item.id, !item.done, in: kind)
+        }
         .listRowBackground(Paper.background)
+        .accessibilityElement(children: .ignore)
+        .accessibilityAddTraits(.isButton)
         .accessibilityLabel(Text(verbatim: item.trimmedText))
         .accessibilityValue(item.done ? Text("Ticked") : Text("Not ticked"))
         .accessibilityIdentifier("phone.list.item")
+        .accessibilityAction {
+            lists.setDone(item.id, !item.done, in: kind)
+        }
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button {
                 lists.delete(item.id, from: kind)

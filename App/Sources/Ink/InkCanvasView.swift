@@ -33,6 +33,18 @@ final class InkCanvasView: PKCanvasView {
     var isReadOnly = false
     var appRecognizers: [UIGestureRecognizer] = []
     private var waitingForDayPress: Set<ObjectIdentifier> = []
+    /// Something else covers the canvas (the iPhone's other tabs): VoiceOver and the UI tests
+    /// find nothing of the page, and no touch reaches it. SwiftUI's own hiding (opacity,
+    /// `accessibilityHidden`, even `isHidden`) did not keep the page's items out.
+    var isCovered = false {
+        didSet {
+            guard isCovered != oldValue else { return }
+            isHidden = isCovered
+            accessibilityElementsHidden = isCovered
+            templateView.accessibilityElementsHidden = isCovered
+            UIAccessibility.post(notification: .layoutChanged, argument: nil)
+        }
+    }
 
     /// Each open page has its own undo history (cleared when another page opens).
     override var undoManager: UndoManager? { pageUndoManager }
@@ -66,6 +78,7 @@ final class InkCanvasView: PKCanvasView {
 
     override var accessibilityElements: [Any]? {
         get {
+            if isCovered { return [] }
             #if DEBUG
             let geometry = UIAccessibilityElement(accessibilityContainer: self)
             geometry.accessibilityIdentifier = "debug.inkGeometry"
@@ -77,6 +90,10 @@ final class InkCanvasView: PKCanvasView {
             #endif
         }
         set { }
+    }
+
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        isCovered ? nil : super.hitTest(point, with: event)
     }
 
     override func didMoveToWindow() {

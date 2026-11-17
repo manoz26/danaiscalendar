@@ -187,12 +187,15 @@ final class PhoneTests: XCTestCase {
         app.swipeDown()
         let keyboardGone = XCTNSPredicateExpectation(predicate: NSPredicate(format: "count == 0"), object: app.keyboards)
         XCTAssertEqual(XCTWaiter().wait(for: [keyboardGone], timeout: 5), .completed, "The keyboard did not go away")
+        settle()
+        // In the middle of the row, away from its box and text: the whole row ticks.
         items.element(boundBy: 0).tap()
         let expected = ["Batteries", "A gift for Maria", "Coffee", "Tea", "Milk", "Bread"]
-        XCTAssertTrue(wait(labels: expected, of: items), "\(labels(items))")
+        let ticked = wait(labels: expected, of: items)
         app.swipeUp()
         settle()
         save(app, "en-portrait-phone-tobuy-ticked")
+        XCTAssertTrue(ticked, "\(labels(items))")
         tap(app, "phone.list.deleteTicked")
         confirm(app, "phone.list.confirmDeleteTicked", label: "Delete")
         XCTAssertTrue(wait(labels: ["Batteries", "A gift for Maria", "Coffee", "Tea"], of: items), "\(labels(items))")
