@@ -190,18 +190,20 @@ final class PhoneTests: XCTestCase {
         settle()
         // In the middle of the row, away from its box and text: the whole row ticks.
         items.element(boundBy: 0).tap()
+        // The small iPhone has no room for all six rows: the ones on screen, from the top.
         let expected = ["Batteries", "A gift for Maria", "Coffee", "Tea", "Milk", "Bread"]
-        let ticked = wait(labels: expected, of: items)
+        let ticked = wait(labelsStartingWith: expected, of: items)
+        let onScreen = labels(items)
         app.swipeUp()
         settle()
         save(app, "en-portrait-phone-tobuy-ticked")
-        XCTAssertTrue(ticked, "\(labels(items))")
+        XCTAssertTrue(ticked, "\(onScreen)")
         tap(app, "phone.list.deleteTicked")
         confirm(app, "phone.list.confirmDeleteTicked", label: "Delete")
+        app.swipeDown()
         XCTAssertTrue(wait(labels: ["Batteries", "A gift for Maria", "Coffee", "Tea"], of: items), "\(labels(items))")
 
         // The page the iPad prints them on: each typed item on its own line.
-        app.swipeDown()
         tap(app, "phone.list.page")
         waitForPage(app, "tobuy")
         XCTAssertEqual(element(app, "tobuy.item.3").label, "Batteries")
@@ -342,6 +344,21 @@ final class PhoneTests: XCTestCase {
             RunLoop.current.run(until: Date().addingTimeInterval(0.3))
         }
         return labels(query) == expected
+    }
+
+    /// Like `wait(labels:of:)` when the screen may be too short for all of them: the rows
+    /// that are there (at least four) are the first ones expected, in that order.
+    @MainActor
+    private func wait(labelsStartingWith expected: [String], of query: XCUIElementQuery) -> Bool {
+        func matches() -> Bool {
+            let shown = labels(query)
+            return shown.count >= min(4, expected.count) && Array(expected.prefix(shown.count)) == shown
+        }
+        let deadline = Date().addingTimeInterval(10)
+        while !matches(), Date() < deadline {
+            RunLoop.current.run(until: Date().addingTimeInterval(0.3))
+        }
+        return matches()
     }
 
     /// Waits until an element's label ends with (or is) a text.
