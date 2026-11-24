@@ -57,7 +57,7 @@ final class CustomizeTests: XCTestCase {
         scroll(app, to: dark)
         dark.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
         XCTAssertTrue(wait(for: dark, value: "1"), "Dark paper did not turn on")
-        scroll(app, to: element(app, "paper.preview"), up: true)
+        for _ in 0..<3 { app.collectionViews.firstMatch.swipeDown() }
         settle()
         save(app, "el-portrait-settings-paper-dark")
         app.navigationBars.buttons.element(boundBy: 0).tap()
