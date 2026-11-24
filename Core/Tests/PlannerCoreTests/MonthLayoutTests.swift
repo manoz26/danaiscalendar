@@ -53,7 +53,7 @@ struct MonthLayoutTests {
         let twelve = MonthPageLayout(month: march, layout: options)
         #expect(twelve.todo.rows.count == 12)
         #expect(twelve.todo.frame.maxY == 1341)
-        #expect(twelve.gridFrame.maxY == 1341 - 12 * 33 - 54)
+        #expect(abs(twelve.gridFrame.maxY - (1341 - 12 * 33 - 54)) < 0.001)
         options.rows = 30
         #expect(MonthPageLayout(month: march, layout: options).todo.rows.count == 12)
         options.rows = 5
