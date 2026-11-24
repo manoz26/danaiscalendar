@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 /// One planner page on disk: a small JSON header and the PencilKit drawing.
@@ -81,6 +82,10 @@ public struct PageMetadata: Codable, Sendable, Equatable {
     public var modified: Date
     /// The app that wrote the file, e.g. "0.1.0 (5)".
     public var writtenBy: String
+    /// Month pages on her own layout (prompt 9): the layout, and when she chose it. Not
+    /// written for the standard page, so those files are as before.
+    public var monthLayout: MonthLayout?
+    public var layoutChanged: Date?
 
     public init(page: PlannerPage, layout: PageLayoutStamp, strokeCount: Int, modified: Date, writtenBy: String) {
         self.page = page.description
@@ -89,6 +94,16 @@ public struct PageMetadata: Codable, Sendable, Equatable {
         self.strokeCount = strokeCount
         self.modified = modified
         self.writtenBy = writtenBy
+        monthLayout = layout.monthLayout
+        layoutChanged = layout.changed
+    }
+
+    /// The layout the file's ink was written on.
+    public var stamp: PageLayoutStamp {
+        PageLayoutStamp(
+            name: layout, firstWeekday: Weekday(key: firstWeekday) ?? .defaultFirst,
+            monthLayout: monthLayout, changed: layoutChanged
+        )
     }
 
     static func makeEncoder() -> JSONEncoder {
@@ -121,10 +136,47 @@ public enum PageFileError: Error, Equatable, Sendable {
 public struct PageLayoutStamp: Sendable, Equatable {
     public let name: String
     public let firstWeekday: Weekday
+    /// A month page on her own layout (`nil`: the standard page).
+    public let monthLayout: MonthLayout?
+    /// When she chose the month page's layout (`nil`: never; the standard page). Of two
+    /// versions of a page on different layouts, the later choice wins.
+    public let changed: Date?
 
-    public init(name: String, firstWeekday: Weekday) {
+    public init(name: String, firstWeekday: Weekday, monthLayout: MonthLayout? = nil, changed: Date? = nil) {
         self.name = name
         self.firstWeekday = firstWeekday
+        self.monthLayout = monthLayout.flatMap { $0.isStandard ? nil : $0.validated }
+        self.changed = changed
+    }
+
+    /// The same printed places (the date of the choice aside): no ink has to move.
+    public static func == (a: PageLayoutStamp, b: PageLayoutStamp) -> Bool {
+        a.firstWeekday == b.firstWeekday && a.monthLayout == b.monthLayout && a.geometryName == b.geometryName
+    }
+
+    /// `month-v1` and `month-v2` print their boxes in the same places.
+    private var geometryName: String {
+        name.hasPrefix("month-") ? "month" : name
+    }
+
+    /// The regions ink is anchored to on this layout, parked ones included, for pages whose
+    /// layout can change (month pages); `nil` for the others.
+    public func anchorRegions(for page: PlannerPage) -> [PageRegion]? {
+        guard case .month(let month) = page else { return nil }
+        return MonthPageLayout(month: month, firstWeekday: firstWeekday, layout: monthLayout ?? .standard).anchorRegions
+    }
+
+    /// Where each stroke (by its bounds, in canvas units) goes when the page moves from this
+    /// layout to `new`: one transform per stroke (`nil`: it stays), or `nil` when nothing moves.
+    public func migration(to new: PageLayoutStamp, page: PlannerPage, strokeBounds: [CGRect]) -> [CGAffineTransform?]? {
+        guard self != new, let old = anchorRegions(for: page), let target = new.anchorRegions(for: page) else { return nil }
+        let transforms = strokeBounds.map { LayoutMigration.transform(forStrokeBounds: $0, from: old, to: target) }
+        return transforms.contains { $0 != nil } ? transforms : nil
+    }
+
+    /// Of two layouts of the same page, the one chosen later (the standard page before any choice).
+    public static func later(_ a: PageLayoutStamp, _ b: PageLayoutStamp) -> PageLayoutStamp {
+        (a.changed ?? .distantPast) >= (b.changed ?? .distantPast) ? a : b
     }
 
     /// The layout the app prints today for a page.
@@ -132,10 +184,16 @@ public struct PageLayoutStamp: Sendable, Equatable {
     /// - `month-v1`: TO DO LIST, TO BUY and MEMO (an open box) at the bottom.
     /// - `month-v2`: TO DO LIST and MEMO as ruled lines over the space of the old TO BUY and
     ///   MEMO. The bottom of the page did not move, so v1 ink keeps its coordinates.
-    public static func current(for page: PlannerPage, firstWeekday: Weekday = .defaultFirst) -> PageLayoutStamp {
+    public static func current(
+        for page: PlannerPage, firstWeekday: Weekday = .defaultFirst, monthLayouts: MonthLayouts = MonthLayouts()
+    ) -> PageLayoutStamp {
         switch page {
         case .year: PageLayoutStamp(name: "year-v1", firstWeekday: firstWeekday)
-        case .month: PageLayoutStamp(name: "month-v2", firstWeekday: firstWeekday)
+        case .month(let month):
+            PageLayoutStamp(
+                name: "month-v2", firstWeekday: firstWeekday,
+                monthLayout: monthLayouts.entry(for: month)?.layout, changed: monthLayouts.entry(for: month)?.changed
+            )
         case .week: PageLayoutStamp(name: "week-v1", firstWeekday: firstWeekday)
         case .toBuy: PageLayoutStamp(name: "tobuy-v1", firstWeekday: firstWeekday)
         case .journal: PageLayoutStamp(name: "journal-v1", firstWeekday: firstWeekday)

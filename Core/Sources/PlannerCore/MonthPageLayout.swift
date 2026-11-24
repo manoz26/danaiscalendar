@@ -3,11 +3,16 @@ import Foundation
 
 /// Where everything sits on a month page, in canvas units (1000 x 1400).
 ///
-/// Top to bottom: year and title (WEEKLY buttons on the right), GOALS box, weekday
-/// headers, the day grid, and at the bottom TO DO LIST (under 3 columns of the grid) and
-/// MEMO (ruled lines under the other 4). The grid always fills the same area; 4, 5 or 6
-/// weeks share it. (Layout `month-v2`; v1 also had a TO BUY list where MEMO's lines now
-/// start: the shopping list has its own page.)
+/// Top to bottom on the standard page: year and title (WEEKLY buttons on the right), GOALS
+/// box, weekday headers, the day grid, and at the bottom TO DO LIST (under 3 columns of the
+/// grid) and MEMO (ruled lines under the other 4). The grid always fills the same area; 4,
+/// 5 or 6 weeks share it. (Layout `month-v2`; v1 also had a TO BUY list where MEMO's lines
+/// now start: the shopping list has its own page.)
+///
+/// With her own layout (`MonthLayout`, prompt 9) the box above the grid and the lists under
+/// it can be others or none, and the lists have 5 to 12 lines; the grid takes what is left.
+/// Boxes that are not shown are parked off the page with their standard size, so that the
+/// ink written in them waits there (`anchorRegions`, `LayoutMigration`).
 public struct MonthPageLayout: Sendable {
     public struct Column: Sendable, Equatable {
         public let weekday: Weekday
@@ -24,6 +29,16 @@ public struct MonthPageLayout: Sendable {
         public let labelAnchor: CGPoint
         public let frame: CGRect
         public let rows: [CGRect]
+    }
+
+    /// A box of the page: where it is (`nil`: not shown, parked off the page) and its area.
+    /// Above the grid it has no rows (a grey box); under it, ruled rows.
+    public struct Box: Sendable, Equatable {
+        public let kind: MonthBoxKind
+        public let slot: MonthSlot?
+        public let section: ListSection
+
+        public var isShown: Bool { slot != nil }
     }
 
     // MARK: Metrics
@@ -49,8 +64,17 @@ public struct MonthPageLayout: Sendable {
     static let listLabelBaseline: CGFloat = 1032
     static let listTop: CGFloat = 1044
     static let listRowHeight: CGFloat = 33
-    public static let listRowCount = 9
+    /// Lines of the lists of the standard page (see `MonthLayout.rows`).
+    public static let listRowCount = MonthLayout.standardRows
     static let columnGutter: CGFloat = 24
+    /// The bottom of the lists: the standard page's 9 lines end there, whatever their number.
+    static let listBottom: CGFloat = listTop + listRowHeight * CGFloat(listRowCount)
+    /// Without a box above the grid, the weekday headers come up under the title.
+    static let gridTopWithoutBox: CGFloat = 168
+    /// From the bottom of the grid to the top of the lists' lines (their labels sit between).
+    static let listGap: CGFloat = listTop - gridFrame.maxY
+    /// Boxes that are not shown wait this far to the right, off the page.
+    static let parkingOffset: CGFloat = 2000
 
     /// Centre of a day number, from the top-left corner of its cell.
     public static let dayNumberOffset = CGPoint(x: 21, y: 21)
@@ -60,6 +84,8 @@ public struct MonthPageLayout: Sendable {
     // MARK: Layout
 
     public let grid: MonthGrid
+    /// Her layout (`MonthLayout.standard` unless she changed it).
+    public let options: MonthLayout
     public let yearAnchor: CGPoint
     public let titleAnchor: CGPoint
     public let title: CGRect
@@ -67,21 +93,38 @@ public struct MonthPageLayout: Sendable {
     public let weeklyLabelAnchor: CGPoint
     /// One button per week, left to right.
     public let weeklyButtons: [CGRect]
-    public let goalsLabelAnchor: CGPoint
-    public let goals: CGRect
     public let weekdays: [Column]
     public let gridFrame: CGRect
     public let columnWidth: CGFloat
     public let rowHeight: CGFloat
     /// One row of 7 cells per week.
     public let weeks: [[Cell]]
-    public let todo: ListSection
-    /// The notes: ruled lines that run across the rest of the width.
-    public let memo: ListSection
+    /// Every box, shown or parked, in `MonthBoxKind` order.
+    public let boxes: [Box]
+    /// To-do lines that are not on the page (beyond `options.rows`, or all of them when the
+    /// list is not shown), parked off it so that their ink comes back with them.
+    public let parkedTodoLines: [CGRect]
 
     public var month: YearMonth { grid.month }
 
-    public init(month: YearMonth, firstWeekday: Weekday = .defaultFirst) {
+    public func box(_ kind: MonthBoxKind) -> Box {
+        boxes.first { $0.kind == kind } ?? boxes[0]
+    }
+
+    /// The boxes on the page.
+    public var shownBoxes: [Box] { boxes.filter(\.isShown) }
+
+    /// The to-do list: under the grid, or parked.
+    public var todo: ListSection { box(.todo).section }
+    /// The notes (ruled lines under the grid on the standard page), or parked.
+    public var memo: ListSection { box(.memo).section }
+    /// The goals box (above the grid on the standard page), or parked.
+    public var goals: CGRect { box(.goals).section.frame }
+    public var goalsLabelAnchor: CGPoint { box(.goals).section.labelAnchor }
+
+    public init(month: YearMonth, firstWeekday: Weekday = .defaultFirst, layout options: MonthLayout = .standard) {
+        let options = options.validated
+        self.options = options
         let grid = MonthGrid(month: month, firstWeekday: firstWeekday)
         self.grid = grid
         let margin = Self.margin
@@ -105,22 +148,29 @@ public struct MonthPageLayout: Sendable {
             y: TemplateText.baseline(centeredOn: titleMiddle, size: Self.labelSize)
         )
 
-        goalsLabelAnchor = CGPoint(x: margin, y: Self.goalsLabelBaseline)
-        goals = Self.goalsFrame
-
         // Columns share the content width exactly; edges are computed per column so they line up.
         let columnWidth = Self.contentWidth / 7
         self.columnWidth = columnWidth
         func columnEdge(_ index: Int) -> CGFloat { margin + columnWidth * CGFloat(index) }
 
+        // The grid fills what the boxes leave: from under the box above it (or the title) to
+        // over the lists under it (or the bottom of the lists' area).
+        let hasTop = options.top != nil
+        let hasBottom = options.left != nil || options.right != nil
+        let rowCount = options.rows
+        let listTop = Self.listBottom - Self.listRowHeight * CGFloat(rowCount)
+        let gridTop = hasTop ? Self.gridFrame.minY : Self.gridTopWithoutBox
+        let gridBottom = hasBottom ? listTop - Self.listGap : Self.listBottom
+        let headerHeight = Self.weekdayRow.height
+
         weekdays = grid.columns.enumerated().map { index, weekday in
             Column(weekday: weekday, frame: CGRect(
-                x: columnEdge(index), y: Self.weekdayRow.minY,
-                width: columnEdge(index + 1) - columnEdge(index), height: Self.weekdayRow.height
+                x: columnEdge(index), y: gridTop - headerHeight,
+                width: columnEdge(index + 1) - columnEdge(index), height: headerHeight
             ))
         }
 
-        let gridFrame = Self.gridFrame
+        let gridFrame = CGRect(x: margin, y: gridTop, width: Self.contentWidth, height: gridBottom - gridTop)
         self.gridFrame = gridFrame
         let rowHeight = gridFrame.height / CGFloat(grid.weekCount)
         self.rowHeight = rowHeight
@@ -135,21 +185,48 @@ public struct MonthPageLayout: Sendable {
             }
         }
 
-        // Bottom lists line up with the grid columns: TO DO over 3, MEMO over the other 4.
+        // Lists under the grid line up with its columns: on the left over 3, on the right
+        // over the other 4 (TO DO LIST and MEMO on the standard page); alone, across.
         let halfGutter = Self.columnGutter / 2
-        let listHeight = Self.listRowHeight * CGFloat(Self.listRowCount)
-        func list(from firstColumn: Int, to endColumn: Int) -> ListSection {
-            let leftEdge = firstColumn == 0 ? margin : columnEdge(firstColumn) + halfGutter
-            let rightEdge = endColumn == 7 ? right : columnEdge(endColumn) - halfGutter
+        let labelGap = Self.listTop - Self.listLabelBaseline
+        func list(from firstColumn: Int, to endColumn: Int, top: CGFloat, rows count: Int, dx: CGFloat = 0) -> ListSection {
+            let leftEdge = (firstColumn == 0 ? margin : columnEdge(firstColumn) + halfGutter) + dx
+            let rightEdge = (endColumn == 7 ? right : columnEdge(endColumn) - halfGutter) + dx
             let width = rightEdge - leftEdge
-            let frame = CGRect(x: leftEdge, y: Self.listTop, width: width, height: listHeight)
-            let rows = (0..<Self.listRowCount).map { index in
-                CGRect(x: leftEdge, y: Self.listTop + Self.listRowHeight * CGFloat(index), width: width, height: Self.listRowHeight)
+            let frame = CGRect(x: leftEdge, y: top, width: width, height: Self.listRowHeight * CGFloat(count))
+            let rows = (0..<count).map { index in
+                CGRect(x: leftEdge, y: top + Self.listRowHeight * CGFloat(index), width: width, height: Self.listRowHeight)
             }
-            return ListSection(labelAnchor: CGPoint(x: leftEdge, y: Self.listLabelBaseline), frame: frame, rows: rows)
+            return ListSection(labelAnchor: CGPoint(x: leftEdge, y: top - labelGap), frame: frame, rows: rows)
         }
-        todo = list(from: 0, to: 3)
-        memo = list(from: 3, to: 7)
+        func topBox(dx: CGFloat = 0) -> ListSection {
+            ListSection(
+                labelAnchor: CGPoint(x: margin + dx, y: Self.goalsLabelBaseline),
+                frame: Self.goalsFrame.offsetBy(dx: dx, dy: 0), rows: []
+            )
+        }
+        // Where a box waits while it is not shown: its place on the standard page, off the page.
+        func parked(_ kind: MonthBoxKind) -> ListSection {
+            let dx = Self.parkingOffset * (kind == .custom ? 2 : 1)
+            switch kind {
+            case .goals: return topBox(dx: dx)
+            case .todo: return list(from: 0, to: 3, top: Self.listTop, rows: Self.listRowCount, dx: dx)
+            case .memo, .custom: return list(from: 3, to: 7, top: Self.listTop, rows: Self.listRowCount, dx: dx)
+            }
+        }
+        let alone = options.left == nil || options.right == nil
+        boxes = MonthBoxKind.allCases.map { kind in
+            switch options.slot(of: kind) {
+            case .top?: Box(kind: kind, slot: .top, section: topBox())
+            case .left?: Box(kind: kind, slot: .left, section: list(from: 0, to: alone ? 7 : 3, top: listTop, rows: rowCount))
+            case .right?: Box(kind: kind, slot: .right, section: list(from: alone ? 0 : 3, to: 7, top: listTop, rows: rowCount))
+            case nil: Box(kind: kind, slot: nil, section: parked(kind))
+            }
+        }
+        // To-do lines off the page continue the standard list, off the page.
+        let shownTodoLines = options.slot(of: .todo) == nil ? 0 : rowCount
+        let parkedList = list(from: 0, to: 3, top: Self.listTop, rows: MonthLayout.rowRange.upperBound, dx: Self.parkingOffset)
+        parkedTodoLines = Array(parkedList.rows.dropFirst(shownTodoLines))
     }
 
     /// The cell of a day shown on this page (including days of the next/previous month).
@@ -158,16 +235,33 @@ public struct MonthPageLayout: Sendable {
         return weeks[position.week][position.column]
     }
 
-    /// Every named area of the page.
+    /// Every named area on the page.
     public var regions: [PageRegion] {
         var regions = [PageRegion(.title, title)]
         regions += weeklyButtons.enumerated().map { PageRegion(.weekly($0.offset + 1), $0.element) }
-        regions.append(PageRegion(.section(.goals), goals))
+        if let top = shownBoxes.first(where: { $0.slot == .top }) {
+            regions.append(PageRegion(.section(top.kind.section), top.section.frame))
+        }
         regions += weekdays.map { PageRegion(.weekday($0.weekday), $0.frame) }
         regions += weeks.joined().map { PageRegion(.day($0.day.date), $0.frame) }
-        regions.append(PageRegion(.section(.todo), todo.frame))
-        regions += todo.rows.enumerated().map { PageRegion(.todoLine($0.offset + 1), $0.element) }
-        regions.append(PageRegion(.section(.memo), memo.frame))
+        for box in shownBoxes where box.slot != .top {
+            regions.append(PageRegion(.section(box.kind.section), box.section.frame))
+            if box.kind == .todo {
+                regions += box.section.rows.enumerated().map { PageRegion(.todoLine($0.offset + 1), $0.element) }
+            }
+        }
+        return regions
+    }
+
+    /// The regions on the page and those parked off it (boxes not shown, to-do lines beyond
+    /// the page's): what ink is anchored to when the layout changes (`LayoutMigration`).
+    public var anchorRegions: [PageRegion] {
+        var regions = self.regions
+        for box in boxes where !box.isShown {
+            regions.append(PageRegion(.section(box.kind.section), box.section.frame))
+        }
+        let firstParked = MonthLayout.rowRange.upperBound - parkedTodoLines.count + 1
+        regions += parkedTodoLines.enumerated().map { PageRegion(.todoLine(firstParked + $0.offset), $0.element) }
         return regions
     }
 }

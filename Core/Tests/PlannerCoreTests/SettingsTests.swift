@@ -89,13 +89,13 @@ struct SettingsTests {
 
     @Test func settingsOfANewerAppAreKept() throws {
         let newer = #"""
-        {"settings":{"lock":{"modified":"2030-03-17T17:46:40Z","value":"app"},"monthLayouts":{"modified":"2030-03-17T17:46:40Z","value":{"from":"2027-01","goals":false}}},"version":1}
+        {"settings":{"lock":{"modified":"2030-03-17T17:46:40Z","value":"app"},"widget":{"modified":"2030-03-17T17:46:40Z","value":{"from":"2027-01","goals":false}}},"version":1}
         """#
         let file = try JSONFileStore<SettingsFile>.decode(Data(newer.utf8))
         var mine = SettingsFile()
         mine.set(.palette, to: [InkPalette.colors[3]], at: at(1))
         let merged = SettingsFile.merged(mine, file)
-        #expect(merged.settings["monthLayouts"]?.value == .object(["from": .string("2027-01"), "goals": .bool(false)]))
+        #expect(merged.settings["widget"]?.value == .object(["from": .string("2027-01"), "goals": .bool(false)]))
         #expect(PlannerSettings(file: merged).lock == .app)
     }
 

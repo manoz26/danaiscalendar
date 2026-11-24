@@ -8,15 +8,29 @@ public struct MonthPageLabels: Sendable, Equatable {
     public var todo: String
     public var memo: String
     public var weekly: String
+    /// Her own box, when she did not give it a title.
+    public var custom: String
 
-    public init(goals: String, todo: String, memo: String, weekly: String) {
+    public init(goals: String, todo: String, memo: String, weekly: String, custom: String = "Extra") {
         self.goals = goals
         self.todo = todo
         self.memo = memo
         self.weekly = weekly
+        self.custom = custom
     }
 
     public static let english = MonthPageLabels(goals: "Goals", todo: "To do list", memo: "Memo", weekly: "Weekly")
+
+    /// The printed name of a box: her title, or the usual label.
+    public func label(of kind: MonthBoxKind, in layout: MonthLayout) -> String {
+        if let title = layout.title(of: kind) { return title }
+        switch kind {
+        case .goals: return goals
+        case .todo: return todo
+        case .memo: return memo
+        case .custom: return custom
+        }
+    }
 }
 
 /// Line widths of the printed pages, in canvas units.
@@ -50,6 +64,7 @@ public enum MonthPageTemplate {
     public static func make(
         month: YearMonth,
         firstWeekday: Weekday = .defaultFirst,
+        layout options: MonthLayout = .standard,
         locale: Locale,
         labels: MonthPageLabels,
         today: PlannerDate? = nil,
@@ -62,7 +77,7 @@ public enum MonthPageTemplate {
         events: [CalendarEvent] = [],
         eventClock: EventClock = .standard
     ) -> PageTemplate {
-        let layout = MonthPageLayout(month: month, firstWeekday: firstWeekday)
+        let layout = MonthPageLayout(month: month, firstWeekday: firstWeekday, layout: options)
         let caps = { (text: String) in PlannerText.uppercased(text, locale: locale) }
         var shapes: [TemplateShape] = []
         var controls: [PageRegion] = []
@@ -98,9 +113,11 @@ public enum MonthPageTemplate {
             }
         }
 
-        // GOALS.
-        shapes.append(label(caps(labels.goals), at: layout.goalsLabelAnchor))
-        shapes.append(.rect(layout.goals, fill: .fill, stroke: nil, lineWidth: 0, cornerRadius: 0))
+        // The box above the grid (GOALS): a grey box.
+        for box in layout.shownBoxes where box.slot == .top {
+            shapes.append(label(caps(labels.label(of: box.kind, in: layout.options)), at: box.section.labelAnchor))
+            shapes.append(.rect(box.section.frame, fill: .fill, stroke: nil, lineWidth: 0, cornerRadius: 0))
+        }
 
         // Weekday headers.
         let names = CalendarNames.shortWeekdays(layout.grid.columns, locale: locale)
@@ -179,18 +196,26 @@ public enum MonthPageTemplate {
             }
         }
 
-        // TO DO LIST (circles) and MEMO (plain lines across the rest of the width).
-        shapes += list(layout.todo, label: caps(labels.todo), marker: .circle)
-        shapes += list(layout.memo, label: caps(labels.memo), marker: nil)
-        shapes += birthdayLines(birthdays.filter { $0.date.yearMonth == month }, in: layout.memo)
+        // Under the grid: TO DO LIST (circles) and MEMO (plain lines across the rest of the
+        // width) on the standard page; the birthdays are written in the notes.
+        for box in layout.shownBoxes where box.slot != .top {
+            let text = caps(labels.label(of: box.kind, in: layout.options))
+            shapes += list(box.section, label: text, marker: box.kind == .todo ? .circle : nil)
+            if box.kind == .memo {
+                shapes += birthdayLines(birthdays.filter { $0.date.yearMonth == month }, in: box.section)
+            }
+        }
 
         // Typed to-dos on their lines, and the + that adds one (right end of the label row).
-        let typed = TypedItemPrinter.shapes(todos, overflow: todoOverflow, rows: layout.todo.rows, section: .todo)
-        shapes += typed.shapes
-        controls += typed.controls
-        let add = addButtonRect(rightEdge: layout.todo.frame.maxX, labelBaseline: layout.todo.labelAnchor.y)
-        shapes += TypedItemPrinter.addButton(add)
-        controls.append(PageRegion(.addItem(.todo), add.insetBy(dx: -10, dy: -10)))
+        let todo = layout.box(.todo)
+        if todo.isShown {
+            let typed = TypedItemPrinter.shapes(todos, overflow: todoOverflow, rows: todo.section.rows, section: .todo)
+            shapes += typed.shapes
+            controls += typed.controls
+            let add = addButtonRect(rightEdge: todo.section.frame.maxX, labelBaseline: todo.section.labelAnchor.y)
+            shapes += TypedItemPrinter.addButton(add)
+            controls.append(PageRegion(.addItem(.todo), add.insetBy(dx: -10, dy: -10)))
+        }
 
         return PageTemplate(shapes: shapes, regions: layout.regions, controls: controls)
     }

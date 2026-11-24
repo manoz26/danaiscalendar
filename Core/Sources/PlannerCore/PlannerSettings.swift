@@ -87,6 +87,8 @@ public enum SettingKey: String, CaseIterable, Sendable {
     case paper
     /// Face ID / Touch ID / passcode.
     case lock
+    /// Her month page: boxes, titles, lines (for all months, or from a month on).
+    case monthLayouts
 }
 
 // MARK: - The settings
@@ -100,10 +102,12 @@ public struct PlannerSettings: Sendable, Equatable {
     public var toolbarTools: [InkTool]
     public var paper: PaperSettings
     public var lock: LockMode
+    public var monthLayouts: MonthLayouts
 
     public init(
         palette: [InkColor] = InkPalette.colors, widths: ToolWidths = ToolWidths(), favorites: [FavoritePen] = [],
-        toolbarTools: [InkTool] = InkTool.allCases, paper: PaperSettings = PaperSettings(), lock: LockMode = .off
+        toolbarTools: [InkTool] = InkTool.allCases, paper: PaperSettings = PaperSettings(), lock: LockMode = .off,
+        monthLayouts: MonthLayouts = MonthLayouts()
     ) {
         self.palette = InkPalette.valid(palette)
         self.widths = widths
@@ -111,6 +115,7 @@ public struct PlannerSettings: Sendable, Equatable {
         self.toolbarTools = InkTool.validToolbar(toolbarTools)
         self.paper = paper
         self.lock = lock
+        self.monthLayouts = monthLayouts
     }
 
     public init(file: SettingsFile) {
@@ -120,7 +125,8 @@ public struct PlannerSettings: Sendable, Equatable {
             favorites: file.value(.favorites, as: [FavoritePen].self) ?? [],
             toolbarTools: file.value(.toolbarTools, as: [InkTool].self) ?? InkTool.allCases,
             paper: file.value(.paper, as: PaperSettings.self) ?? PaperSettings(),
-            lock: file.value(.lock, as: LockMode.self) ?? .off
+            lock: file.value(.lock, as: LockMode.self) ?? .off,
+            monthLayouts: file.value(.monthLayouts, as: MonthLayouts.self) ?? MonthLayouts()
         )
     }
 

@@ -66,6 +66,8 @@ public struct PageRegion: Sendable, Equatable {
 public enum RegionID: Hashable, Sendable, CustomStringConvertible {
     public enum Section: String, Sendable, CaseIterable {
         case goals, todo, memo, tobuy
+        /// Month page: her own box (prompt 9).
+        case custom
         /// The writing area of a journal page or a sketch.
         case body
         /// The notes box of the week page.
