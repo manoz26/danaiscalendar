@@ -123,9 +123,10 @@ struct StrokeLook: Equatable {
 enum StraightStroke {
     /// `from`/`to` in PencilKit units; `scale`: PencilKit units per canvas unit.
     static func make(
-        from start: CGPoint, to end: CGPoint, tools: InkToolState, scale: CGFloat, look: StrokeLook = .plain
+        from start: CGPoint, to end: CGPoint, tools: InkToolState, widths: ToolWidths = ToolWidths(),
+        scale: CGFloat, look: StrokeLook = .plain
     ) -> PKStroke? {
-        guard let type = Self.inkType(for: tools.tool), let width = tools.width else { return nil }
+        guard let type = Self.inkType(for: tools.tool), let width = tools.width(with: widths) else { return nil }
         let toolWidth = width * scale
         let size = CGSize(width: toolWidth * look.size.width, height: toolWidth * look.size.height)
         let length = hypot(end.x - start.x, end.y - start.y)

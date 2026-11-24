@@ -92,7 +92,10 @@ struct PlannerPageContent: Equatable {
         case .journal(let id):
             let record = data.journal.page(id)
             let texts = JournalHeading.texts(title: record?.title ?? "", date: record?.date, locale: locale)
-            template = JournalPageTemplate.make(paper: record?.paper ?? .defaultStyle, label: texts.label, heading: texts.heading)
+            template = JournalPageTemplate.make(
+                paper: record?.paper ?? .defaultStyle, spacing: record?.lineSpacing ?? .normal,
+                label: texts.label, heading: texts.heading
+            )
             identifier = "page.journal"
             let number = (data.journal.index(of: id) ?? 0) + 1
             accessibilityLabel = String(localized: "Journal page \(number)", comment: "VoiceOver: a page of the journal, e.g. 'Journal page 3'.")
@@ -548,6 +551,34 @@ enum LaunchOptions {
 
     /// `-DCKeepCloud YES`: `-DCResetData` keeps the fake iCloud (a new device with the same iCloud).
     static var keepCloud: Bool { ProcessInfo.processInfo.arguments.contains("-DCKeepCloud") }
+
+    /// `-DCSampleSettings YES`: eight colours, two favourite pens, a wider pen and no lasso
+    /// (see `SettingsBook.applyTestSettingsIfRequested`).
+    static var sampleSettings: Bool { ProcessInfo.processInfo.arguments.contains("-DCSampleSettings") }
+
+    /// `-DCDarkPaper YES`: dark paper.
+    static var darkPaper: Bool { ProcessInfo.processInfo.arguments.contains("-DCDarkPaper") }
+
+    /// `-DCLineStrength faint|strong`.
+    static var lineStrength: LineStrength? {
+        value(after: "-DCLineStrength").flatMap(LineStrength.init(rawValue:))
+    }
+
+    /// `-DCLock app|journal`: the lock on, as if she had turned it on (`AppLock`).
+    static var lockMode: LockMode? {
+        value(after: "-DCLock").flatMap(LockMode.init(rawValue:))
+    }
+
+    /// `-DCUnlock yes|no`: Face ID always works (or never does), without the system's sheet.
+    static var fakeUnlock: Bool? {
+        value(after: "-DCUnlock").map { $0.lowercased() != "no" }
+    }
+
+    private static func value(after flag: String) -> String? {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let index = arguments.firstIndex(of: flag), index + 1 < arguments.count else { return nil }
+        return arguments[index + 1]
+    }
 
     static var fakeCloudFolder: URL {
         FileManager.default.temporaryDirectory.appending(path: "FakeCloud", directoryHint: .isDirectory)

@@ -18,6 +18,24 @@
           }
         }
       }
+    },
+    "NSFaceIDUsageDescription" : {
+      "comment" : "Shown by iOS the first time the app asks for Face ID (only after she turns the lock on).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το Danai's Calendar χρησιμοποιεί το Face ID για να ξεκλειδώνει την εφαρμογή, ή το τετράδιο και τα σκίτσα σου, όταν ενεργοποιείς το κλείδωμα στις Ρυθμίσεις του."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Danai's Calendar uses Face ID to unlock the app, or your journal and sketches, when you turn the lock on in its Settings."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

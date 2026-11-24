@@ -2,12 +2,15 @@ import SwiftUI
 import UIKit
 import PlannerCore
 
-/// Settings sheet: drawing with a finger (iPad), the Apple Calendar (events in the cells,
-/// which calendars), iCloud, the backup, and the version; tapping the version 5 times
-/// opens Diagnostics.
+/// Settings sheet: drawing with a finger and the pens and colours (iPad), the paper, the
+/// lock, the Apple Calendar (events in the cells, which calendars), iCloud, the backup, and
+/// the version; tapping the version 5 times opens Diagnostics.
 struct SettingsView: View {
     let calendar: CalendarBook
     let sync: CloudSync
+    let settings: SettingsBook
+    let ink: InkController
+    let lock: AppLock
 
     @Environment(\.dismiss) private var dismiss
     @AppStorage(InkDefaults.drawWithFinger) private var drawWithFinger = false
@@ -20,6 +23,15 @@ struct SettingsView: View {
             List {
                 if UIDevice.current.userInterfaceIdiom == .pad {
                     Section {
+                        NavigationLink {
+                            PensSettingsView(settings: settings, ink: ink)
+                        } label: {
+                            Text("Pens and colours")
+                                .font(.inter(.regular, size: 17, relativeTo: .body))
+                                .foregroundStyle(Paper.ink)
+                        }
+                        .accessibilityIdentifier("settings.pens")
+                        .listRowBackground(Paper.background)
                         Toggle(isOn: $drawWithFinger) {
                             Text("Draw with finger too")
                                 .font(.inter(.regular, size: 17, relativeTo: .body))
@@ -36,6 +48,33 @@ struct SettingsView: View {
                             .foregroundStyle(Paper.secondary)
                     }
                 }
+
+                Section {
+                    NavigationLink {
+                        PaperSettingsView(settings: settings)
+                    } label: {
+                        LabeledContent {
+                            Group {
+                                if settings.settings.paper.dark {
+                                    Text("Dark")
+                                } else {
+                                    Text("White")
+                                }
+                            }
+                            .foregroundStyle(Paper.secondary)
+                        } label: {
+                            Text("Paper")
+                                .foregroundStyle(Paper.ink)
+                        }
+                        .font(.inter(.regular, size: 17, relativeTo: .body))
+                    }
+                    .accessibilityIdentifier("settings.paper")
+                    .listRowBackground(Paper.background)
+                } header: {
+                    CapsLabel("Pages")
+                }
+
+                LockSection(settings: settings, lock: lock)
 
                 calendarSection
 

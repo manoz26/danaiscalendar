@@ -128,10 +128,13 @@ final class JournalBook {
 
     func page(_ id: UUID) -> JournalPage? { journal.page(id) }
 
-    /// A new page at the end of the journal (or right after `after`).
+    /// The paper of new pages (Settings → Paper).
+    @ObservationIgnored var newPaper = PaperSettings()
+
+    /// A new page at the end of the journal (or right after `after`), on the paper of new pages.
     @discardableResult
-    func addPage(date: PlannerDate?, after: UUID? = nil, paper: PaperStyle = .defaultStyle) -> JournalPage {
-        let page = JournalPage(date: date, paper: paper)
+    func addPage(date: PlannerDate?, after: UUID? = nil, paper: PaperStyle? = nil) -> JournalPage {
+        let page = JournalPage(date: date, paper: paper ?? newPaper.journalPaper, spacing: newPaper.spacing)
         journal.insert(page, after: after)
         persist()
         AppLog.info("Journal page added (\(journal.pages.count) pages)")

@@ -76,6 +76,8 @@ targets:
         ITSAppUsesNonExemptEncryption: false
         # Asked only when she taps "Connect Apple Calendar"; translated in App/Resources/InfoPlist.xcstrings.
         NSCalendarsFullAccessUsageDescription: "Danai's Calendar prints the events of your calendars in the day cells, under your handwriting, and lets you add, change and delete them. Your events stay in Apple Calendar."
+        # Asked only when she turns the lock on (Settings → Lock); translated in App/Resources/InfoPlist.xcstrings.
+        NSFaceIDUsageDescription: "Danai's Calendar uses Face ID to unlock the app, or your journal and sketches, when you turn the lock on in its Settings."
         LSRequiresIPhoneOS: true
         UIAppFonts:
           - Inter-Regular.ttf

@@ -235,6 +235,24 @@
         }
       }
     },
+    "Add a colour" : {
+      "comment" : "Settings: adds a colour to the palette.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προσθήκη χρώματος"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a colour"
+          }
+        }
+      }
+    },
     "Add a typed item" : {
       "comment" : "VoiceOver: the printed + at the top of the To Buy page.",
       "extractionState" : "manual",
@@ -321,6 +339,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Add photos of things you'd like to buy."
+          }
+        }
+      }
+    },
+    "Add the pen in use" : {
+      "comment" : "Settings: makes the selected tool, colour and width a favourite pen.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προσθήκη του στυλό που κρατάς"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add the pen in use"
+          }
+        }
+      }
+    },
+    "Add the pen in use to favourites" : {
+      "comment" : "VoiceOver: the star in the toolbar.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προσθήκη του στυλό που κρατάς στα αγαπημένα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add the pen in use to favourites"
           }
         }
       }
@@ -447,6 +501,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Arrange items"
+          }
+        }
+      }
+    },
+    "Asked for when the app opens and each time you come back to it. While the app is not in front, a blank page hides what is locked." : {
+      "comment" : "Settings → Lock: footer.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ζητείται όταν ανοίγει η εφαρμογή και κάθε φορά που επιστρέφεις σε αυτή. Όσο η εφαρμογή δεν είναι μπροστά, μια λευκή σελίδα κρύβει ό,τι είναι κλειδωμένο."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Asked for when the app opens and each time you come back to it. While the app is not in front, a blank page hides what is locked."
           }
         }
       }
@@ -739,6 +811,42 @@
         }
       }
     },
+    "Colour %lld" : {
+      "comment" : "A colour she added to the palette, by its place, e.g. 'Colour 7'.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Χρώμα %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Colour %lld"
+          }
+        }
+      }
+    },
+    "Colours" : {
+      "comment" : "Settings: header of the palette.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Χρώματα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Colours"
+          }
+        }
+      }
+    },
     "Connect Apple Calendar" : {
       "comment" : "Button that asks iOS for access to the calendars.",
       "extractionState" : "manual",
@@ -771,6 +879,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Custom"
+          }
+        }
+      }
+    },
+    "Danai's Calendar" : {
+      "comment" : "The app's name, on its lock screen.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Danai's Calendar"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Danai's Calendar"
+          }
+        }
+      }
+    },
+    "Dark" : {
+      "comment" : "Settings: the paper is dark.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σκούρο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dark"
+          }
+        }
+      }
+    },
+    "Dark paper" : {
+      "comment" : "Settings → Paper: black paper with white lines.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σκούρο χαρτί"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dark paper"
+          }
+        }
+      }
+    },
+    "Dark paper is black with white lines; black ink shows white on it. Shared pages and PDFs stay on white paper." : {
+      "comment" : "Settings → Paper: footer of dark paper.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το σκούρο χαρτί είναι μαύρο με λευκές γραμμές· το μαύρο μελάνι φαίνεται λευκό πάνω του. Οι σελίδες που κοινοποιείς και τα PDF μένουν σε λευκό χαρτί."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dark paper is black with white lines; black ink shows white on it. Shared pages and PDFs stay on white paper."
           }
         }
       }
@@ -1189,6 +1369,24 @@
         }
       }
     },
+    "Each page keeps its own paper; you can change it from the page too." : {
+      "comment" : "Settings → Paper: footer of the new journal pages.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κάθε σελίδα κρατάει το δικό της χαρτί· το αλλάζεις και από τη σελίδα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each page keeps its own paper; you can change it from the page too."
+          }
+        }
+      }
+    },
     "Edit birthday" : {
       "comment" : "Title of the birthday form when changing one.",
       "extractionState" : "manual",
@@ -1405,6 +1603,24 @@
         }
       }
     },
+    "Every page" : {
+      "comment" : "Settings → Paper: header of the line strength and dark paper.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Όλες οι σελίδες"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every page"
+          }
+        }
+      }
+    },
     "Every week" : {
       "comment" : "Repeat of an event.",
       "extractionState" : "manual",
@@ -1477,6 +1693,24 @@
         }
       }
     },
+    "Faint" : {
+      "comment" : "Settings → Paper: faint printed lines.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αχνές"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faint"
+          }
+        }
+      }
+    },
     "Faint highlighter" : {
       "comment" : "Toolbar: the most see-through of the highlighter's three opacity levels (VoiceOver).",
       "extractionState" : "manual",
@@ -1491,6 +1725,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Faint highlighter"
+          }
+        }
+      }
+    },
+    "Favourite pens" : {
+      "comment" : "Settings: header of the favourite pens.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αγαπημένα στυλό"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favourite pens"
           }
         }
       }
@@ -1837,6 +2089,24 @@
         }
       }
     },
+    "Journal and sketches" : {
+      "comment" : "Settings → Lock: only the journal and the sketches are locked; also the title of their lock screen.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τετράδιο και σκίτσα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Journal and sketches"
+          }
+        }
+      }
+    },
     "Journal page" : {
       "comment" : "VoiceOver: this day has a journal page (it shows a dot).",
       "extractionState" : "manual",
@@ -1927,6 +2197,24 @@
         }
       }
     },
+    "Left" : {
+      "comment" : "Settings: the toolbar is on the left of the page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αριστερά"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Left"
+          }
+        }
+      }
+    },
     "Lined" : {
       "comment" : "Paper of a journal page: lines.",
       "extractionState" : "manual",
@@ -1941,6 +2229,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lined"
+          }
+        }
+      }
+    },
+    "Lines" : {
+      "comment" : "Settings → Paper: how strong the printed lines are.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Γραμμές"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lines"
           }
         }
       }
@@ -1977,6 +2283,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Loading…"
+          }
+        }
+      }
+    },
+    "Lock" : {
+      "comment" : "Settings: header of the lock.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κλείδωμα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lock"
+          }
+        }
+      }
+    },
+    "Lock with Face ID" : {
+      "comment" : "Settings → Lock.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κλείδωμα με Face ID"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lock with Face ID"
+          }
+        }
+      }
+    },
+    "Lock with the passcode" : {
+      "comment" : "Settings → Lock (a device without Face ID or Touch ID).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κλείδωμα με τον κωδικό"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lock with the passcode"
+          }
+        }
+      }
+    },
+    "Lock with Touch ID" : {
+      "comment" : "Settings → Lock.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κλείδωμα με Touch ID"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lock with Touch ID"
           }
         }
       }
@@ -2197,6 +2575,24 @@
         }
       }
     },
+    "Narrow" : {
+      "comment" : "Spacing of the lines, squares or dots of a journal page: close together.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πυκνές"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Narrow"
+          }
+        }
+      }
+    },
     "Never" : {
       "comment" : "Repeat of an event: it does not repeat.",
       "extractionState" : "manual",
@@ -2265,6 +2661,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "New item"
+          }
+        }
+      }
+    },
+    "New journal pages" : {
+      "comment" : "Settings → Paper: header of the paper of new journal pages.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Νέες σελίδες τετραδίου"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New journal pages"
           }
         }
       }
@@ -2503,6 +2917,24 @@
         }
       }
     },
+    "No lock" : {
+      "comment" : "Settings → Lock: the app is not locked.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Χωρίς κλείδωμα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No lock"
+          }
+        }
+      }
+    },
     "No pages yet" : {
       "comment" : "Empty journal.",
       "extractionState" : "manual",
@@ -2575,6 +3007,24 @@
         }
       }
     },
+    "Normal" : {
+      "comment" : "Settings → Paper: normal printed lines, or normal spacing of the lines.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κανονικές"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normal"
+          }
+        }
+      }
+    },
     "Not a backup" : {
       "comment" : "Alert when the picked file is not a backup.",
       "extractionState" : "manual",
@@ -2643,6 +3093,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Not ticked"
+          }
+        }
+      }
+    },
+    "Not unlocked. Try again." : {
+      "comment" : "Lock screen: Face ID or the passcode did not work.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δεν ξεκλείδωσε. Δοκίμασε ξανά."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not unlocked. Try again."
           }
         }
       }
@@ -2845,6 +3313,24 @@
         }
       }
     },
+    "Own colour" : {
+      "comment" : "A colour she added, not in the palette any more.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δικό σου χρώμα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Own colour"
+          }
+        }
+      }
+    },
     "Page" : {
       "comment" : "Title of a journal page's details (title, paper, date).",
       "extractionState" : "manual",
@@ -2895,6 +3381,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Page title, paper and date"
+          }
+        }
+      }
+    },
+    "Pages" : {
+      "comment" : "Settings: header of the paper section.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σελίδες"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pages"
           }
         }
       }
@@ -2985,6 +3489,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pencil"
+          }
+        }
+      }
+    },
+    "Pens and colours" : {
+      "comment" : "Settings: the screen with the palette, widths, favourite pens and toolbar tools.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Στυλό και χρώματα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pens and colours"
           }
         }
       }
@@ -3111,6 +3633,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pinned sketches: %lld"
+          }
+        }
+      }
+    },
+    "Preview of the pages" : {
+      "comment" : "VoiceOver: the small pages in Settings → Paper.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προεπισκόπηση των σελίδων"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preview of the pages"
           }
         }
       }
@@ -3277,6 +3817,24 @@
         }
       }
     },
+    "Remove from favourites" : {
+      "comment" : "Menu of a favourite pen in the toolbar.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αφαίρεση από τα αγαπημένα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove from favourites"
+          }
+        }
+      }
+    },
     "Repeat" : {
       "comment" : "Event form: how it repeats.",
       "extractionState" : "manual",
@@ -3291,6 +3849,96 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Repeat"
+          }
+        }
+      }
+    },
+    "Reset" : {
+      "comment" : "Confirms going back to the default settings.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επαναφορά"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset"
+          }
+        }
+      }
+    },
+    "Reset paper" : {
+      "comment" : "Settings → Paper: back to the defaults.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επαναφορά χαρτιού"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset paper"
+          }
+        }
+      }
+    },
+    "Reset paper?" : {
+      "comment" : "Confirmation title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επαναφορά χαρτιού;"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset paper?"
+          }
+        }
+      }
+    },
+    "Reset pens and colours" : {
+      "comment" : "Settings button: palette, widths, favourites and tools back to the defaults.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επαναφορά στυλό και χρωμάτων"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset pens and colours"
+          }
+        }
+      }
+    },
+    "Reset pens and colours?" : {
+      "comment" : "Confirmation title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επαναφορά στυλό και χρωμάτων;"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset pens and colours?"
           }
         }
       }
@@ -3345,6 +3993,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Restore this backup?"
+          }
+        }
+      }
+    },
+    "Right" : {
+      "comment" : "Settings: the toolbar is on the right of the page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δεξιά"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Right"
           }
         }
       }
@@ -3493,6 +4159,24 @@
         }
       }
     },
+    "Side" : {
+      "comment" : "Settings: which side of the page the toolbar is on.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πλευρά"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Side"
+          }
+        }
+      }
+    },
     "Sketch" : {
       "comment" : "A sketch (a blank page from the sketch button): VoiceOver name of the page.",
       "extractionState" : "manual",
@@ -3619,6 +4303,24 @@
         }
       }
     },
+    "Spacing" : {
+      "comment" : "Spacing of the lines, squares or dots of a journal page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Απόσταση"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spacing"
+          }
+        }
+      }
+    },
     "Starts" : {
       "comment" : "Event form: the start.",
       "extractionState" : "manual",
@@ -3633,6 +4335,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Starts"
+          }
+        }
+      }
+    },
+    "Strong" : {
+      "comment" : "Settings → Paper: strong printed lines.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Έντονες"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Strong"
           }
         }
       }
@@ -3777,6 +4497,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tap + to add a friend's name and birthday. Its day gets a small gift on the month page, with a line in the notes."
+          }
+        }
+      }
+    },
+    "Tap a colour to change it. With Edit you can remove colours and change their order. Up to 12; ink already written keeps its colour." : {
+      "comment" : "Settings: footer of the palette.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πάτησε ένα χρώμα για να το αλλάξεις. Με την Επεξεργασία βγάζεις χρώματα και αλλάζεις τη σειρά τους. Έως 12· ό,τι έχει ήδη γραφτεί κρατάει το χρώμα του."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap a colour to change it. With Edit you can remove colours and change their order. Up to 12; ink already written keeps its colour."
           }
         }
       }
@@ -4011,6 +4749,60 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "The pages, lists, birthdays and photos of the backup come back. Nothing you have now is deleted."
+          }
+        }
+      }
+    },
+    "The six colours, the widths and all the tools come back; your favourite pens are removed. Your handwriting does not change." : {
+      "comment" : "Confirmation of resetting pens and colours.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επιστρέφουν τα έξι χρώματα, τα πάχη και όλα τα εργαλεία· τα αγαπημένα στυλό σου βγαίνουν. Το χειρόγραφό σου δεν αλλάζει."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The six colours, the widths and all the tools come back; your favourite pens are removed. Your handwriting does not change."
+          }
+        }
+      }
+    },
+    "The three widths of each tool in the toolbar." : {
+      "comment" : "Settings: footer of the widths.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα τρία πάχη κάθε εργαλείου στη μπάρα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The three widths of each tool in the toolbar."
+          }
+        }
+      }
+    },
+    "The tools the toolbar shows (at least one that writes), and the side of the page it is on. You can also drag it by its handle." : {
+      "comment" : "Settings: footer of the toolbar's tools.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ποια εργαλεία δείχνει η μπάρα (τουλάχιστον ένα που γράφει) και σε ποια πλευρά της σελίδας είναι. Τη σέρνεις και από τη λαβή της."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The tools the toolbar shows (at least one that writes), and the side of the page it is on. You can also drag it by its handle."
           }
         }
       }
@@ -4285,6 +5077,24 @@
         }
       }
     },
+    "To lock the app, first set a passcode for this device in the Settings app." : {
+      "comment" : "Settings → Lock: the device has no passcode.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Για να κλειδώσεις την εφαρμογή, βάλε πρώτα κωδικό σε αυτή τη συσκευή, από την εφαρμογή Ρυθμίσεις."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To lock the app, first set a passcode for this device in the Settings app."
+          }
+        }
+      }
+    },
     "To see the same pages on your iPad and iPhone, sign in to iCloud with iCloud Drive on, in the Settings app. Until then everything stays on this device." : {
       "comment" : "Settings → iCloud footer when not signed in.",
       "extractionState" : "manual",
@@ -4357,6 +5167,42 @@
         }
       }
     },
+    "Tool" : {
+      "comment" : "Settings: which tool's widths are shown.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εργαλείο"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tool"
+          }
+        }
+      }
+    },
+    "Toolbar" : {
+      "comment" : "Settings: header of the toolbar's tools.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μπάρα εργαλείων"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toolbar"
+          }
+        }
+      }
+    },
     "Tools" : {
       "comment" : "VoiceOver: name of the floating tool bar.",
       "extractionState" : "manual",
@@ -4371,6 +5217,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tools"
+          }
+        }
+      }
+    },
+    "Turn on the lock" : {
+      "comment" : "Face ID / passcode reason: turning the lock on in Settings.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ενεργοποίηση του κλειδώματος"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on the lock"
           }
         }
       }
@@ -4429,6 +5293,42 @@
         }
       }
     },
+    "Unlock" : {
+      "comment" : "Lock screen: asks for Face ID, Touch ID or the passcode.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ξεκλείδωμα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlock"
+          }
+        }
+      }
+    },
+    "Unlock Danai's Calendar" : {
+      "comment" : "Face ID / passcode reason: opening the locked app.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ξεκλείδωμα του Danai's Calendar"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlock Danai's Calendar"
+          }
+        }
+      }
+    },
     "Unpin" : {
       "comment" : "Removes a sketch from the day it was pinned to.",
       "extractionState" : "manual",
@@ -4443,6 +5343,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Unpin"
+          }
+        }
+      }
+    },
+    "Up to 4, in the toolbar under the colours: one tap takes the tool, colour and width. The star there adds the pen in use; hold a favourite to remove it." : {
+      "comment" : "Settings: footer of the favourite pens.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Έως 4, στη μπάρα κάτω από τα χρώματα: ένα πάτημα παίρνει εργαλείο, χρώμα και πάχος. Το αστεράκι εκεί προσθέτει το στυλό που κρατάς· κράτα πατημένο ένα αγαπημένο για να το βγάλεις."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to 4, in the toolbar under the colours: one tap takes the tool, colour and width. The star there adds the pen in use; hold a favourite to remove it."
           }
         }
       }
@@ -4605,6 +5523,96 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "When this is off, only Apple Pencil writes and one finger moves the page. When it is on, your finger writes too and two fingers move the page."
+          }
+        }
+      }
+    },
+    "White" : {
+      "comment" : "Settings: the paper is white.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Λευκό"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "White"
+          }
+        }
+      }
+    },
+    "White paper, normal lines, and lined paper for new journal pages." : {
+      "comment" : "Confirmation of resetting the paper.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Λευκό χαρτί, κανονικές γραμμές, και χαρτί με γραμμές για τις νέες σελίδες τετραδίου."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "White paper, normal lines, and lined paper for new journal pages."
+          }
+        }
+      }
+    },
+    "Whole app" : {
+      "comment" : "Settings → Lock: the whole app is locked.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Όλη η εφαρμογή"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Whole app"
+          }
+        }
+      }
+    },
+    "Wide" : {
+      "comment" : "Spacing of the lines, squares or dots of a journal page: far apart.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αραιές"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wide"
+          }
+        }
+      }
+    },
+    "Widths" : {
+      "comment" : "Settings: header of the widths of the tools.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πάχη"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Widths"
           }
         }
       }

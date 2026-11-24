@@ -411,6 +411,7 @@ struct AppSyncOwner: SyncOwner {
     let sketches: SketchBook
     let lists: ListBook
     let wishlist: WishlistBook
+    let settings: SettingsBook
 
     func receive(_ data: Data, for path: SyncPath, replacing: String?) async throws -> Data {
         try await receiveOnMain(data, path, replacing)
@@ -438,6 +439,7 @@ struct AppSyncOwner: SyncOwner {
             case ListFile.todoFileName, ListFile.toBuyFileName: return try lists.receive(data, fileName: name)
             case WishlistFile.fileName: return try wishlist.receive(data)
             case LocalBirthdayStore.fileName: return try birthdays.receive(data)
+            case SettingsFile.fileName: return try settings.receive(data)
             default: throw SyncOwnerError.unknownFile(name)
             }
         }
@@ -480,6 +482,7 @@ struct AppSyncOwner: SyncOwner {
         sketches.waitUntilSaved()
         lists.waitUntilSaved()
         wishlist.waitUntilSaved()
+        settings.waitUntilSaved()
     }
 
     /// A backup brought back: photos first (so that their list shows them), then the lists
@@ -507,6 +510,7 @@ struct AppSyncOwner: SyncOwner {
                     case ListFile.todoFileName, ListFile.toBuyFileName: try lists.restore(data, fileName: name)
                     case WishlistFile.fileName: try wishlist.restore(data)
                     case LocalBirthdayStore.fileName: try birthdays.restore(data)
+                    case SettingsFile.fileName: try settings.restore(data)
                     default: throw SyncOwnerError.unknownFile(name)
                     }
                 case .page(let page):

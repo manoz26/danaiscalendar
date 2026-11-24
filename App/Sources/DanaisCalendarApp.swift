@@ -17,6 +17,10 @@ struct DanaisCalendarApp: App {
     @State private var appleCalendar: CalendarBook
     /// iCloud: the same pages, lists and photos on every device.
     @State private var sync: CloudSync
+    /// Her palette, pens, paper and lock (prompt 9), the same on every device.
+    @State private var settings: SettingsBook
+    /// Face ID / Touch ID / passcode, when she turned it on.
+    @State private var lock: AppLock
 
     init() {
         Chrome.apply()
@@ -24,7 +28,13 @@ struct DanaisCalendarApp: App {
         #if DEBUG
         LaunchOptions.prepareTestData()
         #endif
+        let settings = SettingsBook()
+        #if DEBUG
+        settings.applyTestSettingsIfRequested()
+        #endif
         let ink = InkController()
+        ink.settingsBook = settings
+        ink.apply(settings.settings)
         _ink = State(initialValue: ink)
         let birthdays = BirthdayBook()
         #if DEBUG
@@ -41,13 +51,23 @@ struct DanaisCalendarApp: App {
         lists.addSamplesIfRequested()
         wishlist.addSamplesIfRequested()
         #endif
+        journal.newPaper = settings.settings.paper
+        let lock = AppLock(mode: settings.settings.lock)
+        settings.onChange = { [weak ink, weak journal, weak lock] new in
+            ink?.apply(new)
+            journal?.newPaper = new.paper
+            lock?.mode = new.lock
+        }
+        _settings = State(initialValue: settings)
+        _lock = State(initialValue: lock)
         _journal = State(initialValue: journal)
         _sketches = State(initialValue: sketches)
         _lists = State(initialValue: lists)
         _wishlist = State(initialValue: wishlist)
         _appleCalendar = State(initialValue: CalendarBook())
         let sync = CloudSync(owner: AppSyncOwner(
-            ink: ink, birthdays: birthdays, journal: journal, sketches: sketches, lists: lists, wishlist: wishlist
+            ink: ink, birthdays: birthdays, journal: journal, sketches: sketches, lists: lists, wishlist: wishlist,
+            settings: settings
         ))
         sync.start()
         _sync = State(initialValue: sync)
@@ -59,13 +79,15 @@ struct DanaisCalendarApp: App {
             if UIDevice.current.userInterfaceIdiom == .phone {
                 PhoneRootView(
                     ink: ink, birthdays: birthdays, journal: journal, sketches: sketches, lists: lists,
-                    wishlist: wishlist, appleCalendar: appleCalendar, sync: sync
+                    wishlist: wishlist, appleCalendar: appleCalendar, sync: sync, settings: settings, lock: lock
                 )
+                .lockCover(lock)
             } else {
                 RootView(
                     ink: ink, birthdays: birthdays, journal: journal, sketches: sketches, lists: lists,
-                    wishlist: wishlist, appleCalendar: appleCalendar, sync: sync
+                    wishlist: wishlist, appleCalendar: appleCalendar, sync: sync, settings: settings, lock: lock
                 )
+                .lockCover(lock)
             }
         }
     }

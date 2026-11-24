@@ -322,6 +322,17 @@ struct JournalPageSettingsView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
                         .listRowBackground(Paper.background)
+                        if page.paper != .blank {
+                            SpacingPicker(spacing: Binding(
+                                get: { page.lineSpacing },
+                                set: { spacing in
+                                    var changed = page
+                                    changed.spacing = spacing == .normal ? nil : spacing
+                                    journal.update(changed)
+                                }
+                            ))
+                            .listRowBackground(Paper.background)
+                        }
                     } header: {
                         CapsLabel("Paper")
                     } footer: {
@@ -462,6 +473,31 @@ struct PaperChoice: View {
         case .lined: Text("Lined")
         case .grid: Text("Grid")
         case .dotted: Text("Dotted")
+        }
+    }
+}
+
+/// Narrow, normal or wide lines, squares or dots.
+struct SpacingPicker: View {
+    @Binding var spacing: LineSpacing
+
+    var body: some View {
+        Picker(selection: $spacing) {
+            ForEach(LineSpacing.allCases, id: \.self) { value in
+                Self.name(value).tag(value)
+            }
+        } label: {
+            Text("Spacing")
+        }
+        .pickerStyle(.segmented)
+        .accessibilityIdentifier("paper.spacing")
+    }
+
+    static func name(_ spacing: LineSpacing) -> Text {
+        switch spacing {
+        case .narrow: Text("Narrow")
+        case .normal: Text("Normal")
+        case .wide: Text("Wide")
         }
     }
 }

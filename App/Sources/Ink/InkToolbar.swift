@@ -15,10 +15,21 @@ struct InkToolbarOverlay: View {
     /// Under the colours: the highlighter's opacity, when it is selected (empty otherwise, so
     /// the buttons below never move).
     private static let opacityRow: CGFloat = 28
+    private static let favoriteRow: CGFloat = 34
+    /// More colours than this go in two columns.
+    private static let colorsPerColumn = 6
 
     var body: some View {
         GeometryReader { proxy in
-            bar(areaWidth: proxy.size.width)
+            // A small screen (or many colours and favourites): the bar scrolls instead of
+            // running off the page.
+            ViewThatFits(in: .vertical) {
+                bar(areaWidth: proxy.size.width)
+                ScrollView(.vertical, showsIndicators: false) {
+                    bar(areaWidth: proxy.size.width)
+                }
+                .frame(width: Self.width + 24)
+            }
                 .offset(drag)
                 .frame(
                     maxWidth: .infinity, maxHeight: .infinity,
@@ -84,7 +95,8 @@ struct InkToolbarOverlay: View {
 
     @ViewBuilder
     private var expanded: some View {
-        ForEach(InkTool.allCases, id: \.self) { tool in
+        let palette = ink.settings.palette
+        ForEach(ink.settings.toolbarTools, id: \.self) { tool in
             toolButton(tool)
         }
         divider
@@ -99,17 +111,16 @@ struct InkToolbarOverlay: View {
                 eraserModes
             } else {
                 VStack(spacing: 0) {
-                    ForEach(InkPalette.colors.indices, id: \.self) { index in
-                        colorButton(index)
-                    }
-                    .opacity(ink.tools.tool.drawsInk ? 1 : 0.35)
+                    colors(palette)
+                        .opacity(ink.tools.tool.drawsInk ? 1 : 0.35)
                     if ink.tools.tool == .highlighter {
                         highlighterOpacities
                     }
                 }
             }
         }
-        .frame(height: Self.colorRow * CGFloat(InkPalette.colors.count) + Self.opacityRow, alignment: .top)
+        .frame(height: Self.colorRow * CGFloat(Self.colorRows(palette.count)) + Self.opacityRow, alignment: .top)
+        favorites(palette)
         divider
         iconButton("arrow.uturn.backward", label: Text("Undo"), identifier: "toolbar.undo", enabled: ink.canUndo) {
             ink.undo()
@@ -121,6 +132,101 @@ struct InkToolbarOverlay: View {
         iconButton("chevron.compact.up", label: Text("Hide tools"), identifier: "toolbar.collapse") {
             ink.setToolbarCollapsed(true)
         }
+    }
+
+    /// Rows of colour dots: one column up to six, two columns of up to six beyond.
+    private static func colorRows(_ count: Int) -> Int {
+        count <= colorsPerColumn ? count : (count + 1) / 2
+    }
+
+    @ViewBuilder
+    private func colors(_ palette: [InkColor]) -> some View {
+        if palette.count <= Self.colorsPerColumn {
+            ForEach(palette.indices, id: \.self) { index in
+                colorButton(index, palette: palette, width: Self.toolSize)
+            }
+        } else {
+            let rows = Self.colorRows(palette.count)
+            HStack(spacing: 0) {
+                ForEach(0..<2, id: \.self) { column in
+                    VStack(spacing: 0) {
+                        ForEach(Array(palette.indices.dropFirst(column * rows).prefix(rows)), id: \.self) { index in
+                            colorButton(index, palette: palette, width: (Self.width - 6) / 2)
+                        }
+                        Spacer(minLength: 0)
+                    }
+                }
+            }
+            .frame(width: Self.width - 6, height: Self.colorRow * CGFloat(rows), alignment: .top)
+        }
+    }
+
+    /// Favourite pens under the colours: the tool's icon in its colour; one tap takes it,
+    /// holding it removes it. The star adds the pen in use.
+    @ViewBuilder
+    private func favorites(_ palette: [InkColor]) -> some View {
+        let favorites = ink.settings.favorites
+        let canAdd = favorites.count < FavoritePen.maxCount && ink.tools.tool.drawsInk
+        if !favorites.isEmpty || canAdd {
+            divider
+            ForEach(Array(favorites.enumerated()), id: \.element.id) { index, favorite in
+                favoriteButton(favorite, number: index + 1, palette: palette)
+            }
+            if canAdd {
+                Button {
+                    ink.addFavorite()
+                } label: {
+                    Image(systemName: "star")
+                        .font(.system(size: 16))
+                        .foregroundStyle(Paper.secondary)
+                        .frame(width: Self.toolSize, height: Self.favoriteRow)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text("Add the pen in use to favourites"))
+                .accessibilityIdentifier("toolbar.favorite.add")
+            }
+        }
+    }
+
+    private func favoriteButton(_ favorite: FavoritePen, number: Int, palette: [InkColor]) -> some View {
+        let selected = ink.tools.isUsing(favorite)
+        let weight: Font.Weight = switch favorite.widthIndex {
+        case 0: .light
+        case 1: .regular
+        default: .semibold
+        }
+        let opacity = favorite.tool == .highlighter
+            ? max(0.45, InkOpacities.highlighter[min(max(favorite.opacityIndex, 0), InkOpacities.highlighter.count - 1)])
+            : 1
+        return Button {
+            ink.select(favorite)
+        } label: {
+            Image(systemName: Self.symbol(for: favorite.tool, eraserMode: .partial))
+                .font(.system(size: 18, weight: weight))
+                .foregroundStyle(favorite.color.swiftUIColor.opacity(opacity))
+                .frame(width: Self.toolSize, height: Self.favoriteRow)
+                .background(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(selected ? Paper.tab : Color.clear)
+                )
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .contextMenu {
+            Button(role: .destructive) {
+                ink.removeFavorite(favorite.id)
+            } label: {
+                Label {
+                    Text("Remove from favourites")
+                } icon: {
+                    Image(systemName: "star.slash")
+                }
+            }
+        }
+        .accessibilityLabel(Self.describe(favorite, palette: palette))
+        .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityIdentifier("toolbar.favorite.\(number)")
     }
 
     private var collapsed: some View {
@@ -174,7 +280,6 @@ struct InkToolbarOverlay: View {
     private func widthButton(_ index: Int) -> some View {
         let selected = ink.tools.tool.hasWidths && ink.tools.widthIndex == index
         let thickness: [CGFloat] = [1.5, 3, 5.5]
-        let names = [Text("Thin"), Text("Medium"), Text("Thick")]
         return Button {
             ink.selectWidth(index)
         } label: {
@@ -189,14 +294,14 @@ struct InkToolbarOverlay: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(names[index])
+        .accessibilityLabel(Self.widthName(index))
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibilityIdentifier("toolbar.width.\(index + 1)")
     }
 
-    private func colorButton(_ index: Int) -> some View {
-        let color = InkPalette.colors[index]
-        let selected = ink.tools.colorIndex(in: InkPalette.colors) == index
+    private func colorButton(_ index: Int, palette: [InkColor], width: CGFloat) -> some View {
+        let color = palette[index]
+        let selected = ink.tools.colorIndex(in: palette) == index
         return Button {
             ink.selectColor(index)
         } label: {
@@ -205,11 +310,11 @@ struct InkToolbarOverlay: View {
                 .frame(width: 18, height: 18)
                 .padding(3)
                 .overlay(Circle().stroke(selected ? Paper.ink : Color.clear, lineWidth: 1.8))
-                .frame(width: Self.toolSize, height: Self.colorRow)
+                .frame(width: width, height: Self.colorRow)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(Self.name(of: color))
+        .accessibilityLabel(Self.name(of: color, at: index))
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibilityIdentifier("toolbar.color.\(color.key)")
     }
@@ -327,16 +432,44 @@ struct InkToolbarOverlay: View {
         }
     }
 
-    static func name(of color: InkColor) -> Text {
+    /// The first six by name; the ones she added by their place ("Colour 7").
+    static func name(of color: InkColor, at index: Int? = nil) -> Text {
         switch color.key {
-        case "pink": Text("Pink")
-        case "black": Text("Black")
-        case "red": Text("Red")
-        case "blue": Text("Blue")
-        case "green": Text("Green")
-        case "purple": Text("Purple")
-        default: Text(verbatim: color.key)
+        case "pink": return Text("Pink")
+        case "black": return Text("Black")
+        case "red": return Text("Red")
+        case "blue": return Text("Blue")
+        case "green": return Text("Green")
+        case "purple": return Text("Purple")
+        default:
+            if let index {
+                let number = index + 1
+                return Text("Colour \(number)", comment: "A colour she added to the palette, by its place, e.g. 'Colour 7'.")
+            }
+            return Text("Own colour", comment: "A colour she added, not in the palette any more.")
         }
+    }
+
+    static func widthName(_ index: Int) -> Text {
+        switch index {
+        case 0: Text("Thin")
+        case 1: Text("Medium")
+        default: Text("Thick")
+        }
+    }
+
+    /// E.g. "Highlighter, Blue, Thick, Faint highlighter".
+    static func describe(_ favorite: FavoritePen, palette: [InkColor]) -> Text {
+        let index = palette.firstIndex { $0.key == favorite.color.key }
+        let separator = Text(verbatim: ", ")
+        let text = name(of: favorite.tool) + separator + name(of: favorite.color, at: index) + separator + widthName(favorite.widthIndex)
+        guard favorite.tool == .highlighter else { return text }
+        let level: Text = switch min(max(favorite.opacityIndex, 0), 2) {
+        case 0: Text("Faint highlighter")
+        case 1: Text("Medium highlighter")
+        default: Text("Strong highlighter")
+        }
+        return text + separator + level
     }
 }
 

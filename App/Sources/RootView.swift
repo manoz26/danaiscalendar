@@ -47,6 +47,10 @@ struct RootView: View {
     let appleCalendar: CalendarBook
     /// iCloud sync: its discreet mark on the page, and Settings.
     let sync: CloudSync
+    /// Her palette, pens, paper and lock (Settings).
+    let settings: SettingsBook
+    /// Face ID: the journal and sketches may be locked.
+    let lock: AppLock
     @AppStorage(InkDefaults.drawWithFinger) private var drawWithFinger = false
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -70,10 +74,13 @@ struct RootView: View {
 
     init(
         ink: InkController, birthdays: BirthdayBook, journal: JournalBook, sketches: SketchBook,
-        lists: ListBook, wishlist: WishlistBook, appleCalendar: CalendarBook, sync: CloudSync
+        lists: ListBook, wishlist: WishlistBook, appleCalendar: CalendarBook, sync: CloudSync,
+        settings: SettingsBook, lock: AppLock
     ) {
         self.ink = ink
         self.sync = sync
+        self.settings = settings
+        self.lock = lock
         self.wishlist = wishlist
         self.appleCalendar = appleCalendar
         self.birthdays = birthdays
@@ -125,6 +132,12 @@ struct RootView: View {
                         InkToolbarOverlay(ink: ink)
                     }
                 }
+                .overlay {
+                    // "Lock: journal and sketches": the page waits for Face ID.
+                    if lock.mode == .journal && lock.isLocked {
+                        LockScreen(lock: lock, isWholeApp: false)
+                    }
+                }
                 if !page.isNotebookPage {
                     PlannerTabs(
                         page: page.week == nil ? page : calendarPage,
@@ -161,6 +174,9 @@ struct RootView: View {
         .onChange(of: page) { _, newPage in
             preloadNeighbors(of: newPage)
         }
+        .onChange(of: showsNotebook, initial: true) { _, shows in
+            lock.showsNotebook = shows
+        }
         .onChange(of: journal.pages.map(\.id)) { _, ids in
             // The open journal page was deleted on another device: leave it.
             if case .journal(let id) = page, !ids.contains(id) {
@@ -190,6 +206,7 @@ struct RootView: View {
                 sketches.waitUntilSaved()
                 lists.waitUntilSaved()
                 wishlist.waitUntilSaved()
+                settings.waitUntilSaved()
                 AppLog.info("App in background")
             default:
                 break
@@ -202,6 +219,15 @@ struct RootView: View {
     }
 
     // MARK: - State
+
+    /// A journal page or a sketch is on screen (the page, or a sheet with them).
+    private var showsNotebook: Bool {
+        if page.isNotebookPage { return true }
+        switch sheet {
+        case .journalPages?, .journalPage?, .sketches?, .pin?: return true
+        default: return false
+        }
+    }
 
     private var data: PlannerData {
         PlannerData(
@@ -564,9 +590,12 @@ struct RootView: View {
     private func sheetView(_ sheet: PlannerSheet) -> some View {
         switch sheet {
         case .settings:
-            SettingsView(calendar: appleCalendar, sync: sync)
+            SettingsView(calendar: appleCalendar, sync: sync, settings: settings, ink: ink, lock: lock)
         case .birthdays:
             BirthdaysView(book: birthdays)
+        case .journalPages where lock.mode == .journal && lock.isLocked,
+             .sketches where lock.mode == .journal && lock.isLocked:
+            LockScreen(lock: lock, isWholeApp: false)
         case .journalPages:
             JournalPagesView(
                 journal: journal, ink: ink,

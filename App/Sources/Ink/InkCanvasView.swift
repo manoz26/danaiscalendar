@@ -46,6 +46,17 @@ final class InkCanvasView: PKCanvasView {
         }
     }
 
+    /// White or dark paper and the strength of the lines (Settings → Paper). On dark paper
+    /// PencilKit shows the ink in its dark-mode colours (black shows white); the ink itself
+    /// is kept as it was written.
+    var look: TemplateLook = .standard {
+        didSet {
+            guard look != oldValue else { return }
+            templateView.look = look
+            overrideUserInterfaceStyle = look.dark ? .dark : .light
+        }
+    }
+
     /// Each open page has its own undo history (cleared when another page opens).
     override var undoManager: UndoManager? { pageUndoManager }
 
@@ -315,6 +326,15 @@ final class PageTemplateView: UIView {
         }
     }
 
+    /// White or dark paper, and how strong the lines are (Settings → Paper).
+    var look: TemplateLook = .standard {
+        didSet {
+            guard look != oldValue else { return }
+            backgroundColor = UIColor(white: look.white(.paper), alpha: 1)
+            tiledLayer.look = look
+        }
+    }
+
     var items: [PageAccessibilityItem] = [] {
         didSet {
             guard items != oldValue else { return }
@@ -372,6 +392,7 @@ struct PageAccessibilityItem: Equatable {
 final class PageTiledLayer: CATiledLayer {
     private let lock = NSLock()
     private var storedTemplate: PageTemplate?
+    private var storedLook = TemplateLook.standard
 
     override init() {
         super.init()
@@ -381,6 +402,7 @@ final class PageTiledLayer: CATiledLayer {
         super.init(layer: layer)
         if let other = layer as? PageTiledLayer {
             storedTemplate = other.template
+            storedLook = other.look
         }
     }
 
@@ -400,13 +422,22 @@ final class PageTiledLayer: CATiledLayer {
         }
     }
 
+    var look: TemplateLook {
+        get { lock.withLock { storedLook } }
+        set {
+            lock.withLock { storedLook = newValue }
+            setNeedsDisplay()
+        }
+    }
+
     override func draw(in context: CGContext) {
+        let (template, look) = lock.withLock { (storedTemplate, storedLook) }
         guard let template else { return }
         let scale = PageCanvas.scale(forWidth: bounds.width)
         guard scale > 0 else { return }
-        context.setFillColor(Tone.paper.cgColor)
+        context.setFillColor(look.color(.paper))
         context.fill(context.boundingBoxOfClipPath)
         context.scaleBy(x: scale, y: scale)
-        TemplateRenderer.draw(template, in: context)
+        TemplateRenderer.draw(template, in: context, look: look)
     }
 }

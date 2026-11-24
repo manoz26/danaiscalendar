@@ -31,6 +31,8 @@ enum ToolbarSide: String, Sendable {
 @Observable
 final class InkController {
     private(set) var tools: InkToolState
+    /// Her palette, widths, favourite pens, the toolbar's tools and the paper (synced settings).
+    private(set) var settings = PlannerSettings.defaults
     private(set) var canUndo = false
     private(set) var canRedo = false
     private(set) var toolbarSide: ToolbarSide
@@ -332,7 +334,39 @@ final class InkController {
     }
 
     func selectColor(_ index: Int) {
-        tools.selectColor(index)
+        tools.selectColor(index, in: settings.palette)
+        toolsChanged()
+    }
+
+    /// A favourite pen: its tool, colour and width with one tap.
+    func select(_ favorite: FavoritePen) {
+        tools.apply(favorite)
+        toolsChanged()
+    }
+
+    /// Where her settings are kept (the toolbar's star adds favourite pens there).
+    @ObservationIgnored weak var settingsBook: SettingsBook?
+
+    /// The star of the toolbar: the pen in use becomes a favourite.
+    func addFavorite() {
+        guard let favorite = tools.favorite(), settings.favorites.count < FavoritePen.maxCount else { return }
+        settingsBook?.setFavorites(settings.favorites + [favorite])
+        AppLog.info("Favourite pen added (\(settings.favorites.count))")
+    }
+
+    func removeFavorite(_ id: UUID) {
+        settingsBook?.setFavorites(settings.favorites.filter { $0.id != id })
+    }
+
+    /// The settings changed (here or on another device): the toolbar, the tools' widths and
+    /// colours, and the paper follow.
+    func apply(_ newSettings: PlannerSettings) {
+        settings = newSettings
+        tools.follow(newSettings.palette)
+        if !newSettings.toolbarTools.contains(tools.tool), let shown = newSettings.toolbarTools.first(where: \.drawsInk) {
+            tools.select(shown)
+        }
+        canvas.look = newSettings.look
         toolsChanged()
     }
 
@@ -424,7 +458,7 @@ final class InkController {
         guard let stroke = drawing.strokes.last, stroke.path.creationDate != lookedAtStroke,
               stroke.path.creationDate.timeIntervalSinceNow > -10,
               let type = StraightStroke.inkType(for: tools.tool), stroke.ink.inkType == type,
-              let width = tools.width,
+              let width = tools.width(with: settings.widths),
               let look = StrokeLook(stroke, toolWidth: width * canvas.drawingScale) else { return }
         lookedAtStroke = stroke.path.creationDate
         strokeLooks[type] = look
@@ -608,7 +642,7 @@ final class InkController {
         guard force || (lineEnd != line.shownEnd && now - line.shownAt >= 1.0 / 60) else { return }
         let look = StraightStroke.inkType(for: tools.tool).flatMap { strokeLooks[$0] } ?? .plain
         guard let stroke = StraightStroke.make(
-            from: lineStart, to: lineEnd, tools: tools, scale: canvas.drawingScale, look: look
+            from: lineStart, to: lineEnd, tools: tools, widths: settings.widths, scale: canvas.drawingScale, look: look
         ) else { return }
         var drawing = line.before
         drawing.strokes.append(stroke)
@@ -774,7 +808,7 @@ final class InkController {
 
     private func applyTool() {
         guard canDraw else { return }
-        canvas.tool = InkToolFactory.tool(for: tools, scale: canvas.drawingScale)
+        canvas.tool = InkToolFactory.tool(for: tools, widths: settings.widths, scale: canvas.drawingScale)
         // A new tool can bring new gesture recognizers with it.
         canvas.stopDelayingTouches()
     }
@@ -835,8 +869,8 @@ private struct ActiveLine {
 /// PencilKit tools for the toolbar's state.
 enum InkToolFactory {
     /// `scale`: PencilKit units per canvas unit (the widths are in canvas units).
-    static func tool(for state: InkToolState, scale: CGFloat = 1) -> any PKTool {
-        let width = (state.width ?? 1) * scale
+    static func tool(for state: InkToolState, widths: ToolWidths = ToolWidths(), scale: CGFloat = 1) -> any PKTool {
+        let width = (state.width(with: widths) ?? 1) * scale
         // The highlighter's opacity; the other tools are never see-through.
         let color = state.color.uiColor.withAlphaComponent(state.opacity)
         switch state.tool {

@@ -76,6 +76,8 @@ struct PhoneRootView: View {
     let wishlist: WishlistBook
     let appleCalendar: CalendarBook
     let sync: CloudSync
+    let settings: SettingsBook
+    let lock: AppLock
 
     @Environment(\.scenePhase) private var scenePhase
     @State private var now = AppClock.now
@@ -95,9 +97,12 @@ struct PhoneRootView: View {
 
     init(
         ink: InkController, birthdays: BirthdayBook, journal: JournalBook, sketches: SketchBook,
-        lists: ListBook, wishlist: WishlistBook, appleCalendar: CalendarBook, sync: CloudSync
+        lists: ListBook, wishlist: WishlistBook, appleCalendar: CalendarBook, sync: CloudSync,
+        settings: SettingsBook, lock: AppLock
     ) {
         self.ink = ink
+        self.settings = settings
+        self.lock = lock
         self.birthdays = birthdays
         self.journal = journal
         self.sketches = sketches
@@ -172,6 +177,12 @@ struct PhoneRootView: View {
                         .background(Paper.background)
                 }
             }
+            .overlay {
+                // "Lock: journal and sketches": the Journal tab waits for Face ID.
+                if lock.mode == .journal && lock.isLocked {
+                    LockScreen(lock: lock, isWholeApp: false)
+                }
+            }
             if !keyboardShown {
                 PhoneTabBar(tab: tab, onSelect: select)
             }
@@ -197,6 +208,9 @@ struct PhoneRootView: View {
         #endif
         .sheet(item: $sheet) { sheet in
             sheetView(sheet)
+        }
+        .onChange(of: showsNotebook, initial: true) { _, shows in
+            lock.showsNotebook = shows
         }
         .onChange(of: journal.pages.map(\.id)) { _, ids in
             // The journal page being read was deleted on another device: back to the pages.
@@ -227,6 +241,7 @@ struct PhoneRootView: View {
                 sketches.waitUntilSaved()
                 lists.waitUntilSaved()
                 wishlist.waitUntilSaved()
+                settings.waitUntilSaved()
                 AppLog.info("App in background")
             default:
                 break
@@ -250,6 +265,13 @@ struct PhoneRootView: View {
     /// The Month tab always shows its page; the other tabs when a page is being read there.
     private var showsPage: Bool {
         tab == .month || reading[tab] != nil
+    }
+
+    /// The journal's pages or sketches are on screen (the Journal tab, or a day's sketches).
+    private var showsNotebook: Bool {
+        if tab == .journal { return true }
+        if case .sketches? = sheet { return true }
+        return false
     }
 
     /// The page on the canvas (under the other tabs it is whatever was shown last).
@@ -560,7 +582,7 @@ struct PhoneRootView: View {
     private func sheetView(_ sheet: PhoneSheet) -> some View {
         switch sheet {
         case .settings:
-            SettingsView(calendar: appleCalendar, sync: sync)
+            SettingsView(calendar: appleCalendar, sync: sync, settings: settings, ink: ink, lock: lock)
         case .day(let date, let handwriting, let showsWeek):
             PhoneDayView(
                 book: appleCalendar, day: date, now: now,
@@ -582,6 +604,8 @@ struct PhoneRootView: View {
                 inkedLines: ink.inkedLines(of: kind, today: today, locale: AppLocale.current),
                 focusNew: focusNew, title: PlannerPageContent.listTitle(kind)
             )
+        case .sketches where lock.mode == .journal && lock.isLocked:
+            LockScreen(lock: lock, isWholeApp: false)
         case .sketches(let date):
             SketchesView(
                 book: sketches, ink: ink, filterDay: date, canDraw: false, today: today,
