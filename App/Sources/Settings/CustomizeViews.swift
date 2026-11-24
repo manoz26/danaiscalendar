@@ -420,8 +420,8 @@ private struct PaperPreview: View {
         )
         let look = TemplateLook(dark: paper.dark, lineStrength: paper.lineStrength)
         HStack(spacing: 16) {
-            PageThumbnail(template: month, look: look)
-            PageThumbnail(template: journal, look: look)
+            PrintedPage(template: month, look: look)
+            PrintedPage(template: journal, look: look)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Preview of the pages"))
@@ -430,7 +430,7 @@ private struct PaperPreview: View {
 }
 
 /// A printed page, small, drawn by the same renderer as the pages.
-struct PageThumbnail: View {
+struct PrintedPage: View {
     let template: PageTemplate
     let look: TemplateLook
     var width: CGFloat = 150
