@@ -113,7 +113,7 @@ struct MonthLayoutTests {
         let options = MonthLayout(top: nil, left: .memo, right: .custom, rows: 7, titles: ["custom": "Έξοδα"])
         let data = try JSONEncoder().encode(options)
         let text = String(decoding: data, as: UTF8.self)
-        #expect(text.contains(#""top":null"#), text)
+        #expect(text.contains(#""top":null"#), Comment(rawValue: text))
         #expect(try JSONDecoder().decode(MonthLayout.self, from: data) == options)
         // Unknown boxes are the standard ones; missing keys too.
         let odd = #"{"top":"calendar","rows":99}"#
@@ -213,7 +213,7 @@ struct MonthLayoutTests {
         // The standard page writes nothing new.
         let plain = PageMetadata(page: .month(march), layout: .current(for: .month(march)), strokeCount: 0, modified: changed, writtenBy: "test")
         let json = String(decoding: try PageMetadata.makeEncoder().encode(plain), as: UTF8.self)
-        #expect(!json.contains("monthLayout") && !json.contains("layoutChanged"), json)
+        #expect(!json.contains("monthLayout") && !json.contains("layoutChanged"), Comment(rawValue: json))
         // v1 and v2 print the same places: nothing moves.
         let v1 = PageLayoutStamp(name: "month-v1", firstWeekday: .monday)
         #expect(v1 == .current(for: .month(march)))

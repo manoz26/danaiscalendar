@@ -325,10 +325,15 @@ enum TypedListKind: Hashable, Identifiable {
         }
     }
 
-    /// Lines of the printed list.
+    /// Lines of the printed list (of the standard month page; see `lineCount(in:)`).
     var lineCount: Int {
+        lineCount(in: MonthLayouts())
+    }
+
+    /// Lines of the printed list, with her month layouts.
+    func lineCount(in layouts: MonthLayouts) -> Int {
         switch self {
-        case .todo: MonthPageLayout.listRowCount
+        case .todo(let month): layouts.layout(for: month).slot(of: .todo) == nil ? 0 : layouts.layout(for: month).rows
         case .toBuy: ToBuyPageLayout.rowsPerColumn * ToBuyPageLayout.columnCount
         }
     }
@@ -365,6 +370,8 @@ final class ListBook {
     /// Deleted items of each list (for iCloud).
     @ObservationIgnored private var todoTombstones: [Tombstone]
     @ObservationIgnored private var toBuyTombstones: [Tombstone]
+    /// Her month pages: how many to-do lines each month has (Settings → Month page).
+    @ObservationIgnored var monthLayouts = MonthLayouts()
 
     init(folder: URL = ListsFolder.url) {
         todoSaver = JSONSaver(folder: folder, fileName: ListFile.todoFileName)
@@ -465,7 +472,7 @@ final class ListBook {
     func add(_ text: String, to list: TypedListKind, inkedLines: Set<Int>) -> ListItem? {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
-        let line = TypedLists.freeLine(count: list.lineCount, items: items(list), inked: inkedLines)
+        let line = TypedLists.freeLine(count: list.lineCount(in: monthLayouts), items: items(list), inked: inkedLines)
         var item = ListItem(text: trimmed, line: line)
         if case .todo(let month) = list {
             item.month = month

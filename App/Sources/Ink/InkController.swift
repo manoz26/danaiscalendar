@@ -172,7 +172,13 @@ final class InkController {
     /// nothing unless the page (or its printed template, e.g. at midnight) changed.
     func show(_ content: PlannerPageContent) {
         if content.page == page {
-            if content.template != template {
+            if content.layout != layout {
+                // Her month page changed while it is open: the ink moves with its boxes.
+                finishLine()
+                layout = content.layout
+                setTemplate(content)
+                putInkOnCanvas(resetZoom: false)
+            } else if content.template != template {
                 setTemplate(content)
             }
             return

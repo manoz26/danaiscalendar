@@ -53,10 +53,12 @@ struct DanaisCalendarApp: App {
         #endif
         journal.newPaper = settings.settings.paper
         let lock = AppLock(mode: settings.settings.lock)
-        settings.onChange = { [weak ink, weak journal, weak lock] new in
+        lists.monthLayouts = settings.settings.monthLayouts
+        settings.onChange = { [weak ink, weak journal, weak lock, weak lists] new in
             ink?.apply(new)
             journal?.newPaper = new.paper
             lock?.mode = new.lock
+            lists?.monthLayouts = new.monthLayouts
         }
         _settings = State(initialValue: settings)
         _lock = State(initialValue: lock)

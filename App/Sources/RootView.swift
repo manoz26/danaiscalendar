@@ -238,7 +238,8 @@ struct RootView: View {
             toBuy: lists.toBuy,
             inkedWeeks: ink.inkedWeeks,
             events: pageEvents,
-            eventClock: EventClock.current
+            eventClock: EventClock.current,
+            monthLayouts: settings.settings.monthLayouts
         )
     }
 

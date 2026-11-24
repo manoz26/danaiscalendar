@@ -70,6 +70,15 @@ struct SettingsView: View {
                     }
                     .accessibilityIdentifier("settings.paper")
                     .listRowBackground(Paper.background)
+                    NavigationLink {
+                        MonthLayoutSettingsView(settings: settings)
+                    } label: {
+                        Text("Month page")
+                            .font(.inter(.regular, size: 17, relativeTo: .body))
+                            .foregroundStyle(Paper.ink)
+                    }
+                    .accessibilityIdentifier("settings.month")
+                    .listRowBackground(Paper.background)
                 } header: {
                     CapsLabel("Pages")
                 }

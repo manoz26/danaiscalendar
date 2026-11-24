@@ -61,6 +61,13 @@ final class CustomizeTests: XCTestCase {
         settle()
         save(app, "el-portrait-settings-paper-dark")
         app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        // Settings → Month page, with its preview.
+        tap(app, "settings.month")
+        XCTAssertTrue(element(app, "month.preview").waitForExistence(timeout: 10), "No preview of the month page")
+        settle()
+        save(app, "el-portrait-settings-month")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
         tap(app, "settings.done")
 
         // The month page is dark now, and the toolbar has no pencil.
@@ -110,6 +117,44 @@ final class CustomizeTests: XCTestCase {
         save(app, "en-landscape-month-dark-ink")
         XCUIDevice.shared.orientation = .portrait
         waitForOrientation(app, landscape: false)
+    }
+
+    /// Her month page: the ink moves with its boxes, and a hidden box gets its ink back.
+    @MainActor
+    func testMonthLayoutMovesTheInkEnglish() throws {
+        guard isPad else { throw XCTSkip("Ink is written on the iPad.") }
+        continueAfterFailure = false
+        XCUIDevice.shared.orientation = .portrait
+        let page = ["-DCOpenPage", "month:2029-03", "-DCToday", "2029-03-21"]
+        var app = launch(language: "en", region: "US", extraArguments: page + ["-DCSampleInk", "YES"])
+        waitForOrientation(app, landscape: false)
+        waitForPage(app, "2029-03")
+        settle(1.5)
+        checkInk(app, page: "page.month", targets: ["section.goals", "day.2029-03-03", "day.2029-03-15", "section.todo", "section.memo"], minimum: 4)
+        save(app, "en-portrait-month-layout-before")
+        settle(1.5)
+        app.terminate()
+
+        // The notes above the days ("Ideas"), the to-do list alone under them with 12 lines, no goals.
+        app = launch(language: "en", region: "US", extraArguments: page + ["-DCMonthLayout", "test"], reset: false)
+        waitForPage(app, "2029-03")
+        settle(1.5)
+        XCTAssertFalse(element(app, "section.goals").exists, "The goals were hidden")
+        for target in ["section.memo", "section.todo", "day.2029-03-03", "day.2029-03-15"] {
+            let box = element(app, target)
+            XCTAssertTrue(box.waitForExistence(timeout: 5), "\(target) is not on the page")
+            XCTAssertNotNil(redBounds(app, in: box.frame.insetBy(dx: 1, dy: 1)), "The ink did not move into \(target)")
+        }
+        save(app, "en-portrait-month-layout-after")
+        settle(1.5)
+        app.terminate()
+
+        // Back to the usual page: the goals' ink is back exactly where it was.
+        app = launch(language: "en", region: "US", extraArguments: page + ["-DCMonthLayout", "standard"], reset: false)
+        waitForPage(app, "2029-03")
+        settle(1.5)
+        checkInk(app, page: "page.month", targets: ["section.goals"], minimum: 1)
+        save(app, "en-portrait-month-layout-back")
     }
 
     @MainActor

@@ -56,6 +56,12 @@ final class SettingsBook {
         set(.lock, lock == .off ? nil : lock)
     }
 
+    /// Her month pages. Kept even when back to the usual page: the date of that choice
+    /// decides which layout a page written on two devices ends up on.
+    func setMonthLayouts(_ layouts: MonthLayouts) {
+        set(.monthLayouts, layouts.entries.isEmpty ? nil : layouts)
+    }
+
     /// Settings back to the defaults ("Reset" of a section), on every device.
     func reset(_ keys: [SettingKey]) {
         for key in keys {
@@ -170,6 +176,17 @@ final class SettingsBook {
         if let strength = LaunchOptions.lineStrength { paper.lineStrength = strength }
         setPaper(paper)
         if let lock = LaunchOptions.lockMode { setLock(lock) }
+        if let name = LaunchOptions.monthLayout {
+            var layouts = settings.monthLayouts
+            switch name {
+            case "test":
+                // The notes above the days, the to-do list alone under them with 12 lines, goals hidden.
+                layouts.set(MonthLayout(top: .memo, left: .todo, right: nil, rows: 12, titles: ["memo": "Ideas"]), from: nil)
+            default:
+                layouts.set(.standard, from: nil)
+            }
+            setMonthLayouts(layouts)
+        }
     }
     #endif
 }

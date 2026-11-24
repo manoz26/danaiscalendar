@@ -14,6 +14,8 @@ struct PlannerData: Equatable {
     var inkedWeeks: Set<PlannerWeek> = []
     var events: [CalendarEvent] = []
     var eventClock: EventClock = .standard
+    /// Her month pages (Settings → Month page).
+    var monthLayouts = MonthLayouts()
 }
 
 /// What one planner page shows: its printed template, and the parts VoiceOver and the
@@ -34,7 +36,7 @@ struct PlannerPageContent: Equatable {
     /// `month` is the month she is in: a week page prints the days of other months in grey.
     init(page: PlannerPage, today: PlannerDate, locale: Locale, data: PlannerData = PlannerData(), month: YearMonth? = nil) {
         self.page = page
-        layout = PageLayoutStamp.current(for: page)
+        layout = PageLayoutStamp.current(for: page, monthLayouts: data.monthLayouts)
         switch page {
         case .year(let year):
             let eventDays = EventLayout.days(
@@ -48,13 +50,14 @@ struct PlannerPageContent: Equatable {
             accessibilityItems = Self.yearItems(year: year, template: template, locale: locale)
         case .month(let month):
             let notes = Self.birthdayNotes(for: month, in: data.birthdays)
-            let todos = TypedLists.printed(data.todos.filter { $0.month == month }, lineCount: MonthPageLayout.listRowCount)
+            let options = data.monthLayouts.layout(for: month)
+            let todos = TypedLists.printed(data.todos.filter { $0.month == month }, lineCount: options.rows)
             let pinned = Sketch.pinned(data.sketches)
             let inkedWeeks = Set(PlannerWeek.weeks(of: month).enumerated()
                 .filter { data.inkedWeeks.contains($0.element) }
                 .map { $0.offset + 1 })
             template = MonthPageTemplate.make(
-                month: month, locale: locale, labels: Self.labels, today: today, birthdays: notes,
+                month: month, layout: options, locale: locale, labels: Self.labels, today: today, birthdays: notes,
                 journalDays: data.journal.datedDays, sketchDays: Set(pinned.keys),
                 todos: todos.items, todoOverflow: todos.overflow, inkedWeeks: inkedWeeks,
                 events: data.events, eventClock: data.eventClock
@@ -63,7 +66,7 @@ struct PlannerPageContent: Equatable {
             let name = "\(MonthTitle.text(for: month, locale: locale)) \(month.year)"
             accessibilityLabel = String(localized: "Month page for \(name)", comment: "VoiceOver: the month page, e.g. 'Month page for NOVEMBER 2026'.")
             accessibilityItems = Self.monthItems(
-                month: month, template: template, locale: locale, birthdays: notes,
+                month: month, options: options, template: template, locale: locale, birthdays: notes,
                 journalDays: data.journal.datedDays, pinned: pinned, todos: todos.items, inkedWeeks: inkedWeeks,
                 events: data.events, clock: data.eventClock
             )
@@ -145,14 +148,15 @@ struct PlannerPageContent: Equatable {
             goals: String(localized: "Goals", comment: "Label of the goals box on the month page."),
             todo: String(localized: "To do list", comment: "Label of the to-do list on the month page."),
             memo: String(localized: "Memo", comment: "Label of the memo box on the month page."),
-            weekly: String(localized: "Weekly", comment: "Label before the buttons 1-6 that open the weekly pages.")
+            weekly: String(localized: "Weekly", comment: "Label before the buttons 1-6 that open the weekly pages."),
+            custom: String(localized: "Extra", comment: "Label of her own box on the month page, when she gave it no title.")
         )
     }
 
     // MARK: - Accessibility
 
     private static func monthItems(
-        month: YearMonth, template: PageTemplate, locale: Locale, birthdays: [BirthdayNote],
+        month: YearMonth, options: MonthLayout, template: PageTemplate, locale: Locale, birthdays: [BirthdayNote],
         journalDays: Set<PlannerDate>, pinned: [PlannerDate: [Sketch]], todos: [PrintedItem], inkedWeeks: Set<Int>,
         events: [CalendarEvent], clock: EventClock
     ) -> [PageAccessibilityItem] {
@@ -191,7 +195,9 @@ struct PlannerPageContent: Equatable {
                 traits: .staticText
             ))
         }
-        addSection(.goals, labels.goals)
+        for kind in [MonthBoxKind.goals, .custom] where options.slot(of: kind) == .top {
+            addSection(kind.section, labels.label(of: kind, in: options))
+        }
         let days = DayNames(locale: locale)
         for region in template.regions {
             guard case .day(let date) = region.id else { continue }
@@ -218,12 +224,16 @@ struct PlannerPageContent: Equatable {
                 traits: .staticText
             ))
         }
-        addSection(.todo, labels.todo)
-        addSection(.memo, labels.memo)
+        for slot in [MonthSlot.top, .left, .right] {
+            guard let kind = options.kind(in: slot), slot != .top || kind == .memo else { continue }
+            addSection(kind.section, labels.label(of: kind, in: options))
+        }
 
-        // The birthdays printed in the notes, one item per line.
-        let memo = MonthPageLayout(month: month).memo
-        let (slots, shown) = MonthPageTemplate.birthdaySlots(count: birthdays.count, in: memo)
+        // The birthdays printed in the notes (under the grid), one item per line.
+        let memoBox = MonthPageLayout(month: month, layout: options).box(.memo)
+        let memo = memoBox.section
+        let (slots, shown) = memoBox.isShown && memoBox.slot != .top
+            ? MonthPageTemplate.birthdaySlots(count: birthdays.count, in: memo) : ([], 0)
         for (index, (note, slot)) in zip(birthdays.prefix(shown), slots).enumerated() {
             items.append(PageAccessibilityItem(
                 identifier: "memo.birthday.\(index + 1)",
@@ -567,6 +577,11 @@ enum LaunchOptions {
     /// `-DCLock app|journal`: the lock on, as if she had turned it on (`AppLock`).
     static var lockMode: LockMode? {
         value(after: "-DCLock").flatMap(LockMode.init(rawValue:))
+    }
+
+    /// `-DCMonthLayout test|standard`: her month page for every month (`SettingsBook`).
+    static var monthLayout: String? {
+        value(after: "-DCMonthLayout")
     }
 
     /// `-DCUnlock yes|no`: Face ID always works (or never does), without the system's sheet.

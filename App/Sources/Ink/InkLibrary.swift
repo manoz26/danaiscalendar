@@ -15,6 +15,14 @@ struct AppliedPage: Sendable {
     let data: Data
     /// The file is now exactly the other version (nothing here was missing from it).
     let replaced: Bool
+    /// The layout the file's ink is on now.
+    let stamp: PageLayoutStamp?
+}
+
+/// A page read from its file: the ink, and the layout it was written on (`nil`: no file).
+struct LoadedPage: @unchecked Sendable {
+    let drawing: PKDrawing
+    let stamp: PageLayoutStamp?
 }
 
 /// Reads and writes page files one at a time, off the main thread.
@@ -33,17 +41,22 @@ final class PageFiles: Sendable {
     /// Reads a page now, after any pending save. Never fails: an unreadable file is
     /// logged and set aside (kept, not deleted), and the page starts empty.
     func loadNow(_ page: PlannerPage) -> PKDrawing {
+        loadPageNow(page).drawing
+    }
+
+    /// Like `loadNow`, with the layout the ink was written on.
+    func loadPageNow(_ page: PlannerPage) -> LoadedPage {
         let store = store
-        return queue.sync { Self.read(page, from: store) }.drawing
+        return queue.sync { Self.readPage(page, from: store) }
     }
 
     /// Reads a page in the background and hands it to the main thread.
-    func load(_ page: PlannerPage, then completion: @escaping @MainActor @Sendable (DrawingBox) -> Void) {
+    func load(_ page: PlannerPage, then completion: @escaping @MainActor @Sendable (LoadedPage) -> Void) {
         let store = store
         queue.async {
-            let box = Self.read(page, from: store)
+            let loaded = Self.readPage(page, from: store)
             DispatchQueue.main.async {
-                MainActor.assumeIsolated { completion(box) }
+                MainActor.assumeIsolated { completion(loaded) }
             }
         }
     }
@@ -142,23 +155,22 @@ final class PageFiles: Sendable {
     private static func applyNow(
         _ data: Data, theirs: DrawingBox, to page: PlannerPage, replacing expected: String?, writtenBy: String, store: LocalPageStore
     ) throws -> AppliedPage {
+        let theirStamp = (try? PageFile(decoding: data))?.metadata.stamp
         guard let local = try store.data(of: page) else {
             try store.save(data: data, for: page)
-            return AppliedPage(drawing: theirs, data: data, replaced: true)
+            return AppliedPage(drawing: theirs, data: data, replaced: true, stamp: theirStamp)
         }
         if let expected, ContentHash.of(local) == expected {
             try store.save(data: data, for: page)
-            return AppliedPage(drawing: theirs, data: data, replaced: true)
+            return AppliedPage(drawing: theirs, data: data, replaced: true, stamp: theirStamp)
         }
-        let mine: PKDrawing
-        let layout: PageLayoutStamp
+        var mine: PKDrawing
+        var theirs = theirs
+        var layout: PageLayoutStamp
         do {
             let file = try PageFile(decoding: local)
             mine = try PKDrawing(data: file.drawing)
-            layout = PageLayoutStamp(
-                name: file.metadata.layout,
-                firstWeekday: Weekday(key: file.metadata.firstWeekday) ?? .defaultFirst
-            )
+            layout = file.metadata.stamp
         } catch {
             // Unreadable here: kept aside (never deleted), and the other version is taken.
             AppLog.error("Could not read page \(page.fileStem) to merge it", error)
@@ -166,27 +178,37 @@ final class PageFiles: Sendable {
                 AppLog.warning("Kept the unreadable file as \(kept.lastPathComponent)")
             }
             try store.save(data: data, for: page)
-            return AppliedPage(drawing: theirs, data: data, replaced: true)
+            return AppliedPage(drawing: theirs, data: data, replaced: true, stamp: theirStamp)
+        }
+        // Written on two layouts of her month page: both on the one chosen later, then joined.
+        if let theirStamp, theirStamp != layout {
+            let later = PageLayoutStamp.later(layout, theirStamp)
+            if later == theirStamp {
+                mine = InkLibrary.migrated(mine, page: page, from: layout, to: theirStamp) ?? mine
+            } else {
+                theirs = DrawingBox(drawing: InkLibrary.migrated(theirs.drawing, page: page, from: theirStamp, to: layout) ?? theirs.drawing)
+            }
+            layout = later
         }
         let merged = InkMerge.union(mine, theirs.drawing)
-        if InkMerge.sameStrokes(merged, theirs.drawing) {
+        if InkMerge.sameStrokes(merged, theirs.drawing), layout == theirStamp ?? layout {
             try store.save(data: data, for: page)
-            return AppliedPage(drawing: theirs, data: data, replaced: true)
+            return AppliedPage(drawing: theirs, data: data, replaced: true, stamp: theirStamp)
         }
-        if InkMerge.sameStrokes(merged, mine) {
-            return AppliedPage(drawing: DrawingBox(drawing: mine), data: local, replaced: false)
+        if InkMerge.sameStrokes(merged, mine), let localStamp = try? PageFile(decoding: local).metadata.stamp, localStamp == layout {
+            return AppliedPage(drawing: DrawingBox(drawing: mine), data: local, replaced: false, stamp: layout)
         }
         let metadata = PageMetadata(page: page, layout: layout, strokeCount: merged.strokes.count, modified: Date(), writtenBy: writtenBy)
         let encoded = try PageFile(metadata: metadata, drawing: merged.dataRepresentation()).encoded()
         try store.save(data: encoded, for: page)
         AppLog.info("Page \(page.fileStem): strokes of both versions kept (\(mine.strokes.count) here, \(theirs.drawing.strokes.count) there, \(merged.strokes.count) now)")
-        return AppliedPage(drawing: DrawingBox(drawing: merged), data: encoded, replaced: false)
+        return AppliedPage(drawing: DrawingBox(drawing: merged), data: encoded, replaced: false, stamp: layout)
     }
 
-    private static func read(_ page: PlannerPage, from store: LocalPageStore) -> DrawingBox {
+    private static func readPage(_ page: PlannerPage, from store: LocalPageStore) -> LoadedPage {
         do {
-            guard let file = try store.load(page) else { return DrawingBox(drawing: PKDrawing()) }
-            return DrawingBox(drawing: try PKDrawing(data: file.drawing))
+            guard let file = try store.load(page) else { return LoadedPage(drawing: PKDrawing(), stamp: nil) }
+            return LoadedPage(drawing: try PKDrawing(data: file.drawing), stamp: file.metadata.stamp)
         } catch {
             AppLog.error("Could not read page \(page.fileStem)", error)
             do {
@@ -196,7 +218,7 @@ final class PageFiles: Sendable {
             } catch {
                 AppLog.error("Could not set aside the unreadable page \(page.fileStem)", error)
             }
-            return DrawingBox(drawing: PKDrawing())
+            return LoadedPage(drawing: PKDrawing(), stamp: nil)
         }
     }
 
@@ -271,8 +293,10 @@ final class InkLibrary {
     func drawing(for page: PlannerPage, scale: CGFloat = 1, layout: PageLayoutStamp) -> PKDrawing {
         current = page
         if entries[page] == nil {
-            entries[page] = Entry(drawing: files.loadNow(page), layout: layout)
+            let loaded = files.loadPageNow(page)
+            entries[page] = Entry(drawing: loaded.drawing, layout: loaded.stamp ?? layout)
         }
+        moveInk(of: page, to: layout)
         touch(page)
         trimCache()
         guard let entry = entries[page] else { return PKDrawing() }
@@ -324,13 +348,14 @@ final class InkLibrary {
     func preload(_ pages: [PlannerPage]) {
         for page in pages where entries[page] == nil && !loading.contains(page) {
             loading.insert(page)
-            let layout = PageLayoutStamp.current(for: page)
-            files.load(page) { [weak self] box in
+            files.load(page) { [weak self] loaded in
                 guard let self else { return }
                 self.loading.remove(page)
                 // Opened (or written on) in the meantime: that version is newer.
                 guard self.entries[page] == nil else { return }
-                self.entries[page] = Entry(drawing: box.drawing, layout: layout, lastUse: self.useCounter)
+                // On the layout it was written on; it moves to hers when it opens.
+                let layout = loaded.stamp ?? PageLayoutStamp.current(for: page)
+                self.entries[page] = Entry(drawing: loaded.drawing, layout: layout, lastUse: self.useCounter)
                 self.trimCache()
             }
         }
@@ -346,15 +371,21 @@ final class InkLibrary {
         let before = start.map { Self.rescaled($0.drawing, from: $0.scale, to: 1) }
         let wasClean = !(start?.isDirty ?? false)
         let savesBefore = saveCount[page] ?? 0
-        let applied = try await files.apply(
+        let appliedFile = try await files.apply(
             data, theirs: theirs, to: page, replacing: wasClean ? expected : nil, writtenBy: writtenBy
         )
         let savedMeanwhile = (saveCount[page] ?? 0) != savesBefore
         guard var entry = entries[page] else {
-            onInkChange?(page, !applied.drawing.drawing.strokes.isEmpty)
-            return applied.data
+            onInkChange?(page, !appliedFile.drawing.drawing.strokes.isEmpty)
+            return appliedFile.data
         }
         let now = Self.rescaled(entry.drawing, from: entry.scale, to: 1)
+        // The other version on the layout in use here (her month page as this device has it).
+        var applied = appliedFile
+        if let stamp = applied.stamp, stamp != entry.layout,
+           let moved = Self.migrated(applied.drawing.drawing, page: page, from: stamp, to: entry.layout) {
+            applied = AppliedPage(drawing: DrawingBox(drawing: moved), data: applied.data, replaced: applied.replaced, stamp: entry.layout)
+        }
         let merged: PKDrawing
         if let before {
             // Nothing unsaved here and the file became the other version: what was erased
@@ -381,6 +412,40 @@ final class InkLibrary {
         }
         onInkChange?(page, !merged.strokes.isEmpty)
         return applied.data
+    }
+
+    /// Her month page changed (or the page was written on another layout): every stroke
+    /// moves with its box, day or line (`LayoutMigration`), and the page is saved on the new
+    /// layout. Hidden boxes keep their ink off the page until they come back.
+    private func moveInk(of page: PlannerPage, to layout: PageLayoutStamp) {
+        guard var entry = entries[page], entry.layout != layout else { return }
+        let canvasUnits = Self.rescaled(entry.drawing, from: entry.scale, to: 1)
+        if let moved = Self.migrated(canvasUnits, page: page, from: entry.layout, to: layout) {
+            entry.drawing = moved
+            entry.scale = 1
+            if entry.dirtySince == nil {
+                entry.dirtySince = Date()
+            }
+            entries[page] = entry
+            scheduleSave(page)
+        }
+        entries[page]?.layout = layout
+    }
+
+    /// The ink of a page moved from one layout to another (canvas units), or `nil` when no
+    /// stroke moves.
+    nonisolated static func migrated(_ drawing: PKDrawing, page: PlannerPage, from old: PageLayoutStamp, to new: PageLayoutStamp) -> PKDrawing? {
+        guard !drawing.strokes.isEmpty,
+              let transforms = old.migration(to: new, page: page, strokeBounds: drawing.strokes.map(\.renderBounds)) else { return nil }
+        var strokes = drawing.strokes
+        var count = 0
+        for (index, transform) in transforms.enumerated() {
+            guard let transform else { continue }
+            strokes[index].transform = strokes[index].transform.concatenating(transform)
+            count += 1
+        }
+        AppLog.info("Page \(page.fileStem): \(count) of \(strokes.count) strokes moved to the new layout")
+        return PKDrawing(strokes: strokes)
     }
 
     /// Whether a page's ink is in memory and not saved yet.

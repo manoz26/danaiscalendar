@@ -217,6 +217,24 @@
         }
       }
     },
+    "Above the days" : {
+      "comment" : "Settings → Month page: header of the box above the day grid.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πάνω από τις μέρες"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Above the days"
+          }
+        }
+      }
+    },
     "Add" : {
       "comment" : "Saves a new event.",
       "extractionState" : "manual",
@@ -415,6 +433,24 @@
         }
       }
     },
+    "All months" : {
+      "comment" : "Settings → Month page: use the layout for every month.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Όλους τους μήνες"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All months"
+          }
+        }
+      }
+    },
     "All pages" : {
       "comment" : "Top bar button on a journal page: all the journal's pages as small pictures.",
       "extractionState" : "manual",
@@ -559,6 +595,42 @@
         }
       }
     },
+    "Back to the usual page" : {
+      "comment" : "Settings → Month page: the standard layout for every month.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επιστροφή στη συνηθισμένη σελίδα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back to the usual page"
+          }
+        }
+      }
+    },
+    "Back to the usual page?" : {
+      "comment" : "Confirmation title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επιστροφή στη συνηθισμένη σελίδα;"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back to the usual page?"
+          }
+        }
+      }
+    },
     "Back to the year" : {
       "comment" : "Button at the top left of a month page that opens the year page.",
       "extractionState" : "manual",
@@ -681,6 +753,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Blue"
+          }
+        }
+      }
+    },
+    "Box" : {
+      "comment" : "Settings → Month page: which box is above the days.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κουτί"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Box"
           }
         }
       }
@@ -1405,6 +1495,24 @@
         }
       }
     },
+    "Empty: the usual name." : {
+      "comment" : "Settings → Month page: footer of the titles.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κενό: το συνηθισμένο όνομα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empty: the usual name."
+          }
+        }
+      }
+    },
     "Ends" : {
       "comment" : "Event form: the end.",
       "extractionState" : "manual",
@@ -1693,6 +1801,24 @@
         }
       }
     },
+    "Extra" : {
+      "comment" : "Label of her own box on the month page, when she gave it no title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επιπλέον"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extra"
+          }
+        }
+      }
+    },
     "Faint" : {
       "comment" : "Settings → Paper: faint printed lines.",
       "extractionState" : "manual",
@@ -1761,6 +1887,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Goals"
+          }
+        }
+      }
+    },
+    "Goals above the days, the to-do list and the notes under them with 9 lines, for every month." : {
+      "comment" : "Confirmation of going back to the standard month page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Στόχοι πάνω από τις μέρες, η λίστα «Να κάνω» και οι σημειώσεις από κάτω με 9 γραμμές, για όλους τους μήνες."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Goals above the days, the to-do list and the notes under them with 9 lines, for every month."
           }
         }
       }
@@ -2251,6 +2395,24 @@
         }
       }
     },
+    "Lines: %lld" : {
+      "comment" : "Settings → Month page: how many ruled lines the lists under the days have.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Γραμμές: %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lines: %lld"
+          }
+        }
+      }
+    },
     "Lists" : {
       "comment" : "iPhone tab: to buy, to do, birthdays and the wishlist.",
       "extractionState" : "manual",
@@ -2445,6 +2607,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Month"
+          }
+        }
+      }
+    },
+    "Month page" : {
+      "comment" : "Settings: the screen of her month page layout.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σελίδα μήνα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Month page"
           }
         }
       }
@@ -3151,6 +3331,24 @@
         }
       }
     },
+    "Nothing" : {
+      "comment" : "Settings → Month page: no box in this place.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τίποτα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing"
+          }
+        }
+      }
+    },
     "Nothing here yet. Type below to add." : {
       "comment" : "iPhone: an empty typed list.",
       "extractionState" : "manual",
@@ -3309,6 +3507,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Other"
+          }
+        }
+      }
+    },
+    "Own box" : {
+      "comment" : "Settings → Month page: her own box, with her own title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Δικό μου κουτί"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Own box"
           }
         }
       }
@@ -3633,6 +3849,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pinned sketches: %lld"
+          }
+        }
+      }
+    },
+    "Preview of the month page" : {
+      "comment" : "VoiceOver: the small month page in Settings → Month page.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προεπισκόπηση της σελίδας μήνα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preview of the month page"
           }
         }
       }
@@ -4969,6 +5203,24 @@
         }
       }
     },
+    "This month and the next ones" : {
+      "comment" : "Settings → Month page: use the layout from the current month on.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αυτόν τον μήνα και τους επόμενους"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This month and the next ones"
+          }
+        }
+      }
+    },
     "Ticked" : {
       "comment" : "VoiceOver: a typed to-do or thing to buy is ticked (done).",
       "extractionState" : "manual",
@@ -5001,6 +5253,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Title"
+          }
+        }
+      }
+    },
+    "Titles" : {
+      "comment" : "Settings → Month page: her titles of the boxes.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τίτλοι"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Titles"
           }
         }
       }
@@ -5275,6 +5545,24 @@
         }
       }
     },
+    "Under the days" : {
+      "comment" : "Settings → Month page: header of the lists under the day grid.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κάτω από τις μέρες"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Under the days"
+          }
+        }
+      }
+    },
     "Undo" : {
       "comment" : "Toolbar: undo the last change to the ink (VoiceOver).",
       "extractionState" : "manual",
@@ -5379,6 +5667,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Up to date"
+          }
+        }
+      }
+    },
+    "Use it for" : {
+      "comment" : "Settings → Month page: header of the two ways to use the layout.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Να ισχύει για"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use it for"
           }
         }
       }
@@ -5703,6 +6009,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Your Apple Calendar in the planner"
+          }
+        }
+      }
+    },
+    "Your handwriting moves with its box, day or line. A box you hide keeps its handwriting and gets it back when you show it again." : {
+      "comment" : "Settings → Month page: what happens to the handwriting.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το χειρόγραφό σου μετακινείται μαζί με το κουτί, τη μέρα ή τη γραμμή του. Ένα κουτί που κρύβεις κρατάει το χειρόγραφό του και το ξαναβρίσκει όταν το ξαναεμφανίσεις."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your handwriting moves with its box, day or line. A box you hide keeps its handwriting and gets it back when you show it again."
           }
         }
       }

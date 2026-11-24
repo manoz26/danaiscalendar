@@ -300,7 +300,8 @@ struct PhoneRootView: View {
             toBuy: lists.toBuy,
             inkedWeeks: ink.inkedWeeks,
             events: events(on: page),
-            eventClock: EventClock.current
+            eventClock: EventClock.current,
+            monthLayouts: settings.settings.monthLayouts
         )
     }
 
@@ -847,7 +848,7 @@ extension InkController {
     /// The lines of a typed list's page that have handwriting: a new typed item never
     /// takes one of them.
     func inkedLines(of list: TypedListKind, today: PlannerDate, locale: Locale) -> Set<Int> {
-        let template = PlannerPageContent(page: list.page, today: today, locale: locale).template
+        let template = PlannerPageContent(page: list.page, today: today, locale: locale, data: PlannerData(monthLayouts: settings.monthLayouts)).template
         return Set(inkedRegions(of: list.page, template: template).compactMap { list.line(of: $0) })
     }
 }
