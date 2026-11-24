@@ -19,6 +19,8 @@ public struct JournalPage: Codable, Sendable, Hashable, Identifiable {
     /// and a long press on the day opens its page. `nil`: a page without a date.
     public var date: PlannerDate?
     public var paper: PaperStyle
+    /// The spacing of the paper's lines, squares or dots (`nil`: normal, as before prompt 9).
+    public var spacing: LineSpacing?
     public var created: Date
     public var modified: Date
     /// Its place in the journal: pages are in the order of their positions. A moved page
@@ -29,18 +31,22 @@ public struct JournalPage: Codable, Sendable, Hashable, Identifiable {
 
     public init(
         id: UUID = UUID(), title: String = "", date: PlannerDate?, paper: PaperStyle = .defaultStyle,
-        created: Date = Date(), modified: Date? = nil, position: Double? = nil
+        spacing: LineSpacing? = nil, created: Date = Date(), modified: Date? = nil, position: Double? = nil
     ) {
         self.id = id
         self.title = title
         self.date = date
         self.paper = paper
+        self.spacing = spacing == .normal ? nil : spacing
         self.created = created
         self.modified = modified ?? created
         self.position = position
     }
 
     public var page: PlannerPage { .journal(id) }
+
+    /// The paper's spacing (normal when the file has none).
+    public var lineSpacing: LineSpacing { spacing ?? .normal }
 
     /// The title without spaces or new lines at the ends, on one line.
     public var trimmedTitle: String {

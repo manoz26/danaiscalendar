@@ -196,7 +196,7 @@ struct InkToolbarOverlay: View {
 
     private func colorButton(_ index: Int) -> some View {
         let color = InkPalette.colors[index]
-        let selected = ink.tools.colorIndex == index
+        let selected = ink.tools.colorIndex(in: InkPalette.colors) == index
         return Button {
             ink.selectColor(index)
         } label: {

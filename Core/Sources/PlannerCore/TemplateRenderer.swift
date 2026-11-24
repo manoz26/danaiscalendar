@@ -11,17 +11,17 @@ import Foundation
 /// Safe to call from any thread.
 public enum TemplateRenderer {
     /// Paints the paper and the template at `scale` (device units per canvas unit).
-    public static func drawPage(_ template: PageTemplate, in context: CGContext, scale: CGFloat) {
+    public static func drawPage(_ template: PageTemplate, in context: CGContext, scale: CGFloat, look: TemplateLook = .standard) {
         context.saveGState()
         defer { context.restoreGState() }
         context.scaleBy(x: scale, y: scale)
-        context.setFillColor(Tone.paper.cgColor)
+        context.setFillColor(look.color(.paper))
         context.fill(CGRect(origin: .zero, size: PageCanvas.size))
-        draw(template, in: context)
+        draw(template, in: context, look: look)
     }
 
     /// Draws the template's shapes; the context is already in canvas units.
-    public static func draw(_ template: PageTemplate, in context: CGContext) {
+    public static func draw(_ template: PageTemplate, in context: CGContext, look: TemplateLook = .standard) {
         context.saveGState()
         defer { context.restoreGState() }
         context.setShouldAntialias(true)
@@ -30,14 +30,14 @@ public enum TemplateRenderer {
         context.setLineCap(.butt)
         let visible = context.boundingBoxOfClipPath
         for shape in template.shapes where bounds(of: shape).intersects(visible) {
-            draw(shape, in: context)
+            draw(shape, in: context, look: look)
         }
     }
 
-    static func draw(_ shape: TemplateShape, in context: CGContext) {
+    static func draw(_ shape: TemplateShape, in context: CGContext, look: TemplateLook = .standard) {
         switch shape {
         case let .line(from, to, width, tone):
-            context.setStrokeColor(tone.cgColor)
+            context.setStrokeColor(look.color(tone))
             context.setLineWidth(width)
             context.move(to: from)
             context.addLine(to: to)
@@ -47,26 +47,28 @@ public enum TemplateRenderer {
             let path = cornerRadius > 0
                 ? CGPath(roundedRect: rect, cornerWidth: cornerRadius, cornerHeight: cornerRadius, transform: nil)
                 : CGPath(rect: rect, transform: nil)
-            fillAndStroke(path, fill: fill, stroke: stroke, lineWidth: lineWidth, in: context)
+            fillAndStroke(path, fill: fill, stroke: stroke, lineWidth: lineWidth, in: context, look: look)
 
         case let .circle(center, radius, fill, stroke, lineWidth):
             let rect = CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2)
-            fillAndStroke(CGPath(ellipseIn: rect, transform: nil), fill: fill, stroke: stroke, lineWidth: lineWidth, in: context)
+            fillAndStroke(CGPath(ellipseIn: rect, transform: nil), fill: fill, stroke: stroke, lineWidth: lineWidth, in: context, look: look)
 
         case let .text(text):
-            draw(text, in: context)
+            draw(text, in: context, look: look)
         }
     }
 
-    private static func fillAndStroke(_ path: CGPath, fill: Tone?, stroke: Tone?, lineWidth: CGFloat, in context: CGContext) {
+    private static func fillAndStroke(
+        _ path: CGPath, fill: Tone?, stroke: Tone?, lineWidth: CGFloat, in context: CGContext, look: TemplateLook
+    ) {
         if let fill {
             context.addPath(path)
-            context.setFillColor(fill.cgColor)
+            context.setFillColor(look.color(fill))
             context.fillPath()
         }
         if let stroke, lineWidth > 0 {
             context.addPath(path)
-            context.setStrokeColor(stroke.cgColor)
+            context.setStrokeColor(look.color(stroke))
             context.setLineWidth(lineWidth)
             context.strokePath()
         }
@@ -74,8 +76,8 @@ public enum TemplateRenderer {
 
     // MARK: - Text
 
-    static func draw(_ text: TemplateText, in context: CGContext) {
-        let line = makeLine(text)
+    static func draw(_ text: TemplateText, in context: CGContext, look: TemplateLook = .standard) {
+        let line = makeLine(text, look: look)
         let x: CGFloat = switch text.alignment {
         case .left: text.anchor.x
         case .center: text.anchor.x - width(of: line, text) / 2
@@ -100,11 +102,11 @@ public enum TemplateRenderer {
         return max(0, typographic - text.tracking)
     }
 
-    private static func makeLine(_ text: TemplateText) -> CTLine {
+    private static func makeLine(_ text: TemplateText, look: TemplateLook = .standard) -> CTLine {
         let font = CTFontCreateWithName(text.font.postScriptName as CFString, text.size, nil)
         var attributes: [NSAttributedString.Key: Any] = [
             NSAttributedString.Key(kCTFontAttributeName as String): font,
-            NSAttributedString.Key(kCTForegroundColorAttributeName as String): text.tone.cgColor,
+            NSAttributedString.Key(kCTForegroundColorAttributeName as String): look.color(text.tone),
         ]
         if text.tracking != 0 {
             attributes[NSAttributedString.Key(kCTKernAttributeName as String)] = text.tracking

@@ -78,8 +78,9 @@ public enum JournalHeading {
 }
 
 public enum JournalPageTemplate {
-    /// A journal page: the heading texts (see `JournalHeading`), a rule, and the paper.
-    public static func make(paper style: PaperStyle, label: String, heading: String) -> PageTemplate {
+    /// A journal page: the heading texts (see `JournalHeading`), a rule, and the paper with
+    /// its lines, squares or dots at `spacing`.
+    public static func make(paper style: PaperStyle, spacing: LineSpacing = .normal, label: String, heading: String) -> PageTemplate {
         let layout = JournalPageLayout()
         var shapes: [TemplateShape] = []
         if !label.isEmpty {
@@ -104,14 +105,14 @@ public enum JournalPageTemplate {
         case .blank:
             break
         case .lined:
-            let step = JournalPageLayout.lineSpacing
+            let step = spacing.linedStep
             var y = paper.minY + step
             while y <= paper.maxY + 0.5 {
                 shapes.append(.line(from: CGPoint(x: paper.minX, y: y), to: CGPoint(x: paper.maxX, y: y), width: Stroke.hairline, tone: .rule))
                 y += step
             }
         case .grid:
-            let step = JournalPageLayout.gridSpacing
+            let step = spacing.gridStep
             let rows = Int(paper.height / step)
             let columns = Int(paper.width / step)
             let bottom = paper.minY + CGFloat(rows) * step
@@ -124,7 +125,7 @@ public enum JournalPageTemplate {
                 shapes.append(.line(from: CGPoint(x: x, y: paper.minY), to: CGPoint(x: x, y: bottom), width: Stroke.grid, tone: .rule))
             }
         case .dotted:
-            let step = JournalPageLayout.gridSpacing
+            let step = spacing.gridStep
             let rows = Int(paper.height / step)
             let columns = Int(paper.width / step)
             for row in 1...rows {

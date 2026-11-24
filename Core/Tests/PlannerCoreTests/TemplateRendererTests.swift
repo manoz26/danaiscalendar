@@ -31,7 +31,7 @@ struct PageBitmap {
     let pixels: [UInt8]
     let image: CGImage
 
-    init(_ template: PageTemplate, scale: CGFloat) throws {
+    init(_ template: PageTemplate, scale: CGFloat, look: TemplateLook = .standard) throws {
         _ = TestFonts.registered
         width = Int(PageCanvas.size.width * scale)
         height = Int(PageCanvas.size.height * scale)
@@ -44,7 +44,7 @@ struct PageBitmap {
         // Bitmap contexts have y going up; flip so the template is drawn as on iOS.
         context.translateBy(x: 0, y: CGFloat(height))
         context.scaleBy(x: 1, y: -1)
-        TemplateRenderer.drawPage(template, in: context, scale: scale)
+        TemplateRenderer.drawPage(template, in: context, scale: scale, look: look)
         image = try #require(context.makeImage())
         let data = try #require(context.data)
         pixels = Array(UnsafeBufferPointer(start: data.assumingMemoryBound(to: UInt8.self), count: width * height * 4))
@@ -231,6 +231,19 @@ struct TemplateRendererTests {
         ]
         for (name, template) in samples {
             try PageBitmap(template, scale: 1.5).writePNG(to: directory.appending(path: "\(name).png"))
+        }
+        // Settings → Paper (prompt 9): dark paper, faint and strong lines, other spacings.
+        let november = MonthPageTemplate.make(month: YearMonth(year: 2026, month: 11), locale: greek, labels: greekLabels, today: today)
+        let looks: [(String, PageTemplate, TemplateLook)] = [
+            ("month-2026-11-el-dark", november, TemplateLook(dark: true)),
+            ("month-2026-11-el-faint", november, TemplateLook(lineStrength: .faint)),
+            ("month-2026-11-el-strong", november, TemplateLook(lineStrength: .strong)),
+            ("year-2026-en-dark", YearPageTemplate.make(year: 2026, locale: english, today: today), TemplateLook(dark: true)),
+            ("journal-grid-el-narrow-dark", JournalPageTemplate.make(paper: .grid, spacing: .narrow, label: heading.label, heading: heading.heading), TemplateLook(dark: true)),
+            ("journal-lined-el-wide-strong", JournalPageTemplate.make(paper: .lined, spacing: .wide, label: heading.label, heading: heading.heading), TemplateLook(lineStrength: .strong)),
+        ]
+        for (name, template, look) in looks {
+            try PageBitmap(template, scale: 1.5, look: look).writePNG(to: directory.appending(path: "\(name).png"))
         }
     }
 }

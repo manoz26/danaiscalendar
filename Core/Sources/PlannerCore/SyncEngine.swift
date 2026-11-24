@@ -20,7 +20,7 @@ public struct SyncPath: Hashable, Sendable, Comparable, CustomStringConvertible 
     public static let folders = [listsFolder, pagesFolder, photosFolder]
     public static let listNames: Set<String> = [
         JournalFile.fileName, SketchFile.fileName, ListFile.todoFileName, ListFile.toBuyFileName,
-        WishlistFile.fileName, LocalBirthdayStore.fileName,
+        WishlistFile.fileName, LocalBirthdayStore.fileName, SettingsFile.fileName,
     ]
 
     public let path: String
