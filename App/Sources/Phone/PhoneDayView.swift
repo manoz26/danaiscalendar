@@ -69,6 +69,23 @@ struct PhoneDayView: View {
             .navigationTitle(Text(verbatim: DayNames(locale: locale).name(of: day)))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // The weekday small over the date: the whole date fits on the smallest iPhone.
+                ToolbarItem(placement: .principal) {
+                    VStack(spacing: 1) {
+                        Text(verbatim: PlannerText.uppercased(Self.format(day, "EEEE", locale: locale), locale: locale))
+                            .font(.inter(.semibold, size: 11, relativeTo: .caption2))
+                            .tracking(1.2)
+                            .foregroundStyle(Paper.secondary)
+                        Text(verbatim: Self.format(day, "dMMMMy", locale: locale))
+                            .font(.inter(.semibold, size: 17, relativeTo: .headline))
+                            .foregroundStyle(Paper.ink)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityIdentifier("day.title")
+                }
                 if book.isAllowed, !book.writableCalendars.isEmpty {
                     ToolbarItem(placement: .topBarLeading) {
                         Button {
@@ -191,5 +208,16 @@ struct PhoneDayView: View {
         .buttonStyle(.plain)
         .listRowBackground(Paper.background)
         .accessibilityIdentifier(identifier)
+    }
+
+    /// The day in the app's language, e.g. "Thursday" or "15 Μαρτίου 2029".
+    static func format(_ day: PlannerDate, _ template: String, locale: Locale) -> String {
+        let calendar = PlannerLocale.calendar(locale: locale)
+        let formatter = DateFormatter()
+        formatter.locale = locale
+        formatter.calendar = calendar
+        formatter.timeZone = calendar.timeZone
+        formatter.setLocalizedDateFormatFromTemplate(template)
+        return formatter.string(from: day.noon(in: calendar))
     }
 }
