@@ -102,7 +102,7 @@ final class CalendarTests: XCTestCase {
 
         tapBarButton(app, "settings.button", label: "Settings")
         let toggle = app.switches["settings.showEvents"]
-        XCTAssertTrue(toggle.waitForExistence(timeout: 10), "No 'Show events in the cells' in Settings")
+        XCTAssertTrue(revealInSettings(app, toggle), "No 'Show events in the cells' in Settings")
         settle()
         save(app, "en-portrait-settings-calendar")
 
@@ -124,7 +124,7 @@ final class CalendarTests: XCTestCase {
 
         // On again: the 5th has the dentist but not the lunch of the unticked calendar.
         tapBarButton(app, "settings.button", label: "Settings")
-        XCTAssertTrue(toggle.waitForExistence(timeout: 10))
+        XCTAssertTrue(revealInSettings(app, toggle))
         toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
         XCTAssertTrue(wait(toggle, value: "1"))
         tap(app, "settings.done")

@@ -249,7 +249,7 @@ final class PhoneTests: XCTestCase {
 
         // The Settings open from the gear of the lists.
         tap(app, "settings.button")
-        XCTAssertTrue(app.buttons["settings.version"].waitForExistence(timeout: 10), "Settings did not open")
+        XCTAssertTrue(revealInSettings(app, app.buttons["settings.version"]), "Settings did not open")
         tap(app, "settings.done")
     }
 

@@ -142,7 +142,7 @@ final class ScreenshotTests: XCTestCase {
         tapBarButton(app, "settings.button", label: language == "el" ? "Ρυθμίσεις" : "Settings")
 
         let version = app.buttons["settings.version"]
-        XCTAssertTrue(version.waitForExistence(timeout: 10), "Settings did not open")
+        XCTAssertTrue(revealInSettings(app, version), "Settings did not open")
         settle()
         save(app, "\(language)-portrait-settings")
 

@@ -185,6 +185,20 @@ extension XCTestCase {
         item.tap()
     }
 
+    /// Waits for Settings to open, then swipes its list up until `target` can be tapped
+    /// (the list is long since prompt 9, and only the rows on screen exist).
+    @MainActor
+    @discardableResult
+    func revealInSettings(_ app: XCUIApplication, _ target: XCUIElement, timeout: TimeInterval = 10) -> Bool {
+        XCTAssertTrue(app.buttons["settings.done"].waitForExistence(timeout: timeout), "Settings did not open")
+        let list = app.collectionViews.firstMatch
+        for _ in 0..<10 {
+            if target.exists, target.isHittable { return true }
+            list.swipeUp()
+        }
+        return target.exists && target.isHittable
+    }
+
     /// Holds a finger on something printed on the page.
     @MainActor
     func longPressOnPage(_ app: XCUIApplication, _ identifier: String) {

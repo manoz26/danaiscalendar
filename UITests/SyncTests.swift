@@ -68,6 +68,7 @@ final class SyncTests: XCTestCase {
         let upToDate = app.descendants(matching: .any)
             .matching(NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", "Ενημερωμένα", "Ενημερωμένα"))
             .firstMatch
+        revealInSettings(app, upToDate)
         XCTAssertTrue(upToDate.waitForExistence(timeout: 15), "The iCloud section does not say up to date")
         let export = element(app, "settings.exportBackup")
         if !export.isHittable {
