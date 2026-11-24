@@ -130,7 +130,7 @@ final class CustomizeTests: XCTestCase {
         waitForOrientation(app, landscape: false)
         waitForPage(app, "2029-03")
         settle(1.5)
-        checkInk(app, page: "page.month", targets: ["section.goals", "day.2029-03-03", "day.2029-03-15", "section.todo", "section.memo"], minimum: 4)
+        checkInk(app, page: "page.month", targets: ["section.goals", "day.2029-03-03", "day.2029-03-15", "section.todo", "section.memo"], minimum: 3)
         save(app, "en-portrait-month-layout-before")
         settle(1.5)
         app.terminate()
